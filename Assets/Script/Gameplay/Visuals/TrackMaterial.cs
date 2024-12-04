@@ -82,6 +82,8 @@ namespace YARG.Gameplay.Visuals
         public bool GrooveMode;
         [HideInInspector]
         public bool StarpowerMode;
+        [HideInInspector]
+        public bool SoloMode;
 
         private float _soloState;
 
@@ -174,6 +176,15 @@ namespace YARG.Gameplay.Visuals
             else
             {
                 StarpowerState = Mathf.Lerp(StarpowerState, 0f, Time.deltaTime * 4f);
+            }
+
+            if (SoloMode)
+            {
+                SoloState = Mathf.Lerp(SoloState, 1f, Time.deltaTime * 3f);
+            }
+            else
+            {
+                SoloState = Mathf.Lerp(SoloState, 0f, Time.deltaTime * 5f);
             }
         }
 

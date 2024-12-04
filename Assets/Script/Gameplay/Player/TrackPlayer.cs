@@ -163,6 +163,11 @@ namespace YARG.Gameplay.Player
         private bool _newHighScoreShown;
 
         private double _previousStarPowerAmount;
+        private bool _isSoloActive = false;
+        private bool _isSoloStarting = false;
+        private bool _isSoloEnding = false;
+        private double _nextSoloStartTime;
+        private double _nextSoloEndTime;
 
         public override void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? currentHighScore)
@@ -261,6 +266,7 @@ namespace YARG.Gameplay.Player
             TrackMaterial.SetTrackScroll(songTime, NoteSpeed);
             TrackMaterial.GrooveMode = groove;
             TrackMaterial.StarpowerMode = stats.IsStarPowerActive;
+            TrackMaterial.SoloMode = _isSoloActive;
 
             ComboMeter.SetCombo(stats.ScoreMultiplier, maxMultiplier, stats.Combo);
             StarpowerBar.SetStarpower(currentStarPowerAmount, stats.IsStarPowerActive);
@@ -315,6 +321,18 @@ namespace YARG.Gameplay.Player
                 NoteIndex++;
 
                 OnNoteSpawned(note);
+                // This seems like it should go in OnNoteSpawned, but that is overridden for Pro Guitar
+                if(note.IsSoloStart)
+                {
+                    _isSoloStarting = true;
+                    _nextSoloStartTime = note.Time;
+                }
+
+                if(note.IsSoloEnd)
+                {
+                    _isSoloEnding = true;
+                    _nextSoloEndTime = note.TimeEnd;
+                }
 
                 // Don't spawn hit or missed notes
                 if (note.WasHit || note.WasMissed)
@@ -496,6 +514,7 @@ namespace YARG.Gameplay.Player
 
         protected virtual void OnSoloStart(SoloSection solo)
         {
+            _isSoloActive = true;
             TrackView.StartSolo(solo);
 
             foreach (var haptic in SantrollerHaptics)
@@ -506,6 +525,7 @@ namespace YARG.Gameplay.Player
 
         protected virtual void OnSoloEnd(SoloSection solo)
         {
+            _isSoloActive = false;
             TrackView.EndSolo(solo.SoloBonus);
 
             foreach (var haptic in SantrollerHaptics)
