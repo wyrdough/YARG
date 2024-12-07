@@ -166,6 +166,8 @@ Material:
     - _Layer_3_Color: {r: 1, g: 1, b: 1, a: 0}
     - _Layer_4_Color: {r: 0.3301887, g: 0.3301887, b: 0.3301887, a: 1}
     - _Solo_Color: {r: 0, g: 0.7058823, b: 1, a: 0.019607844}
+    - _Solo_Max: {r: 0, g: 0, b: 0, a: 0}
+    - _Solo_Min: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _Starpower_Color: {r: 1, g: 0.59607846, b: 0, a: 1}
   m_BuildTextureStacks: []

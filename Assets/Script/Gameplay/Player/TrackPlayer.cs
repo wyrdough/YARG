@@ -321,18 +321,6 @@ namespace YARG.Gameplay.Player
                 NoteIndex++;
 
                 OnNoteSpawned(note);
-                // This seems like it should go in OnNoteSpawned, but that is overridden for Pro Guitar
-                if(note.IsSoloStart)
-                {
-                    _isSoloStarting = true;
-                    _nextSoloStartTime = note.Time;
-                }
-
-                if(note.IsSoloEnd)
-                {
-                    _isSoloEnding = true;
-                    _nextSoloEndTime = note.TimeEnd;
-                }
 
                 // Don't spawn hit or missed notes
                 if (note.WasHit || note.WasMissed)
@@ -343,7 +331,17 @@ namespace YARG.Gameplay.Player
                 // Spawn all of the notes and child notes
                 foreach (var child in note.AllNotes)
                 {
-                    SpawnNote(child);
+                    var noteElement = SpawnNote(child);
+                    if(note.IsSoloStart || child.IsSoloStart)
+                    {
+                        _isSoloStarting = true;
+                        TrackMaterial.PrepareForSoloStart(noteElement);
+                    }
+                    if(note.IsSoloEnd || child.IsSoloEnd)
+                    {
+                        _isSoloEnding = true;
+                        TrackMaterial.PrepareForSoloEnd(noteElement);
+                    }
                 }
             }
         }
@@ -429,17 +427,18 @@ namespace YARG.Gameplay.Player
             base.SetReplayTime(time);
         }
 
-        protected void SpawnNote(TNote note)
+        protected BaseElement SpawnNote(TNote note)
         {
             var poolable = NotePool.KeyedTakeWithoutEnabling(note);
             if (poolable == null)
             {
                 YargLogger.LogWarning("Attempted to spawn note, but it's at its cap!");
-                return;
+                return (BaseElement) null;
             }
 
             InitializeSpawnedNote(poolable, note);
             poolable.EnableFromPool();
+            return (BaseElement) poolable;
         }
 
         protected abstract void InitializeSpawnedNote(IPoolable poolable, TNote note);
@@ -515,7 +514,9 @@ namespace YARG.Gameplay.Player
         protected virtual void OnSoloStart(SoloSection solo)
         {
             _isSoloActive = true;
+            _isSoloStarting = false;
             TrackView.StartSolo(solo);
+            TrackMaterial.SoloMode = true;
 
             foreach (var haptic in SantrollerHaptics)
             {
@@ -526,7 +527,9 @@ namespace YARG.Gameplay.Player
         protected virtual void OnSoloEnd(SoloSection solo)
         {
             _isSoloActive = false;
+            _isSoloEnding = false;
             TrackView.EndSolo(solo.SoloBonus);
+            TrackMaterial.OnSoloEnd();
 
             foreach (var haptic in SantrollerHaptics)
             {

@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: TrackTrim
-  m_Shader: {fileID: -6465566751694194690, guid: 0c474304b74472f4a8b212da29713486,
+  m_Shader: {fileID: -6465566751694194690, guid: 8c7603da648039f419062d9015ed8051,
     type: 3}
   m_ValidKeywords:
   - _EMISSION_DISABLED
@@ -60,7 +60,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 3cce78becbd9abc4eadfa7b3da09092b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -75,8 +75,16 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_c7bde03b7f0b49d99cc23a9eeb90b80b_Texture_1:
+        m_Texture: {fileID: 2800000, guid: 9f91876904280614381a91a16b9e7f70, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _ShineMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Solo_Texture:
+        m_Texture: {fileID: 2800000, guid: 8a62560d719904d4db590f097bd84878, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -108,6 +116,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EMISSION: 0
+    - _Emission_Intensity: 1
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -122,6 +131,7 @@ Material:
     - _ShineAmount: 0
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
+    - _Solo_State: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
@@ -131,5 +141,11 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Normal_Color: {r: 0.34117648, g: 0.34117648, b: 0.34117648, a: 1}
+    - _Solo_Color: {r: 0, g: 11.294118, b: 16, a: 1}
+    - _Solo_End: {r: 0, g: 0, b: 1.61, a: 0}
+    - _Solo_Max: {r: 1, g: 110, b: 10, a: 0}
+    - _Solo_Min: {r: -1, g: 90, b: 3, a: 0}
+    - _Solo_Start: {r: 0, g: 0, b: -1.65, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
