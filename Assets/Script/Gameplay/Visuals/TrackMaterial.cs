@@ -304,7 +304,11 @@ namespace YARG.Gameplay.Visuals
             // FIXME: This will break if a solo end and solo start are too close together
             SoloMode = false;
             // This shouldn't be necessary because Update() should have been handling it
-            // when it was still lerping SoloState
+            // when it was still lerping SoloState. More correctly handled, SoloState would
+            // be left on and solo processing would continue until the solo section scrolled
+            // off the end of the screen below the strike line, not end at the strike line.
+            // It's not really noticeable, though, since there's a lot going on visually at
+            // the bottom of the screen.
             SoloState = 0.0f;
 
             _soloProcessingRequired = false;
