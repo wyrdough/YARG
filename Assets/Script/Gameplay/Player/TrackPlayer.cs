@@ -163,11 +163,32 @@ namespace YARG.Gameplay.Player
         private bool _newHighScoreShown;
 
         private double _previousStarPowerAmount;
+
+        private struct Solo
+        {
+            public Solo(double startTime, double endTime)
+            {
+                StartTime = startTime;
+                EndTime = endTime;
+                Started = false;
+                Finished = false;
+            }
+
+            public readonly double StartTime;
+            public readonly double EndTime;
+            public bool Started;
+            public bool Finished;
+        }
+
+        private Queue<Solo> _upcomingSolos = new();
+        private Stack<Solo> _previousSolos = new();
+        private Queue<Solo> _currentSolos = new();
+
         private bool _isSoloActive = false;
         private bool _isSoloStarting = false;
         private bool _isSoloEnding = false;
-        private double _nextSoloStartTime;
-        private double _nextSoloEndTime;
+        private double _nextSoloStartTime = 0;
+        private double _nextSoloEndTime = 0;
 
         public override void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? currentHighScore)
@@ -204,6 +225,16 @@ namespace YARG.Gameplay.Player
                 Engine.SetSpeed(GameManager.SongSpeed);
             }
 
+            foreach(var soloSection in Engine.GetSolos())
+            {
+                _upcomingSolos.Enqueue(new Solo(soloSection.StartTime, soloSection.EndTime));
+            }
+            if (_upcomingSolos.Any())
+            {
+                _nextSoloStartTime = _upcomingSolos.Peek().StartTime;
+                _nextSoloEndTime = _upcomingSolos.Peek().EndTime;
+            }
+
             ResetNoteCounters();
 
             FinishInitialization();
@@ -223,7 +254,7 @@ namespace YARG.Gameplay.Player
         {
             GameManager.BeatEventHandler.Subscribe(StarpowerBar.PulseBar);
 
-            TrackMaterial.Initialize(ZeroFadePosition, FadeSize, Player.HighwayPreset);
+            TrackMaterial.Initialize(ZeroFadePosition, FadeSize, Player.HighwayPreset, GameManager);
             CameraPositioner.Initialize(Player.CameraPreset);
         }
 
@@ -304,6 +335,8 @@ namespace YARG.Gameplay.Player
             {
                 haptics.SetStarPowerFill((float) currentStarPowerAmount);
             }
+
+            UpdateSoloState();
         }
 
         protected override void UpdateNotes(double songTime)
@@ -331,17 +364,7 @@ namespace YARG.Gameplay.Player
                 // Spawn all of the notes and child notes
                 foreach (var child in note.AllNotes)
                 {
-                    var noteElement = SpawnNote(child);
-                    if(note.IsSoloStart || child.IsSoloStart)
-                    {
-                        _isSoloStarting = true;
-                        TrackMaterial.PrepareForSoloStart(noteElement);
-                    }
-                    if(note.IsSoloEnd || child.IsSoloEnd)
-                    {
-                        _isSoloEnding = true;
-                        TrackMaterial.PrepareForSoloEnd(noteElement);
-                    }
+                    SpawnNote(child);
                 }
             }
         }
@@ -381,6 +404,76 @@ namespace YARG.Gameplay.Player
 
                 BeatlineIndex++;
             }
+        }
+
+        private float ZFromTime(double time)
+        {
+            // +2 accounts for the lead in, IIRC
+            // FIXME: This is dumb
+            float z = STRIKE_LINE_POS + (float) (time - GameManager.RealVisualTime) * NoteSpeed;
+            return z;
+        }
+
+        protected void UpdateSoloState()
+        {
+            // Check to see if any solo events are happening soon and update
+            // coordinates for the solo objects/shader/whatever
+
+            // There may be no solos in this song or no more solos
+            if (_nextSoloStartTime == 0 && _nextSoloEndTime == 0)
+            {
+                // This may be unnecessary, not sure yet
+                TrackMaterial.SetSoloProcessing(false);
+                return;
+            }
+
+            var lookAheadTime = (ZeroFadePosition + -STRIKE_LINE_POS) / NoteSpeed;
+
+            bool soloStartInWindow = (_nextSoloStartTime > 0) &&
+                _nextSoloStartTime <= GameManager.RealVisualTime + lookAheadTime;
+            bool soloEndInWindow =
+                (_nextSoloEndTime > 0) && _nextSoloEndTime <= GameManager.RealVisualTime + lookAheadTime;
+
+            // No need to keep doing work if there is no nearby solo and we're not in a solo.
+            if (!(soloStartInWindow || soloEndInWindow) && !_isSoloActive)
+            {
+                // TrackMaterial.SetSoloProcessing(false);
+                return;
+            }
+
+            if (soloStartInWindow)
+            {
+                // Next solo coming, better get prepared
+                var thisSolo = _upcomingSolos.Dequeue();
+                if (!thisSolo.Started)
+                {
+                    thisSolo.Started = true;
+                    _nextSoloEndTime = thisSolo.EndTime;
+                    if (_upcomingSolos.TryPeek(out Solo nextSolo))
+                    {
+                        _nextSoloStartTime = nextSolo.StartTime;
+                    }
+                    else
+                    {
+                        _nextSoloStartTime = 0;
+                    }
+                    _currentSolos.Enqueue(thisSolo);
+                    _isSoloStarting = true;
+                    TrackMaterial.PrepareForSoloStart(ZFromTime(thisSolo.StartTime), ZFromTime(thisSolo.EndTime));
+                }
+            }
+            // This can probably all go away since OnSoloEnd can take care of everything
+            // if (soloEndInWindow)
+            // {
+            //     // Solo ending, do the needful
+            //     // FIXME: This is probably not right.
+            //     var thisSolo = _currentSolos.Peek();
+            //     _isSoloEnding = true;
+            //     // TrackMaterial.PrepareForSoloEnd(thisSolo.EndTime);
+            //     // TrackMaterial.SetSoloProcessing(true);
+            // }
+
+            // TrackMaterial.UpdateSoloShader();
         }
 
         protected virtual void OnNoteSpawned(TNote parentNote)
@@ -530,6 +623,7 @@ namespace YARG.Gameplay.Player
             _isSoloEnding = false;
             TrackView.EndSolo(solo.SoloBonus);
             TrackMaterial.OnSoloEnd();
+            _previousSolos.Push(_currentSolos.Dequeue());
 
             foreach (var haptic in SantrollerHaptics)
             {

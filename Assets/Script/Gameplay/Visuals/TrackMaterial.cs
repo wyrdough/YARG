@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using YARG.Core.Game;
+using YARG.Gameplay.Player;
 using YARG.Helpers.Extensions;
 using YARG.Settings;
 
@@ -88,14 +89,32 @@ namespace YARG.Gameplay.Visuals
         public bool StarpowerMode;
         [HideInInspector]
         public bool SoloMode;
-        
+
         private bool _soloProcessingRequired = false;
         private Vector3 _soloStart;
-        private BaseElement _soloStartNote = null;
         private Vector3 _soloEnd;
-        private BaseElement _soloEndNote = null;
         private float _noteSpeed;
         private float _soloState;
+
+        private struct Solo
+        {
+            public Solo(float zStart, float zEnd)
+            {
+                // Could have done time here, but I feel like the material
+                // doesn't really need to access the engine for RealVisualTime
+                // Separation of concerns and all that
+                StartZ = zStart;
+                EndZ = zEnd;
+                Slot = 0;
+            }
+            public double StartZ { get; set; }
+            public double EndZ { get; set; }
+            public int Slot { get; set; }
+        }
+
+        private List<Solo> _solos;
+
+        private GameManager _gameManager;
 
         public float SoloState
         {
@@ -136,7 +155,7 @@ namespace YARG.Gameplay.Visuals
             {
                 _trimMaterials.Add(trim.material);
             }
-            
+
             _normalPreset = new()
             {
                 Layer1 = FromHex("0F0F0F", 1f),
@@ -154,24 +173,16 @@ namespace YARG.Gameplay.Visuals
             };
         }
 
-        public void Initialize(float fadePos, float fadeSize, HighwayPreset highwayPreset)
+        public void Initialize(float fadePos, float fadeSize, HighwayPreset highwayPreset, GameManager gameManager = null)
         {
-            // FIXME: These should be calculated from the strike line position and highway length
-            var soloStart = new Vector3(0.0f, 0.0f, -3.5f);
-            var soloEnd = new Vector3(0.0f, 0.0f, 8.0f);
+            _gameManager = gameManager;
+
             // Set all fade values
             _material.SetFade(fadePos, fadeSize);
             foreach (var trimMat in _trimMaterials)
             {
                 trimMat.SetFade(fadePos, fadeSize);
-                // Some sane defaults that cover the entire highway
-                // These should probably be calculated properly at some point
-                trimMat.SetVector(_soloStartTrimProperty, soloStart);
-                trimMat.SetVector(_soloEndTrimProperty, soloEnd);
             }
-
-            _material.SetVector(_soloStartHighwayProperty, soloStart);
-            _material.SetVector(_soloEndHighwayProperty, soloEnd);
 
             _material.SetColor(_starPowerColorProperty, highwayPreset.StarPowerColor.ToUnityColor() );
             _normalPreset = Preset.FromHighwayPreset(highwayPreset, false);
@@ -228,16 +239,18 @@ namespace YARG.Gameplay.Visuals
         // comfort in the fact that it will fix itself at the end of the
         // next solo.
 
-        public void PrepareForSoloStart(BaseElement note)
+        // public void PrepareForSoloStart(BaseElement note)
+        public void PrepareForSoloStart(float startZ, float endZ)
         {
+            // Find an unused shader slot and add the new solo to the list
+            // FIXME: We're not doing this yet. Still limiting to a single solo
+            // per track length, just without knowing about notes.
+
             // Note has just been spawned above the top of the highway
             _soloProcessingRequired = true;
-            _soloStartNote = note;
-            _soloStart = new Vector3(0.0f, 0.0f, _soloStartNote.transform.position.z);
-            // We can't know the real end yet, so set it even further off the end of the highway
-            // If the total length of the solo ends up being less than a highway length
-            // PrepareForSoloEnd should have been called before the end note becomes visible
-            _soloEnd = new Vector3(0.0f, 0.0f, _soloStart.z + 1);
+            // _soloStartNote = note;
+            _soloStart = new Vector3(0.0f, 0.0f, startZ);
+            _soloEnd = new Vector3(0.0f, 0.0f, endZ);
 
             // This has to be called before we turn on SoloMode
             UpdateSoloShader();
@@ -249,36 +262,10 @@ namespace YARG.Gameplay.Visuals
             // so we set it hard on here instead
             SoloState = 1.0f;
         }
-        public void PrepareForSoloEnd(BaseElement note) {
-            _soloEndNote = note;
-            // We don't mess with the start value here since it will naturally end up below the viewport anyway
-            _soloEnd = new Vector3(0.0f, 0.0f, note.transform.position.z);
-            var coords = _soloEndNote.transform.position;
-            var logmsg = String.Format("Solo end note found. Coords are {0}, {1}, {2}.", coords.x, coords.y, coords.z);
-        }
 
         public void UpdateSoloShader() {
-            if(_soloStartNote)
-            {
-                _soloStart = new Vector3(0.0f, 0.0f, _soloStartNote.transform.position.z);
-                _material.SetVector(_soloStartHighwayProperty, _soloStart);
-                foreach(var trimMat in _trimMaterials)
-                {
-                    trimMat.SetVector(_soloStartTrimProperty, _soloStart);
-                }
-                // The note has done its job, forget about it
-                if(_soloStart.z <= 3f)
-                {
-                    // Starting on the next frame we scroll without the benefit
-                    // of the note since it will go away soon. This could
-                    // almost certainly be changed to only use the note to set
-                    // the starting position now that having the changeover
-                    // within the viewport isn't necessary for debugging.
-                    _soloStartNote = null;
-                }
-            }
             // FIXME: This should be calculated from the strike line somehow, not a constant
-            else if(_soloStart.z > -3.5f)
+            if(_soloStart.z > -3.5f)
             {
                 _soloStart.z -= Time.deltaTime * _noteSpeed;
                 _material.SetVector(_soloStartHighwayProperty, _soloStart);
@@ -287,44 +274,36 @@ namespace YARG.Gameplay.Visuals
                     trimMat.SetVector(_soloStartTrimProperty, _soloStart);
                 }
             }
-            
-            if(_soloEndNote)
+            else
             {
-                _soloEnd = new Vector3(0.0f, 0.0f, _soloEndNote.transform.position.z);
+                // Do we actually need to do anything here?
+            }
+
+            if (_soloEnd.z > -3.5f)
+            {
+                _soloEnd.z -= Time.deltaTime * _noteSpeed;
                 _material.SetVector(_soloEndHighwayProperty, _soloEnd);
-                foreach(var trimMat in _trimMaterials)
+                foreach (var trimMat in _trimMaterials)
                 {
                     trimMat.SetVector(_soloEndTrimProperty, _soloEnd);
                 }
-            }            
+            }
+            else
+            {
+                // We're done with this one, remove it from the list
+                // Since we're not actually using the list yet, just turn off
+                // the solo effects
+                SoloState = 0.0f;
+                _soloProcessingRequired = false;
+            }
         }
 
         public void OnSoloEnd() {
-            // Solo ended. Make sure solo effects are off and positions are reset
-            // FIXME: This will break if a solo end and solo start are too close together
-            SoloMode = false;
-            // This shouldn't be necessary because Update() should have been handling it
-            // when it was still lerping SoloState. More correctly handled, SoloState would
-            // be left on and solo processing would continue until the solo section scrolled
-            // off the end of the screen below the strike line, not end at the strike line.
-            // It's not really noticeable, though, since there's a lot going on visually at
-            // the bottom of the screen.
-            SoloState = 0.0f;
 
-            _soloProcessingRequired = false;
-            _soloStartNote = null;
-            _soloEndNote = null;
-            // FIXME: The z values here should be calculated from strike line position and highway length
-            _soloStart = new Vector3(0.0f, 0.0f, -3.5f);
-            _soloEnd = new Vector3(0.0f, 0.0f, 8.0f);
-            _material.SetVector(_soloStartHighwayProperty, _soloStart);
-            _material.SetVector(_soloEndHighwayProperty, _soloEnd);
-            foreach(var trimMat in _trimMaterials)
-            {
-                trimMat.SetVector(_soloStartTrimProperty, _soloStart);
-                trimMat.SetVector(_soloEndTrimProperty, _soloEnd);
-            }
-
+        }
+        public void SetSoloProcessing(bool state)
+        {
+            _soloProcessingRequired = state;
         }
     }
 }
