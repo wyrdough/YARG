@@ -462,18 +462,6 @@ namespace YARG.Gameplay.Player
                     TrackMaterial.PrepareForSoloStart(ZFromTime(thisSolo.StartTime), ZFromTime(thisSolo.EndTime));
                 }
             }
-            // This can probably all go away since OnSoloEnd can take care of everything
-            // if (soloEndInWindow)
-            // {
-            //     // Solo ending, do the needful
-            //     // FIXME: This is probably not right.
-            //     var thisSolo = _currentSolos.Peek();
-            //     _isSoloEnding = true;
-            //     // TrackMaterial.PrepareForSoloEnd(thisSolo.EndTime);
-            //     // TrackMaterial.SetSoloProcessing(true);
-            // }
-
-            // TrackMaterial.UpdateSoloShader();
         }
 
         protected virtual void OnNoteSpawned(TNote parentNote)
