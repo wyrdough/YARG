@@ -237,12 +237,6 @@ namespace YARG.Gameplay.Visuals
             _noteSpeed = noteSpeed;
         }
 
-        // TODO: All this solo stuff will almost certainly be broken in
-        //  interesting and hilarous ways if a solo ends less than a
-        //  highway length before another one begins. At least I can take
-        //  comfort in the fact that it will fix itself at the end of the
-        //  next solo.
-
         // public void PrepareForSoloStart(BaseElement note)
         public void PrepareForSoloStart(float startZ, float endZ)
         {
@@ -285,7 +279,9 @@ namespace YARG.Gameplay.Visuals
             SoloState = 1.0f;
         }
 
-        public void UpdateSoloShader() {
+        public void UpdateSoloShader()
+        {
+            var soloDone = false;
             foreach (var solo in _solos)
             {
                 if (solo.Slot < 0)
@@ -328,13 +324,18 @@ namespace YARG.Gameplay.Visuals
                     // We're done with this one, remove it from the solo queue
                     // and return the slot to the slot queue
                     _availableSoloSlots.Enqueue(solo.Slot);
-                    _solos.Dequeue();
+                    soloDone = true;
                     _soloCount -= 1;
                     if (_soloCount >= 1) continue;
                     // We know of no more solos, so disable processing
                     SoloState = 0.0f;
                     _soloProcessingRequired = false;
                 }
+            }
+
+            if (soloDone)
+            {
+                _solos.Dequeue();
             }
         }
 
