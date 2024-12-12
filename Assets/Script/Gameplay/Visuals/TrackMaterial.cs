@@ -91,28 +91,32 @@ namespace YARG.Gameplay.Visuals
         public bool SoloMode;
 
         private bool _soloProcessingRequired = false;
-        private Vector3 _soloStart;
-        private Vector3 _soloEnd;
+        // The values here are arbitrary, just outside the viewport and with end larger than start
+        private Vector4 _soloStart = new Vector4(10.0f, 10.2f, 10.4f, 10.6f);
+        private Vector4 _soloEnd = new Vector4(10.1f, 10.3f, 10.5f, 10.7f);
+        private int _soloCount = 0;
         private float _noteSpeed;
         private float _soloState;
 
         private struct Solo
         {
-            public Solo(float zStart, float zEnd)
+            public Solo(float zStart, float zEnd, int slot)
             {
                 // Could have done time here, but I feel like the material
                 // doesn't really need to access the engine for RealVisualTime
                 // Separation of concerns and all that
                 StartZ = zStart;
                 EndZ = zEnd;
-                Slot = 0;
+                Slot = slot; // This should be negative if no slot is available at creation
             }
             public double StartZ { get; set; }
             public double EndZ { get; set; }
             public int Slot { get; set; }
         }
 
-        private List<Solo> _solos;
+        // I would rather this be a Queue, but elements need to be updated sometimes
+        private Queue<Solo> _solos = new();
+        private Queue<int> _availableSoloSlots = new (new[] { 3, 2, 1, 0 });
 
         private GameManager _gameManager;
 
@@ -234,10 +238,10 @@ namespace YARG.Gameplay.Visuals
         }
 
         // TODO: All this solo stuff will almost certainly be broken in
-        // interesting and hilarous ways if a solo ends less than a
-        // highway length before another one begins. At least I can take
-        // comfort in the fact that it will fix itself at the end of the
-        // next solo.
+        //  interesting and hilarous ways if a solo ends less than a
+        //  highway length before another one begins. At least I can take
+        //  comfort in the fact that it will fix itself at the end of the
+        //  next solo.
 
         // public void PrepareForSoloStart(BaseElement note)
         public void PrepareForSoloStart(float startZ, float endZ)
@@ -248,9 +252,27 @@ namespace YARG.Gameplay.Visuals
 
             // Note has just been spawned above the top of the highway
             _soloProcessingRequired = true;
-            // _soloStartNote = note;
-            _soloStart = new Vector3(0.0f, 0.0f, startZ);
-            _soloEnd = new Vector3(0.0f, 0.0f, endZ);
+            _soloCount += 1;
+
+            if (_availableSoloSlots.TryDequeue(out var slot))
+            {
+                _solos.Enqueue(new Solo(startZ, endZ, slot));
+            }
+            else
+            {
+                // No available slot, we'll assign it later when one frees up
+                _solos.Enqueue(new Solo(startZ, endZ, -1));
+            }
+
+            if (slot < 0)
+            {
+                // If the new solo doesn't yet have a slot, best not continue
+                return;
+            }
+
+            // Happily, Unity's VectorX types accept indexed access
+            _soloStart[slot] = startZ;
+            _soloEnd[slot] = endZ;
 
             // This has to be called before we turn on SoloMode
             UpdateSoloShader();
@@ -264,37 +286,55 @@ namespace YARG.Gameplay.Visuals
         }
 
         public void UpdateSoloShader() {
-            // FIXME: This should be calculated from the strike line somehow, not a constant
-            if(_soloStart.z > -3.5f)
+            foreach (var solo in _solos)
             {
-                _soloStart.z -= Time.deltaTime * _noteSpeed;
-                _material.SetVector(_soloStartHighwayProperty, _soloStart);
-                foreach(var trimMat in _trimMaterials)
+                if (solo.Slot < 0)
                 {
-                    trimMat.SetVector(_soloStartTrimProperty, _soloStart);
+                    // Check to see if there is a free slot now
+                    // Actually, this won't work since the z vals haven't been updated
+                    // Too much solo density means some will get dropped,
+                    // oh well, they're still scored
+                    // if (_availableSoloSlots.TryDequeue(out var slot))
+                    // {
+                    //     solo.Slot = slot;
+                    // }
+                    continue;
                 }
-            }
-            else
-            {
-                // Do we actually need to do anything here?
-            }
-
-            if (_soloEnd.z > -3.5f)
-            {
-                _soloEnd.z -= Time.deltaTime * _noteSpeed;
-                _material.SetVector(_soloEndHighwayProperty, _soloEnd);
-                foreach (var trimMat in _trimMaterials)
+                // FIXME: This should be calculated from the strike line somehow, not a constant
+                if(_soloStart[solo.Slot] > -3.5f)
                 {
-                    trimMat.SetVector(_soloEndTrimProperty, _soloEnd);
+                    _soloStart[solo.Slot] -= Time.deltaTime * _noteSpeed;
+                    _material.SetVector(_soloStartHighwayProperty, _soloStart);
+                    foreach(var trimMat in _trimMaterials)
+                    {
+                        trimMat.SetVector(_soloStartTrimProperty, _soloStart);
+                    }
                 }
-            }
-            else
-            {
-                // We're done with this one, remove it from the list
-                // Since we're not actually using the list yet, just turn off
-                // the solo effects
-                SoloState = 0.0f;
-                _soloProcessingRequired = false;
+                else
+                {
+                    // Do we actually need to do anything here?
+                }
+                if (_soloEnd[solo.Slot] > -3.5f)
+                {
+                    _soloEnd[solo.Slot] -= Time.deltaTime * _noteSpeed;
+                    _material.SetVector(_soloEndHighwayProperty, _soloEnd);
+                    foreach (var trimMat in _trimMaterials)
+                    {
+                        trimMat.SetVector(_soloEndTrimProperty, _soloEnd);
+                    }
+                }
+                else
+                {
+                    // We're done with this one, remove it from the solo queue
+                    // and return the slot to the slot queue
+                    _availableSoloSlots.Enqueue(solo.Slot);
+                    _solos.Dequeue();
+                    _soloCount -= 1;
+                    if (_soloCount >= 1) continue;
+                    // We know of no more solos, so disable processing
+                    SoloState = 0.0f;
+                    _soloProcessingRequired = false;
+                }
             }
         }
 
