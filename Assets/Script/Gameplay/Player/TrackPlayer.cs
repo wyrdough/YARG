@@ -57,6 +57,8 @@ namespace YARG.Gameplay.Player
         protected KeyedPool NotePool;
         [SerializeField]
         protected Pool BeatlinePool;
+        [SerializeField]
+        protected Pool SoloPool;
 
         public float ZeroFadePosition { get; private set; }
         public float FadeSize         { get; private set; }
@@ -70,6 +72,22 @@ namespace YARG.Gameplay.Player
         protected bool IsBass { get; private set; }
 
         private float _spawnAheadDelay;
+
+        public struct Solo
+        {
+            public Solo(double startTime, double endTime)
+            {
+                StartTime = startTime;
+                EndTime = endTime;
+                Started = false;
+                Finished = false;
+            }
+
+            public readonly double StartTime;
+            public readonly double EndTime;
+            public bool Started;
+            public bool Finished;
+        }
 
         public virtual void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? lastHighScore)
@@ -117,6 +135,7 @@ namespace YARG.Gameplay.Player
             base.UpdateVisualsWithTimes(time);
             UpdateNotes(time);
             UpdateBeatlines(time);
+            UpdateSolos(time);
         }
 
         protected override void ResetVisuals()
@@ -137,6 +156,8 @@ namespace YARG.Gameplay.Player
         protected abstract void UpdateNotes(double time);
 
         protected abstract void UpdateBeatlines(double time);
+
+        protected abstract void UpdateSolos(double time);
     }
 
     public abstract class TrackPlayer<TEngine, TNote> : TrackPlayer
@@ -163,22 +184,6 @@ namespace YARG.Gameplay.Player
         private bool _newHighScoreShown;
 
         private double _previousStarPowerAmount;
-
-        private struct Solo
-        {
-            public Solo(double startTime, double endTime)
-            {
-                StartTime = startTime;
-                EndTime = endTime;
-                Started = false;
-                Finished = false;
-            }
-
-            public readonly double StartTime;
-            public readonly double EndTime;
-            public bool Started;
-            public bool Finished;
-        }
 
         private Queue<Solo> _upcomingSolos = new();
         private Stack<Solo> _previousSolos = new();
@@ -336,7 +341,7 @@ namespace YARG.Gameplay.Player
                 haptics.SetStarPowerFill((float) currentStarPowerAmount);
             }
 
-            UpdateSoloState();
+            // UpdateSoloState();
         }
 
         protected override void UpdateNotes(double songTime)
@@ -406,10 +411,33 @@ namespace YARG.Gameplay.Player
             }
         }
 
-        private float ZFromTime(double time)
+        protected override void UpdateSolos(double time)
         {
-            // +2 accounts for the lead in, IIRC
-            // FIXME: This is dumb
+            if (!_upcomingSolos.TryPeek(out var nextSolo))
+            {
+                return;
+            }
+
+            if (!(nextSolo.StartTime <= time + SpawnTimeOffset))
+            {
+                return;
+            }
+
+            var poolable = SoloPool.TakeWithoutEnabling();
+            if (poolable == null)
+            {
+                YargLogger.LogWarning("Attempted to spawn solo, but it's at its cap!");
+                return;
+            }
+
+            ((SoloElement) poolable).SoloRef = nextSolo;
+            poolable.EnableFromPool();
+            _currentSolos.Enqueue(nextSolo);
+            _upcomingSolos.Dequeue();
+        }
+
+        public float ZFromTime(double time)
+        {
             float z = STRIKE_LINE_POS + (float) (time - GameManager.RealVisualTime) * NoteSpeed;
             return z;
         }
@@ -506,6 +534,19 @@ namespace YARG.Gameplay.Player
             ResetNoteCounters();
 
             base.SetReplayTime(time);
+        }
+
+        protected BaseElement SpawnSolo(SoloSection solo)
+        {
+            var poolable = SoloPool.TakeWithoutEnabling();
+
+            if (poolable == null)
+            {
+                YargLogger.LogWarning("Attempted to spawn Solo, but it's at its cap!");
+                return (BaseElement) null;
+            }
+
+            return (BaseElement) poolable;
         }
 
         protected BaseElement SpawnNote(TNote note)
