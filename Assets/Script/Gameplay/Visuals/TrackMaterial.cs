@@ -21,12 +21,6 @@ namespace YARG.Gameplay.Visuals
         private static readonly int _layer3ColorProperty = Shader.PropertyToID("_Layer_3_Color");
         private static readonly int _layer4ColorProperty = Shader.PropertyToID("_Layer_4_Color");
 
-        private static readonly int _soloStateProperty = Shader.PropertyToID("_Solo_State");
-        private static readonly int _soloStartTrimProperty = Shader.PropertyToID("_Solo_Start");
-        private static readonly int _soloEndTrimProperty = Shader.PropertyToID("_Solo_End");
-        private static readonly int _soloStartHighwayProperty = Shader.PropertyToID("_Solo_Start1");
-        private static readonly int _soloEndHighwayProperty = Shader.PropertyToID("_Solo_End1");
-
         private static readonly int _starPowerColorProperty = Shader.PropertyToID("_Starpower_Color");
 
         public struct Preset
@@ -87,54 +81,7 @@ namespace YARG.Gameplay.Visuals
         public bool GrooveMode;
         [HideInInspector]
         public bool StarpowerMode;
-        [HideInInspector]
-        public bool SoloMode;
-
-        private bool _soloProcessingRequired = false;
-        // The values here are arbitrary, just outside the viewport and with end larger than start
-        private Vector4 _soloStart = new Vector4(10.0f, 10.2f, 10.4f, 10.6f);
-        private Vector4 _soloEnd = new Vector4(10.1f, 10.3f, 10.5f, 10.7f);
-        private int _soloCount = 0;
-        private float _noteSpeed;
-        private float _soloState;
-
-        private struct Solo
-        {
-            public Solo(float zStart, float zEnd, int slot)
-            {
-                // Could have done time here, but I feel like the material
-                // doesn't really need to access the engine for RealVisualTime
-                // Separation of concerns and all that
-                StartZ = zStart;
-                EndZ = zEnd;
-                Slot = slot; // This should be negative if no slot is available at creation
-            }
-            public double StartZ { get; set; }
-            public double EndZ { get; set; }
-            public int Slot { get; set; }
-        }
-
-        // I would rather this be a Queue, but elements need to be updated sometimes
-        private Queue<Solo> _solos = new();
-        private Queue<int> _availableSoloSlots = new (new[] { 3, 2, 1, 0 });
-
         private GameManager _gameManager;
-
-        public float SoloState
-        {
-            get => _soloState;
-            set
-            {
-                _soloState = value;
-
-                foreach (var material in _trimMaterials)
-                {
-                    material.SetFloat(_soloStateProperty, value);
-                }
-
-                _material.SetFloat(_soloStateProperty, value);
-            }
-        }
 
         public float StarpowerState
         {
@@ -212,11 +159,6 @@ namespace YARG.Gameplay.Visuals
             {
                 StarpowerState = Mathf.Lerp(StarpowerState, 0f, Time.deltaTime * 4f);
             }
-
-            if (_soloProcessingRequired)
-            {
-                UpdateSoloShader();
-            }
         }
 
         private static Color FromHex(string hex, float alpha)
@@ -234,117 +176,6 @@ namespace YARG.Gameplay.Visuals
         {
             float position = (float) time * noteSpeed / 4f;
             _material.SetFloat(_scrollProperty, position);
-            _noteSpeed = noteSpeed;
-        }
-
-        // public void PrepareForSoloStart(BaseElement note)
-        public void PrepareForSoloStart(float startZ, float endZ)
-        {
-            // Find an unused shader slot and add the new solo to the list
-            // FIXME: We're not doing this yet. Still limiting to a single solo
-            // per track length, just without knowing about notes.
-
-            // Note has just been spawned above the top of the highway
-            _soloProcessingRequired = true;
-            _soloCount += 1;
-
-            if (_availableSoloSlots.TryDequeue(out var slot))
-            {
-                _solos.Enqueue(new Solo(startZ, endZ, slot));
-            }
-            else
-            {
-                // No available slot, we'll assign it later when one frees up
-                _solos.Enqueue(new Solo(startZ, endZ, -1));
-            }
-
-            if (slot < 0)
-            {
-                // If the new solo doesn't yet have a slot, best not continue
-                return;
-            }
-
-            // Happily, Unity's VectorX types accept indexed access
-            _soloStart[slot] = startZ;
-            _soloEnd[slot] = endZ;
-
-            // This has to be called before we turn on SoloMode
-            UpdateSoloShader();
-
-            // SoloMode has to be set before the solo actually starts so the visuals can scroll
-            // before the start note hits the strike line
-            SoloMode = true;
-            // For some reason lerping the SoloState in Update() wasn't working right,
-            // so we set it hard on here instead
-            SoloState = 1.0f;
-        }
-
-        public void UpdateSoloShader()
-        {
-            var soloDone = false;
-            foreach (var solo in _solos)
-            {
-                if (solo.Slot < 0)
-                {
-                    // Check to see if there is a free slot now
-                    // Actually, this won't work since the z vals haven't been updated
-                    // Too much solo density means some will get dropped,
-                    // oh well, they're still scored
-                    // if (_availableSoloSlots.TryDequeue(out var slot))
-                    // {
-                    //     solo.Slot = slot;
-                    // }
-                    continue;
-                }
-                // FIXME: This should be calculated from the strike line somehow, not a constant
-                if(_soloStart[solo.Slot] > -3.5f)
-                {
-                    _soloStart[solo.Slot] -= Time.deltaTime * _noteSpeed;
-                    _material.SetVector(_soloStartHighwayProperty, _soloStart);
-                    foreach(var trimMat in _trimMaterials)
-                    {
-                        trimMat.SetVector(_soloStartTrimProperty, _soloStart);
-                    }
-                }
-                else
-                {
-                    // Do we actually need to do anything here?
-                }
-                if (_soloEnd[solo.Slot] > -3.5f)
-                {
-                    _soloEnd[solo.Slot] -= Time.deltaTime * _noteSpeed;
-                    _material.SetVector(_soloEndHighwayProperty, _soloEnd);
-                    foreach (var trimMat in _trimMaterials)
-                    {
-                        trimMat.SetVector(_soloEndTrimProperty, _soloEnd);
-                    }
-                }
-                else
-                {
-                    // We're done with this one, remove it from the solo queue
-                    // and return the slot to the slot queue
-                    _availableSoloSlots.Enqueue(solo.Slot);
-                    soloDone = true;
-                    _soloCount -= 1;
-                    if (_soloCount >= 1) continue;
-                    // We know of no more solos, so disable processing
-                    SoloState = 0.0f;
-                    _soloProcessingRequired = false;
-                }
-            }
-
-            if (soloDone)
-            {
-                _solos.Dequeue();
-            }
-        }
-
-        public void OnSoloEnd() {
-
-        }
-        public void SetSoloProcessing(bool state)
-        {
-            _soloProcessingRequired = state;
         }
     }
 }
