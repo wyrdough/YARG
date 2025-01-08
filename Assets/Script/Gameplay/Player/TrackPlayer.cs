@@ -233,7 +233,7 @@ namespace YARG.Gameplay.Player
             }
             var drumFillEvents = TrackEffect.PhrasesToEffects(_drumFillPhrases);
             var soloEvents = TrackEffect.PhrasesToEffects(_soloPhrases);
-            foreach (var effect in TrackEffect.SliceEffects(soloEvents, drumFillEvents))
+            foreach (var effect in TrackEffect.SliceEffects(NoteSpeed, soloEvents, drumFillEvents))
             {
                 _upcomingEffects.Enqueue(effect);
             }
@@ -650,7 +650,7 @@ namespace YARG.Gameplay.Player
             var drumFillEffects = TrackEffect.PhrasesToEffects(_drumFillPhrases);
             var soloEffects = TrackEffect.PhrasesToEffects(_soloPhrases);
 
-            var slicedEffects= TrackEffect.SliceEffects(soloEffects, unisonEffects, drumFillEffects);
+            var slicedEffects= TrackEffect.SliceEffects(NoteSpeed, soloEffects, unisonEffects, drumFillEffects);
             // TODO: At some point we really need to just make this a list instead of a queue
             _upcomingEffects.Clear();
             foreach (var effect in slicedEffects)
