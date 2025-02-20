@@ -5,6 +5,9 @@ using System.Diagnostics;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Serialization;
+using YARG.Core;
+using YARG.Core.Chart;
+using YARG.Core.Game;
 using YARG.Core.Logging;
 using YARG.Gameplay.Player;
 using YARG.Helpers.Extensions;
@@ -68,15 +71,38 @@ namespace YARG.Gameplay.Visuals
         private float _currentVisibility = 1.0f;
         private bool _startVisibilityInTransition = false;
         private bool _endVisibilityInTransition = false;
-        private float _currentStartVisibility = 1.0f;
-        private float _currentEndVisibility = 1.0f;
-
+        private bool _laneMapEnable = false;
+        private Color _laneColor = System.Drawing.Color.FromArgb(0xFF, 0xC8, 0x00, 0xFF).ToUnityColor();
 
         private bool _previousStartTransitionEnable;
         private bool _previousEndTransitionEnable;
         public TrackEffect EffectRef { get; set; }
 
-        private static readonly int _visibility = Shader.PropertyToID("_Visibility");
+
+        private static readonly int VisibilityProperty = Shader.PropertyToID("_Visibility");
+        private static readonly int LaneMapEnabledProperty = Shader.PropertyToID("_Lane_Map_Enabled");
+        private static readonly int LaneCountProperty = Shader.PropertyToID("_LaneCount");
+        private static readonly int LaneOffsetProperty = Shader.PropertyToID("_LaneOffset");
+        private static readonly int LaneColorProperty = Shader.PropertyToID("_LaneColor");
+
+        private float _laneOffset
+        {
+            get
+            {
+                if (EffectRef.Lane == 0)
+                {
+                    YargLogger.LogDebug("No activation lane found for drum fill");
+                }
+                if (Player.Player.Profile.LeftyFlip)
+                {
+                    return 1 - EffectRef.Lane;
+                }
+                else
+                {
+                    return (LaneCount - EffectRef.Lane) * -1;
+                }
+            }
+        }
 
         public override double ElementTime => EffectRef.Time;
         public double MiddleTime => EffectRef.Time + ((EffectRef.TimeEnd - EffectRef.Time) / 2);
@@ -85,6 +111,11 @@ namespace YARG.Gameplay.Visuals
         protected new float RemovePointOffset => (float) ((EffectRef.TimeEnd - EffectRef.Time) * Player.NoteSpeed + 3.5);
 
         public bool Active { get; private set; }
+
+        private int LaneCount { get; set; }
+
+        // Used only for drum fill sections, so we can be specific about the type here
+        public DrumNote NoteRef { get; set; }
 
         protected override void InitializeElement()
         {
@@ -96,15 +127,50 @@ namespace YARG.Gameplay.Visuals
             StartVisibility = EnableStartTransition ? Visibility : 0.0f;
             EndVisibility = EnableEndTransition ? Visibility : 0.0f;
             _currentVisibility = Visibility;
-            _currentStartVisibility = StartVisibility;
-            _currentEndVisibility = EndVisibility;
             _visibilityInTransition = false;
 
             SetMaterials();
             RescaleForZ();
-            InitializeMaterials();
             SetTransitionState();
+            if (EffectRef.EffectType is TrackEffectType.DrumFill or TrackEffectType.SoloAndDrumFill
+                or TrackEffectType.DrumFillAndUnison)
+            {
+                LaneCount = Player.Player.Profile.GameMode switch
+                {
+                    GameMode.FourLaneDrums  => 4,
+                    GameMode.FiveLaneDrums  => 5,
+                    _                       => 4,
+                };
+                if (NoteRef != null)
+                {
+                    _laneColor = Player.Player.Profile.GameMode switch
+                    {
+                        GameMode.FourLaneDrums => GetFourLaneDrumColor(NoteRef.Pad),
+                        GameMode.FiveLaneDrums => GetFiveLaneDrumColor(NoteRef.Pad),
+                        _                      => throw new ArgumentOutOfRangeException()
+                    };
+                }
+
+                _laneMapEnable = true;
+            }
+            else
+            {
+                _laneMapEnable = false;
+            }
+            InitializeMaterials();
             Active = true;
+        }
+
+        private Color GetFourLaneDrumColor(int pad)
+        {
+            var noteColor = Player.Player.ColorProfile.FourLaneDrums.GetNoteColor(pad);
+            return noteColor.ToUnityColor();
+        }
+
+        private Color GetFiveLaneDrumColor(int pad)
+        {
+            var noteColor = Player.Player.ColorProfile.FiveLaneDrums.GetNoteColor(pad);
+            return noteColor.ToUnityColor();
         }
 
         private void InitializeMaterials()
@@ -123,7 +189,14 @@ namespace YARG.Gameplay.Visuals
                 foreach (var material in meshRenderer.materials)
                 {
                     material.SetFade(fadePos, fadeSize);
-                    material.SetFloat(_visibility, Visibility);
+                    material.SetFloat(VisibilityProperty, Visibility);
+                    material.SetFloat(LaneMapEnabledProperty, _laneMapEnable ? 1.0f : 0.0f);
+                    if (_laneMapEnable && material.name.StartsWith("DrumSPActivationTrack"))
+                    {
+                        material.SetFloat(LaneCountProperty, LaneCount);
+                        material.SetFloat(LaneOffsetProperty, _laneOffset);
+                        material.SetColor(LaneColorProperty, _laneColor);
+                    }
                 }
 
                 if (Visibility == 1.0f)
@@ -228,7 +301,7 @@ namespace YARG.Gameplay.Visuals
                 {
                     continue;
                 }
-                child.material.SetFloat(_visibility, visibility);
+                child.material.SetFloat(VisibilityProperty, visibility);
             }
         }
 
@@ -260,7 +333,7 @@ namespace YARG.Gameplay.Visuals
                 }
                 foreach (var material in meshRenderer.materials)
                 {
-                    material.SetFloat(_visibility, visibility);
+                    material.SetFloat(VisibilityProperty, visibility);
                 }
                 // Enable the renderer if it isn't already. Hopefully resetting it to the same value
                 // if it happens to already be enabled isn't expensive.

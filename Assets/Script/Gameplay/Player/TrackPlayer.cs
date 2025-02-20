@@ -174,9 +174,9 @@ namespace YARG.Gameplay.Player
 
         private double _previousStarPowerAmount;
 
-        private Queue<TrackEffect> _upcomingEffects = new();
-        private List<TrackEffectElement> _currentEffects = new();
-        private List<TrackEffect> _trackEffects = new();
+        protected Queue<TrackEffect> _upcomingEffects = new();
+        protected List<TrackEffectElement> _currentEffects = new();
+        protected List<TrackEffect> _trackEffects = new();
 
         protected SongChart Chart;
 
@@ -224,7 +224,7 @@ namespace YARG.Gameplay.Player
             FinishInitialization();
         }
 
-        private void InitializeTrackEffects()
+        protected virtual void InitializeTrackEffects()
         {
             var phrases = new List<Phrase>();
 

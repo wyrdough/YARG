@@ -21,7 +21,7 @@ namespace YARG.Gameplay.Visuals
     public class TrackEffect : IComparable<TrackEffect>, IEquatable<TrackEffect>
     {
         public TrackEffect(double time, double timeEnd, TrackEffectType effectType,
-            bool startTransitionEnable = true, bool endTransitionEnable = true)
+            bool startTransitionEnable = true, bool endTransitionEnable = true, int lane = 0)
         {
             Time = time;
             TimeEnd = timeEnd;
@@ -31,6 +31,7 @@ namespace YARG.Gameplay.Visuals
             OriginalStartTransitionEnable = startTransitionEnable;
             EndTransitionEnable = endTransitionEnable;
             OriginalEndTransitionEnable = endTransitionEnable;
+            _lane = lane;
         }
 
         // This is the scale of the transition object (currently 0.005) * 100
@@ -48,6 +49,19 @@ namespace YARG.Gameplay.Visuals
 
         public bool OriginalStartTransitionEnable { get; private set; }
         public float Visibility { get; set; } = 1.0f;
+
+        private int _lane = 0;
+        public int Lane
+        {
+            get => _lane;
+            set
+            {
+                if (value is > 0 and <= 5)
+                {
+                    _lane = value;
+                }
+            }
+        }
 
         public bool Equals(TrackEffect other) => Time.Equals(other.Time) && TimeEnd.Equals(other.TimeEnd);
         public override bool Equals(object obj) => obj is TrackEffect && Equals((TrackEffect)obj);
@@ -237,8 +251,12 @@ namespace YARG.Gameplay.Visuals
                     // Unison and DrumFill no longer use transitions
                     var transitionState = kind == TrackEffectType.Solo;
 
+                    // Since we don't have access to the notes here, the lane info for drum fills will
+                    // have to be added later
                     effects.Add(
-                        new TrackEffect(phrases[i].Time, phrases[i].TimeEnd, (TrackEffectType) kind, transitionState, transitionState));
+                        new TrackEffect(phrases[i].Time, phrases[i].TimeEnd, (TrackEffectType) kind,
+                            transitionState, transitionState));
+
                 }
             }
             return effects;

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DrumSPActivationEffectRail
-  m_Shader: {fileID: -6465566751694194690, guid: 2d0cf1e9084960a4b97aa8946af15b27,
+  m_Name: DrumSPActivationTrack
+  m_Shader: {fileID: -6465566751694194690, guid: 294b6046db92df14e84948c843bb8f96,
     type: 3}
   m_ValidKeywords:
   - _EMISSION_ENABLED
@@ -23,7 +23,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 6d7c1e706a18a8841a8e543eb8534194, type: 3}
+        m_Texture: {fileID: 2800000, guid: b342e4b572842a74ba1a7191e94c1a62, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -44,6 +44,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LaneMap:
+        m_Texture: {fileID: 2800000, guid: 610e8da3d61e5864686c953dd0873cf1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -99,6 +103,9 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _LaneCount: 4
+    - _LaneOffset: 0
+    - _Lane_Map_Enabled: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -113,12 +120,15 @@ Material:
     - _SpecularHighlights: 0
     - _SrcBlend: 5
     - _Surface: 1
+    - _Visibility: 1
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0.19607845, g: 0.19607845, b: 0.19607845, a: 1}
-    - _Color: {r: 0.32132697, g: 1, b: 0, a: 1}
-    - _EmissionColor: {r: 0, g: 0.32941177, b: 0, a: 1}
+    - _Color: {r: 0, g: 0.32941177, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0.088655606, b: 0, a: 1}
+    - _LaneColor: {r: 0.73333335, g: 0.2509804, b: 0.7254902, a: 1}
+    - _LaneOffset: {r: 0, g: 0, b: 0, a: 0}
     - _Solo_Color: {r: 0, g: 1, b: 1, a: 1}
     - _Solo_End: {r: 0, g: 0, b: 0, a: 0}
     - _Solo_Start: {r: 0, g: 0, b: 0, a: 0}
