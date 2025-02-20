@@ -71,7 +71,9 @@ namespace YARG.Settings
                 nameof(Settings.UseFullDirectoryForPlaylists),
                 new HeaderMetadata("MusicLibrary"),
                 nameof(Settings.ShowFavoriteButton),
-                nameof(Settings.HighScoreInfo)
+                nameof(Settings.DifficultyRings),
+                nameof(Settings.HighScoreInfo),
+                nameof(Settings.HighScoreHistory),
             },
             new MetadataTab("Sound", icon: "Sound")
             {
@@ -125,11 +127,13 @@ namespace YARG.Settings
                 new HeaderMetadata("Graphics"),
                 nameof(Settings.LowQuality),
                 nameof(Settings.DisableBloom),
+                nameof(Settings.DisableFilmGrain),
                 nameof(Settings.StarPowerHighwayFx),
                 nameof(Settings.SongBackgroundOpacity),
 
                 new HeaderMetadata("Gameplay"),
                 nameof(Settings.UseCymbalModelsInFiveLane),
+                nameof(Settings.UseThreeLaneLyricsInHarmony),
                 nameof(Settings.KickBounceMultiplier),
 
                 new HeaderMetadata("HUD"),
@@ -139,7 +143,6 @@ namespace YARG.Settings
                 nameof(Settings.CountdownDisplay),
                 nameof(Settings.ShowPlayerNameWhenStartingSong),
                 nameof(Settings.LyricDisplay),
-                nameof(Settings.UpcomingLyricsTime),
                 nameof(Settings.SongTimeOnScoreBox),
                 nameof(Settings.GraphicalProgressOnScoreBox),
                 nameof(Settings.KeepSongInfoVisible),

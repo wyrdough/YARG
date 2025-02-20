@@ -15,6 +15,7 @@ using YARG.Menu.MusicLibrary;
 using YARG.Menu.Persistent;
 using YARG.Menu.Settings;
 using YARG.Player;
+using YARG.Scores;
 using YARG.Settings.Types;
 using YARG.Song;
 using YARG.Venue;
@@ -39,6 +40,7 @@ namespace YARG.Settings
             public bool ShowExperimentalWarningDialog = true;
 
             public SortAttribute LibrarySort = SortAttribute.Name;
+            public SortAttribute PreviousLibrarySort = SortAttribute.Name;
 
             public Dictionary<string, HUDPositionProfile> HUDPositionProfiles = new();
 
@@ -59,7 +61,7 @@ namespace YARG.Settings
 
             public void OpenVenueFolder()
             {
-                FileExplorerHelper.OpenFolder(VenueLoader.VenueFolder.FullName);
+                FileExplorerHelper.OpenFolder(VenueLoader.VenueFolder);
             }
 
             public ToggleSetting DisableGlobalBackgrounds { get; } = new(false);
@@ -93,10 +95,17 @@ namespace YARG.Settings
 
             #region Songs
 
-            public ToggleSetting AllowDuplicateSongs { get; } = new(true);
+            public ToggleSetting AllowDuplicateSongs { get; } = new(true, _ => MusicLibraryMenu.SetReload(MusicLibraryReloadState.Partial));
             public ToggleSetting UseFullDirectoryForPlaylists { get; } = new(false);
 
             public ToggleSetting ShowFavoriteButton { get; } = new(true);
+
+            public DropdownSetting<DifficultyRingMode> DifficultyRings { get; }
+                = new(DifficultyRingMode.Classic)
+                {
+                    DifficultyRingMode.Classic,
+                    DifficultyRingMode.Expanded,
+                };
 
             public DropdownSetting<HighScoreInfoMode> HighScoreInfo { get; }
                 = new(HighScoreInfoMode.Stars)
@@ -104,6 +113,13 @@ namespace YARG.Settings
                     HighScoreInfoMode.Stars,
                     HighScoreInfoMode.Score,
                     HighScoreInfoMode.Off
+                };
+
+            public DropdownSetting<HighScoreHistoryMode> HighScoreHistory { get; }
+                = new(HighScoreHistoryMode.HighestDifficulty, _ => ScoreContainer.InvalidateScoreCache())
+                {
+                    HighScoreHistoryMode.HighestOverall,
+                    HighScoreHistoryMode.HighestDifficulty,
                 };
 
             #endregion
@@ -207,6 +223,7 @@ namespace YARG.Settings
 
             public ToggleSetting LowQuality { get; } = new(false, LowQualityCallback);
             public ToggleSetting DisableBloom { get; } = new(false, DisableBloomCallback);
+            public ToggleSetting DisableFilmGrain { get; } = new(false, DisableFilmGrainCallback);
 
             public DropdownSetting<StarPowerHighwayFxMode> StarPowerHighwayFx { get; }
                 = new(StarPowerHighwayFxMode.On)
@@ -219,6 +236,7 @@ namespace YARG.Settings
             public SliderSetting SongBackgroundOpacity { get; } = new(1f, 0f, 1f);
 
             public ToggleSetting UseCymbalModelsInFiveLane { get; } = new(true);
+            public ToggleSetting UseThreeLaneLyricsInHarmony { get; } = new(true);
             public SliderSetting KickBounceMultiplier { get; } = new(1f, 0f, 2f);
 
             public ToggleSetting ShowHitWindow { get; } = new(false, ShowHitWindowCallback);
@@ -250,8 +268,6 @@ namespace YARG.Settings
                     LyricDisplayMode.NoBackground,
                     LyricDisplayMode.Disabled
                 };
-
-            public SliderSetting UpcomingLyricsTime { get; } = new(3f, 0f, 10f);
 
             public DropdownSetting<SongProgressMode> SongTimeOnScoreBox { get; }
                 = new(SongProgressMode.CountUpOnly)
@@ -544,6 +560,11 @@ namespace YARG.Settings
             private static void DisableBloomCallback(bool value)
             {
                 GraphicsManager.Instance.BloomEnabled = !value;
+            }
+
+            private static void DisableFilmGrainCallback(bool value)
+            {
+                GraphicsManager.Instance.FilmGrainEnabled = !value;
             }
 
             private static void ShowHitWindowCallback(bool value)
