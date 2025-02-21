@@ -9,7 +9,6 @@ using YARG.Core.Audio;
 using YARG.Core.Chart;
 using YARG.Core.Engine;
 using YARG.Core.Game;
-using YARG.Core.Input;
 using YARG.Core.Logging;
 using YARG.Gameplay.HUD;
 using YARG.Gameplay.Visuals;
@@ -640,6 +639,7 @@ namespace YARG.Gameplay.Player
             if (poolable == null)
             {
                 YargLogger.LogWarning("Attempted to spawn note, but it's at its cap!");
+                return;
             }
 
             InitializeSpawnedNote(poolable, note);
@@ -743,9 +743,9 @@ namespace YARG.Gameplay.Player
             YargLogger.LogFormatDebug("TrackPlayer would have awarded unison bonus at engine time {0}", Engine.CurrentTime);
         }
 
-        protected virtual void OnCountdownChange(int measuresLeft, double countdownLength, double endTime)
+        protected virtual void OnCountdownChange(double countdownLength, double endTime)
         {
-            TrackView.UpdateCountdown(measuresLeft, countdownLength, endTime);
+            TrackView.UpdateCountdown(countdownLength, endTime);
         }
 
         protected virtual void OnStarPowerPhraseHit(TNote note)
