@@ -93,6 +93,9 @@ namespace YARG.Gameplay.Player
             {
                 _stem = SongStem.Rhythm;
             }
+
+            BRELanes = new LaneElement[5];
+
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
 
@@ -174,6 +177,7 @@ namespace YARG.Gameplay.Player
             InitializeRangeShift();
             GameManager.BeatEventHandler.Subscribe(_fretArray.PulseFretColors);
 
+            // TODO: During a BRE, the subdivisions value actually needs to be 6 to get the right size
             LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 4);
         }
 
@@ -229,6 +233,16 @@ namespace YARG.Gameplay.Player
             for (var fret = GuitarAction.GreenFret; fret <= GuitarAction.OrangeFret; fret++)
             {
                 _fretArray.SetPressed((int) fret, Engine.IsFretHeld(fret));
+            }
+
+            if (Engine.IsCodaActive)
+            {
+                // Set emission color of BRE lanes depending on currently available score value
+                for (int i = 0; i < CurrentCoda.Lanes; i++)
+                {
+                    var intensity = (float) CurrentCoda.GetCurrentLaneScore(i, songTime) / CurrentCoda.MaxLaneScore;
+                    BRELanes[i].SetEmissionColor(intensity);
+                }
             }
         }
 

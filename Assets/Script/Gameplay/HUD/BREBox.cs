@@ -26,9 +26,17 @@ namespace YARG.Gameplay.HUD
         [Space]
         [SerializeField]
         private Sprite _breSpriteNormal;
+        [SerializeField]
+        private Sprite _breSpriteSuccess;
+        [SerializeField]
+        private Sprite _breSpriteFail;
 
         [SerializeField]
         private TMP_ColorGradient _breGradientNormal;
+        [SerializeField]
+        private TMP_ColorGradient _breGradientSuccess;
+        [SerializeField]
+        private TMP_ColorGradient _breGradientFail;
 
         private bool _breEnded;
         private CodaSection _coda;
@@ -96,13 +104,22 @@ namespace YARG.Gameplay.HUD
             _coda = null;
         }
 
-        private IEnumerator HideCoroutine(int soloBonus, Action endCallback)
+        private IEnumerator HideCoroutine(int breBonus, Action endCallback)
         {
             _breEnded = true;
 
             // Hide the top and bottom text
             _breTopText.text = string.Empty;
             _breBottomText.text = string.Empty;
+
+            var (sprite, gradient) = _coda.Success switch
+            {
+                true  => (_breSpriteSuccess, _breGradientSuccess),
+                false => (_breSpriteFail, _breGradientFail),
+            };
+
+            _breBox.sprite = sprite;
+            _breFullText.colorGradientPreset = gradient;
 
             // Get the correct gradient and color
             // var (sprite, gradient) = HitPercent switch
@@ -136,13 +153,13 @@ namespace YARG.Gameplay.HUD
             //
             // _breFullText.text = Localize.Key("Gameplay.Solo.Performance", performanceKey);
 
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(2f);
 
-            // Show point bonus
-            // TODO: Fix this to use BRE text
-            _breFullText.text = Localize.KeyFormat("Gameplay.Solo.PointsResult", _coda.TotalCodaBonus);
-
-            yield return new WaitForSeconds(1f);
+            // // Show point bonus
+            // // TODO: Fix this to use BRE text
+            // _breFullText.text = Localize.KeyFormat("Gameplay.Solo.PointsResult", _coda.TotalCodaBonus);
+            //
+            // yield return new WaitForSeconds(1f);
 
             // Fade out the box
             yield return _breBoxCanvasGroup
