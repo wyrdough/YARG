@@ -60,7 +60,7 @@ namespace YARG.Gameplay.Player
                 _stem = SongStem.Rhythm;
             }
 
-            BRELanes = new LaneElement[5];
+            BRELanes = new BreLaneElement[5];
 
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
@@ -133,7 +133,7 @@ namespace YARG.Gameplay.Player
                 Player.ColorProfile.FiveFretGuitar,
                 Player.Profile.LeftyFlip);
 
-            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 6);
+            BreLaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 6);
         }
 
         public override void ResetPracticeSection()
@@ -194,9 +194,9 @@ namespace YARG.Gameplay.Player
             return note.Fret;
         }
 
-        protected override void InitializeSpawnedLane(LaneElement lane, int fret)
+        protected override void InitializeSpawnedLane(BreLaneElement breLane, int fret)
         {
-            lane.SetAppearance(Player.Profile.CurrentInstrument, fret, 5,
+            breLane.SetAppearance(Player.Profile.CurrentInstrument, fret, 5,
                 Player.ColorProfile.FiveFretGuitar.GetNoteColor(fret).ToUnityColor());
         }
 

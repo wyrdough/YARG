@@ -77,7 +77,7 @@ namespace YARG.Gameplay.Player
 
         private float _spawnAheadDelay;
 
-        protected LaneElement[] BRELanes;
+        protected BreLaneElement[] BRELanes;
 
         public virtual void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? lastHighScore)
@@ -532,7 +532,7 @@ namespace YARG.Gameplay.Player
 
                 for (int i = 0; i < BRELanes.Length; i++)
                 {
-                    var newLane = (LaneElement) LanePool.TakeWithoutEnabling();
+                    var newLane = (BreLaneElement) LanePool.TakeWithoutEnabling();
 
                     double startTime = nextEffect.Time;
                     double endTime = nextEffect.TimeEnd;
@@ -718,7 +718,7 @@ namespace YARG.Gameplay.Player
 
         protected abstract void InitializeSpawnedNote(IPoolable poolable, TNote note);
         // protected abstract void InitializeSpawnedLane(LaneElement lane, int index);
-        protected virtual void InitializeSpawnedLane(LaneElement lane, int index)
+        protected virtual void InitializeSpawnedLane(BreLaneElement breLane, int index)
         {
 
         }

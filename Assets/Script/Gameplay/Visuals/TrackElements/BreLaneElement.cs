@@ -9,7 +9,7 @@ using YARG.Themes;
 
 namespace YARG.Gameplay.Visuals
 {
-    public class LaneElement : TrackElement<TrackPlayer>
+    public class BreLaneElement : TrackElement<TrackPlayer>
     {
         // Maximum time in seconds where consecutive lanes at the same note index should be combined
         public const float COMBINE_LANE_THRESHOLD = 0.1f;
