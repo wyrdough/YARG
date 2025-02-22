@@ -26,6 +26,8 @@ namespace YARG.Gameplay.HUD
         [SerializeField]
         private SoloBox _soloBox;
         [SerializeField]
+        private BREBox _breBox;
+        [SerializeField]
         private TextNotifications _textNotifications;
         [SerializeField]
         private CountdownDisplay _countdownDisplay;
@@ -104,6 +106,16 @@ namespace YARG.Gameplay.HUD
                 // Show text notifications again
                 _textNotifications.gameObject.SetActive(true);
             });
+        }
+
+        public void StartCoda(CodaSection coda)
+        {
+            _breBox.StartCoda(coda);
+        }
+
+        public void EndCoda(int codaBonus)
+        {
+            _breBox.EndCoda(codaBonus, () => { });
         }
 
         public void UpdateNoteStreak(int streak)

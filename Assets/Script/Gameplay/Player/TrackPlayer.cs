@@ -226,14 +226,37 @@ namespace YARG.Gameplay.Player
         private void InitializeTrackEffects()
         {
             var phrases = new List<Phrase>();
+            double codaTime = double.MaxValue;
+
+            // We need to know if there is a coda event in the chart because drum fills
+            // have to be transmuted into BREs after that point
+            foreach (var textEvent in Chart.GlobalEvents)
+            {
+                if (textEvent.Text != "coda")
+                {
+                    continue;
+                }
+
+                codaTime = textEvent.Time;
+                break;
+            }
 
             foreach (var phrase in NoteTrack.Phrases)
             {
-                // We only want solo and drum fill here. Unisons are added later
+                // We only want solo, drum fill, and BRE here. Unisons are added later
                 // and there are no track effects for the other phrase types
-                if (phrase.Type is PhraseType.Solo or PhraseType.DrumFill)
+                if (phrase.Type is PhraseType.Solo or PhraseType.DrumFill or PhraseType.BigRockEnding)
                 {
-                    phrases.Add(phrase);
+                    // Drum fills after the coda event need to be turned into BREs
+                    if (phrase.Type == PhraseType.DrumFill && phrase.Time >= codaTime)
+                    {
+                        var brePhrase = new Phrase(PhraseType.BigRockEnding, phrase.Time, phrase.TimeLength, phrase.Tick, phrase.TickLength);
+                        phrases.Add(brePhrase);
+                    }
+                    else
+                    {
+                        phrases.Add(phrase);
+                    }
                 }
             }
 
@@ -734,6 +757,16 @@ namespace YARG.Gameplay.Player
             {
                 haptic.SetSolo(false);
             }
+        }
+
+        protected virtual void OnCodaStart(CodaSection coda)
+        {
+            TrackView.StartCoda(coda);
+        }
+
+        protected virtual void OnCodaEnd(CodaSection coda)
+        {
+            TrackView.EndCoda(coda.TotalCodaBonus);
         }
 
         protected virtual void OnUnisonPhraseSuccess()

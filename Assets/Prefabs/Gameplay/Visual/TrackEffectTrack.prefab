@@ -463,6 +463,7 @@ MonoBehaviour:
   _drumFillTransitionMaterial: {fileID: 0}
   _drumFillRailLeftTransitionMaterial: {fileID: 0}
   _drumFillRailRightTransitionMaterial: {fileID: 0}
+  _breTrackMaterial: {fileID: 2100000, guid: 4456f11f144e1ba41b398a43422662fe, type: 2}
   Visibility: 1
   StartVisibility: 0
   EndVisibility: 0
