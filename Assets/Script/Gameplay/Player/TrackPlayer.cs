@@ -236,17 +236,37 @@ namespace YARG.Gameplay.Player
         private void InitializeTrackEffects()
         {
             var phrases = new List<Phrase>();
+            double codaTime = double.MaxValue;
+
+            // We need to know if there is a coda event in the chart because drum fills
+            // have to be transmuted into BREs after that point
+            foreach (var textEvent in Chart.GlobalEvents)
+            {
+                if (textEvent.Text != "coda")
+                {
+                    continue;
+                }
+
+                codaTime = textEvent.Time;
+                break;
+            }
 
             foreach (var phrase in NoteTrack.Phrases)
             {
-                // We only want solo and drum fill here. Unisons are added later
+                // We only want solo, drum fill, and BRE here. Unisons are added later
                 // and there are no track effects for the other phrase types
-                if (phrase.Type is PhraseType.Solo or PhraseType.DrumFill)
+                if (phrase.Type is PhraseType.Solo or PhraseType.DrumFill or PhraseType.BigRockEnding)
                 {
                     // It turns out that some charts have drum fill phrases that aren't SP activation
                     // (they have no notes), so we need to ignore those
                     if (phrase.Type is PhraseType.DrumFill)
                     {
+                        if (phrase.Time >= codaTime)
+                        {
+                            phrases.Add(new Phrase(PhraseType.BigRockEnding, phrase.Time, phrase.TimeLength, phrase.Tick, phrase.TickLength));
+                            continue;
+                        }
+
                         foreach (var note in Notes)
                         {
                             if (note.Time >= phrase.Time && note.Time <= phrase.TimeEnd)
@@ -600,7 +620,7 @@ namespace YARG.Gameplay.Player
             {
                 return;
             }
-            
+
             if (!LanePool.CanSpawnAmount(1))
             {
                 return;
@@ -620,7 +640,7 @@ namespace YARG.Gameplay.Player
             {
                 var laneStartNotes = new Dictionary<int, TNote>();
                 var laneEndTimes = new Dictionary<int, double>();
-                
+
                 // Iterate forward to find the length of all lanes in this phrase
                 var noteRef = parentNote;
                 var thisLaneFlag = parentNote.IsTrill ? NoteFlags.Trill : NoteFlags.Tremolo;
@@ -650,12 +670,12 @@ namespace YARG.Gameplay.Player
                             }
                         }
                     }
-                    
+
                     if (containsLaneEnd)
                     {
                         break;
                     }
-                    
+
                     noteRef = noteRef.NextNote;
                 }
 
@@ -666,7 +686,7 @@ namespace YARG.Gameplay.Player
                         // Ending note was not found, do not create lane
                         continue;
                     }
-                    
+
                     var firstLaneNote = laneStartNotes[laneIndex];
                     double startTime = firstLaneNote.Time;
                     double endTime = laneEndTimes[laneIndex];
@@ -899,6 +919,16 @@ namespace YARG.Gameplay.Player
             {
                 haptic.SetSolo(false);
             }
+        }
+
+        protected virtual void OnCodaStart(CodaSection coda)
+        {
+            TrackView.StartCoda(coda);
+        }
+
+        protected virtual void OnCodaEnd(CodaSection coda)
+        {
+            TrackView.EndCoda(coda.TotalCodaBonus);
         }
 
         protected virtual void OnUnisonPhraseSuccess()

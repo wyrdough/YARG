@@ -14,6 +14,7 @@ namespace YARG.Gameplay.Visuals
         DrumFill,
         SoloAndDrumFill,
         DrumFillAndUnison,
+        BigRockEnding,
     }
 
     // Small warning, TrackEffects are equal if their Time and TimeEnd values
@@ -262,10 +263,11 @@ namespace YARG.Gameplay.Visuals
                     var type = phrases[i].Type;
                     TrackEffectType? kind = type switch
                     {
-                        PhraseType.Solo      => TrackEffectType.Solo,
-                        PhraseType.DrumFill  => TrackEffectType.DrumFill,
-                        PhraseType.StarPower => TrackEffectType.Unison,
-                        _                    => null
+                        PhraseType.Solo          => TrackEffectType.Solo,
+                        PhraseType.DrumFill      => TrackEffectType.DrumFill,
+                        PhraseType.StarPower     => TrackEffectType.Unison,
+                        PhraseType.BigRockEnding => TrackEffectType.BigRockEnding,
+                        _                        => null
                     };
                     if (kind == null)
                     {

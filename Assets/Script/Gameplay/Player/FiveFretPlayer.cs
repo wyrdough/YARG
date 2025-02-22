@@ -140,6 +140,9 @@ namespace YARG.Gameplay.Player
             engine.OnSoloStart += OnSoloStart;
             engine.OnSoloEnd += OnSoloEnd;
 
+            engine.OnCodaStart += OnCodaStart;
+            engine.OnCodaEnd += OnCodaEnd;
+
             engine.OnStarPowerPhraseHit += OnStarPowerPhraseHit;
             engine.OnStarPowerStatus += OnStarPowerStatus;
 

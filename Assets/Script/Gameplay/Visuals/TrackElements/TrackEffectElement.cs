@@ -63,6 +63,8 @@ namespace YARG.Gameplay.Visuals
         private Material _drumFillRailLeftTransitionMaterial;
         [SerializeField]
         private Material _drumFillRailRightTransitionMaterial;
+        [SerializeField]
+        private Material _breTrackMaterial;
 
         [SerializeField]
         public float Visibility;
@@ -413,6 +415,7 @@ namespace YARG.Gameplay.Visuals
                     TrackEffectType.SoloAndUnison     => _unisonTrackMaterial,
                     TrackEffectType.SoloAndDrumFill   => _drumFillTrackMaterial,
                     TrackEffectType.DrumFillAndUnison => _drumFillTrackMaterial,
+                    TrackEffectType.BigRockEnding     => _breTrackMaterial,
                     _                                 => null,
                 },
                 "TrackEffectTrack(Clone)" => effectType switch
@@ -423,6 +426,7 @@ namespace YARG.Gameplay.Visuals
                     TrackEffectType.SoloAndUnison     => _unisonTrackMaterial,
                     TrackEffectType.SoloAndDrumFill   => _drumFillTrackMaterial,
                     TrackEffectType.DrumFillAndUnison => _drumFillTrackMaterial,
+                    TrackEffectType.BigRockEnding     => _breTrackMaterial,
                     _                                 => null,
                 },
                 "TrackEffectRailLeft" => effectType switch
