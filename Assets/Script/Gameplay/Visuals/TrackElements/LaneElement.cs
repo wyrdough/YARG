@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 using YARG.Core;
 using YARG.Gameplay.Player;
 using YARG.Helpers.Extensions;
@@ -21,6 +22,9 @@ namespace YARG.Gameplay.Visuals
 
         private static readonly int _emissionEnabled = Shader.PropertyToID("_Emission");
         private static readonly int _emissionColor = Shader.PropertyToID("_EmissionColor");
+
+        private Shader       _shader;
+        private LocalKeyword _emissionKeyword;
 
         private static Dictionary<Instrument,float> _scaleByInstrument = new();
 
@@ -202,8 +206,20 @@ namespace YARG.Gameplay.Visuals
                     // Set color
                     thisMaterial.color = _color;
                     thisMaterial.SetColor(_emissionColor, _color);
+
+                    // Get shader and keyword
+                    _shader = thisMaterial.shader;
+                    _emissionKeyword = new LocalKeyword(_shader, "_EMISSION_ENABLED");
                 }
             }
+        }
+
+        public void SetEmissionColor(float strength)
+        {
+            var newColor = _color * strength;
+
+            _meshRenderer.materials[0].SetColor(_emissionColor, newColor);
+            _meshRenderer.materials[0].SetKeyword(_emissionKeyword, true);
         }
 
         protected override void UpdateElement()

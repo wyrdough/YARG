@@ -57,6 +57,8 @@ namespace YARG.Gameplay.Player
         [SerializeField]
         protected KeyedPool NotePool;
         [SerializeField]
+        protected Pool LanePool;
+        [SerializeField]
         protected Pool BeatlinePool;
         [FormerlySerializedAs("SoloPool")]
         [SerializeField]
@@ -74,6 +76,8 @@ namespace YARG.Gameplay.Player
         protected bool IsBass { get; private set; }
 
         private float _spawnAheadDelay;
+
+        protected LaneElement[] BRELanes;
 
         public virtual void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? lastHighScore)
@@ -137,6 +141,7 @@ namespace YARG.Gameplay.Player
 
             NotePool.ReturnAllObjects();
             BeatlinePool.ReturnAllObjects();
+            LanePool.ReturnAllObjects();
 
             HitWindowDisplay.SetHitWindowSize();
         }
@@ -178,6 +183,8 @@ namespace YARG.Gameplay.Player
         private List<TrackEffect> _trackEffects = new();
 
         protected SongChart Chart;
+
+        protected CodaSection CurrentCoda { get; set; }
 
         public override void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? currentHighScore)
@@ -511,6 +518,39 @@ namespace YARG.Gameplay.Player
 
         private void SpawnEffect(TrackEffect nextEffect, bool seeking)
         {
+            // TODO: This is just a placeholder to get lanes working for the BREs
+            //  BREs should probably be handled some other way
+            if (nextEffect.EffectType == TrackEffectType.BigRockEnding)
+            {
+                if (!LanePool.CanSpawnAmount(BRELanes.Length))
+                {
+                    return;
+                }
+                // Completely different handling, we use lanes instead of a track effect
+                // TODO: This has to be repeated for each lane, for now we just use 5 since we're
+                //  only testing with five fret guitar
+
+                for (int i = 0; i < BRELanes.Length; i++)
+                {
+                    var newLane = (LaneElement) LanePool.TakeWithoutEnabling();
+
+                    double startTime = nextEffect.Time;
+                    double endTime = nextEffect.TimeEnd;
+
+                    newLane.SetTimeRange(startTime, endTime);
+                    // Purplo's lanes are 1 indexed (odd to me, but whatever)
+                    InitializeSpawnedLane(newLane, i + 1);
+                    newLane.EnableFromPool();
+
+                    // Need to keep a reference so we can tell it to do things later
+                    BRELanes[i] = newLane;
+                }
+
+                _upcomingEffects.Dequeue();
+
+                return;
+            }
+
             var poolable = EffectPool.TakeWithoutEnabling();
             if (poolable == null)
             {
@@ -588,6 +628,13 @@ namespace YARG.Gameplay.Player
 
         protected virtual void OnNoteSpawned(TNote parentNote)
         {
+        }
+
+        protected virtual int GetLaneIndex(TNote note)
+        {
+            // return note.LaneNote;
+            // TODO: Do something proper instead of this placeholder
+            return 0;
         }
 
         public override void SetPracticeSection(uint start, uint end)
@@ -670,6 +717,11 @@ namespace YARG.Gameplay.Player
         }
 
         protected abstract void InitializeSpawnedNote(IPoolable poolable, TNote note);
+        // protected abstract void InitializeSpawnedLane(LaneElement lane, int index);
+        protected virtual void InitializeSpawnedLane(LaneElement lane, int index)
+        {
+
+        }
 
         protected virtual void OnNoteHit(int index, TNote note)
         {
@@ -761,6 +813,7 @@ namespace YARG.Gameplay.Player
 
         protected virtual void OnCodaStart(CodaSection coda)
         {
+            CurrentCoda = coda;
             TrackView.StartCoda(coda);
         }
 

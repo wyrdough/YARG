@@ -104,7 +104,8 @@ namespace YARG.Gameplay.Visuals
                     if (effect.TimeEnd == nextEffect.Time)
                     {
                         // There is adjacency, so disable the transitions
-                        effect.EndTransitionEnable = false;
+                        // Unless nexteffect is a big rock ending
+                        effect.EndTransitionEnable = nextEffect.EffectType == TrackEffectType.BigRockEnding;
                         nextEffect.StartTransitionEnable = false;
                     }
 

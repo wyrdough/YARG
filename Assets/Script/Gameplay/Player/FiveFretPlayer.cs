@@ -13,6 +13,7 @@ using YARG.Core.Logging;
 using YARG.Core.Replays;
 using YARG.Gameplay.HUD;
 using YARG.Gameplay.Visuals;
+using YARG.Helpers.Extensions;
 using YARG.Player;
 using YARG.Settings;
 
@@ -58,6 +59,9 @@ namespace YARG.Gameplay.Player
             {
                 _stem = SongStem.Rhythm;
             }
+
+            BRELanes = new LaneElement[5];
+
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
 
@@ -128,6 +132,8 @@ namespace YARG.Gameplay.Player
                 Player.Profile.GameMode,
                 Player.ColorProfile.FiveFretGuitar,
                 Player.Profile.LeftyFlip);
+
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 6);
         }
 
         public override void ResetPracticeSection()
@@ -144,6 +150,16 @@ namespace YARG.Gameplay.Player
             for (var fret = GuitarAction.GreenFret; fret <= GuitarAction.OrangeFret; fret++)
             {
                 _fretArray.SetPressed((int) fret, Engine.IsFretHeld(fret));
+            }
+
+            if (Engine.IsCodaActive)
+            {
+                // Set emission color of BRE lanes depending on currently available score value
+                for (int i = 0; i < CurrentCoda.Lanes; i++)
+                {
+                    var intensity = (float) CurrentCoda.GetCurrentLaneScore(i, songTime) / CurrentCoda.MaxLaneScore;
+                    BRELanes[i].SetEmissionColor(intensity);
+                }
             }
         }
 
@@ -171,6 +187,17 @@ namespace YARG.Gameplay.Player
         protected override void InitializeSpawnedNote(IPoolable poolable, GuitarNote note)
         {
             ((FiveFretNoteElement) poolable).NoteRef = note;
+        }
+
+        protected override int GetLaneIndex(GuitarNote note)
+        {
+            return note.Fret;
+        }
+
+        protected override void InitializeSpawnedLane(LaneElement lane, int fret)
+        {
+            lane.SetAppearance(Player.Profile.CurrentInstrument, fret, 5,
+                Player.ColorProfile.FiveFretGuitar.GetNoteColor(fret).ToUnityColor());
         }
 
         protected override void OnNoteHit(int index, GuitarNote chordParent)

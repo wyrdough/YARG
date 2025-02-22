@@ -1551,7 +1551,13 @@ MonoBehaviour:
   _breFullText: {fileID: 6069234715133103115}
   _breBoxCanvasGroup: {fileID: 6160393083018494260}
   _breSpriteNormal: {fileID: 1163767304, guid: 209c4c454d169a1488594ca96b9191a8, type: 3}
+  _breSpriteSuccess: {fileID: -1518087258, guid: 209c4c454d169a1488594ca96b9191a8,
+    type: 3}
+  _breSpriteFail: {fileID: -1426596008, guid: 209c4c454d169a1488594ca96b9191a8, type: 3}
   _breGradientNormal: {fileID: 11400000, guid: 132f88818a8eedb488c1ffe3e9b3b56d, type: 2}
+  _breGradientSuccess: {fileID: 11400000, guid: abc1f28caa461884799e14ec182504e8,
+    type: 2}
+  _breGradientFail: {fileID: 11400000, guid: 0ec55dfdb30cdb349bfb21ff2285f6b0, type: 2}
 --- !u!1001 &2671688710016650648
 PrefabInstance:
   m_ObjectHideFlags: 0
