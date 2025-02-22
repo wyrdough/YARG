@@ -47,6 +47,7 @@ namespace YARG.Gameplay.Player
         {
             // Before we do anything, see if we're in five lane mode or not
             _fiveLaneMode = player.Profile.CurrentInstrument == Instrument.FiveLaneDrums;
+            BRELanes = new LaneElement[_fiveLaneMode ? 5 : 4];
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
 
@@ -96,6 +97,9 @@ namespace YARG.Gameplay.Player
             engine.OnSoloStart += OnSoloStart;
             engine.OnSoloEnd += OnSoloEnd;
 
+            engine.OnCodaStart += OnCodaStart;
+            engine.OnCodaEnd += OnCodaEnd;
+
             engine.OnStarPowerPhraseHit += OnStarPowerPhraseHit;
             engine.OnStarPowerStatus += OnStarPowerStatus;
 
@@ -133,6 +137,17 @@ namespace YARG.Gameplay.Player
         protected override void UpdateVisuals(double songTime)
         {
             UpdateBaseVisuals(Engine.EngineStats, EngineParams, songTime);
+
+            if (Engine.IsCodaActive)
+            {
+                var lanes = _fiveLaneMode ? 5 : 4;
+                // Set emission color of BRE lanes depending on time since last hit
+                for (int i = 0; i < lanes; i++)
+                {
+                    var intensity = CurrentCoda.GetLaneIntensity(i, songTime);
+                    BRELanes[i].SetEmissionColor(intensity);
+                }
+            }
         }
 
         public override void SetStemMuteState(bool muted)
@@ -190,7 +205,7 @@ namespace YARG.Gameplay.Player
             }
 
             lane.SetAppearance(Player.Profile.CurrentInstrument, index, totalLanes, laneColor);
-            
+
         }
 
         protected override void ModifyLaneFromNote(LaneElement lane, DrumNote note)
@@ -356,6 +371,12 @@ namespace YARG.Gameplay.Player
                     _kickFretFlash.PlayHitAnimation();
                     CameraPositioner.Bounce();
                 }
+            }
+            // This is done in engine for guitar/bass, but it seems better to do it here for drums
+            // since we have the correct visual ordering for the pads
+            if (Engine.IsCodaActive && fret != 0)
+            {
+                CurrentCoda.HitLane(Engine.CurrentTime, fret - 1);
             }
         }
 

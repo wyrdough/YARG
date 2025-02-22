@@ -219,6 +219,7 @@ namespace YARG.Gameplay.Visuals
             var newColor = _color * strength;
 
             _meshRenderer.materials[0].SetColor(_emissionColor, newColor);
+            // TODO: This doesn't actually enable emission, figure out how to make that work with the enum
             _meshRenderer.materials[0].SetKeyword(_emissionKeyword, true);
         }
 

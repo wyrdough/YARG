@@ -242,17 +242,10 @@ namespace YARG.Gameplay.Player
             var phrases = new List<Phrase>();
             double codaTime = double.MaxValue;
 
-            // We need to know if there is a coda event in the chart because drum fills
-            // have to be transmuted into BREs after that point
-            foreach (var textEvent in Chart.GlobalEvents)
+            var codaEvent = Chart.GetCodaEvent();
+            if (codaEvent != null)
             {
-                if (textEvent.Text != "coda")
-                {
-                    continue;
-                }
-
-                codaTime = textEvent.Time;
-                break;
+                codaTime = codaEvent.Time;
             }
 
             foreach (var phrase in NoteTrack.Phrases)
@@ -261,16 +254,9 @@ namespace YARG.Gameplay.Player
                 // and there are no track effects for the other phrase types
                 if (phrase.Type is PhraseType.Solo or PhraseType.DrumFill or PhraseType.BigRockEnding)
                 {
-                    // It turns out that some charts have drum fill phrases that aren't SP activation
-                    // (they have no notes), so we need to ignore those
                     if (phrase.Type is PhraseType.DrumFill)
                     {
-                        if (phrase.Time >= codaTime)
-                        {
-                            phrases.Add(new Phrase(PhraseType.BigRockEnding, phrase.Time, phrase.TimeLength, phrase.Tick, phrase.TickLength));
-                            continue;
-                        }
-
+                        // Make sure there are notes in the drum fill
                         foreach (var note in Notes)
                         {
                             if (note.Time >= phrase.Time && note.Time <= phrase.TimeEnd)
@@ -547,9 +533,6 @@ namespace YARG.Gameplay.Player
                     return;
                 }
                 // Completely different handling, we use lanes instead of a track effect
-                // TODO: This has to be repeated for each lane, for now we just use 5 since we're
-                //  only testing with five fret guitar
-
                 for (int i = 0; i < BRELanes.Length; i++)
                 {
                     var newLane = (LaneElement) LanePool.TakeWithoutEnabling();
