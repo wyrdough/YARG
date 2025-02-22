@@ -235,17 +235,10 @@ namespace YARG.Gameplay.Player
             var phrases = new List<Phrase>();
             double codaTime = double.MaxValue;
 
-            // We need to know if there is a coda event in the chart because drum fills
-            // have to be transmuted into BREs after that point
-            foreach (var textEvent in Chart.GlobalEvents)
+            var codaEvent = Chart.GetCodaEvent();
+            if (codaEvent != null)
             {
-                if (textEvent.Text != "coda")
-                {
-                    continue;
-                }
-
-                codaTime = textEvent.Time;
-                break;
+                codaTime = codaEvent.Time;
             }
 
             foreach (var phrase in NoteTrack.Phrases)
@@ -254,16 +247,7 @@ namespace YARG.Gameplay.Player
                 // and there are no track effects for the other phrase types
                 if (phrase.Type is PhraseType.Solo or PhraseType.DrumFill or PhraseType.BigRockEnding)
                 {
-                    // Drum fills after the coda event need to be turned into BREs
-                    if (phrase.Type == PhraseType.DrumFill && phrase.Time >= codaTime)
-                    {
-                        var brePhrase = new Phrase(PhraseType.BigRockEnding, phrase.Time, phrase.TimeLength, phrase.Tick, phrase.TickLength);
-                        phrases.Add(brePhrase);
-                    }
-                    else
-                    {
-                        phrases.Add(phrase);
-                    }
+                    phrases.Add(phrase);
                 }
             }
 
@@ -527,9 +511,6 @@ namespace YARG.Gameplay.Player
                     return;
                 }
                 // Completely different handling, we use lanes instead of a track effect
-                // TODO: This has to be repeated for each lane, for now we just use 5 since we're
-                //  only testing with five fret guitar
-
                 for (int i = 0; i < BRELanes.Length; i++)
                 {
                     var newLane = (BreLaneElement) LanePool.TakeWithoutEnabling();
