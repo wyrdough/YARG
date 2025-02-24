@@ -553,7 +553,7 @@ namespace YARG.Gameplay.Player
 
         private void OnLaneHit(int fret)
         {
-            _fretArray.PlayHitAnimation(fret);
+            _fretArray.PlayHitAnimation(fret, true);
         }
 
         protected override void OnCodaStart(CodaSection coda)

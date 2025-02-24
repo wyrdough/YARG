@@ -126,10 +126,10 @@ namespace YARG.Gameplay.Visuals
             _frets[index].SetSustained(sustained);
         }
 
-        public void PlayHitAnimation(int index)
+        public void PlayHitAnimation(int index, bool breMode = false)
         {
             _frets[index].PlayHitAnimation();
-            _frets[index].PlayHitParticles();
+            _frets[index].PlayHitParticles(breMode);
         }
 
         public void PlayOpenHitAnimation()

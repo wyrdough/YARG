@@ -29,10 +29,10 @@ namespace YARG.Helpers.Authoring
                 lights.SetColor(c);
         }
 
-        public void Play()
+        public void Play(bool breMode = false)
         {
             foreach (var particles in _effectParticles)
-                particles.Play();
+                particles.Play(breMode);
             foreach (var lights in _effectLights)
                 lights.Play();
         }
