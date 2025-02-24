@@ -217,7 +217,10 @@ namespace YARG.Gameplay.Player
                 // Set emission color of BRE lanes depending on time since last hit
                 for (int i = 0; i < lanes; i++)
                 {
-                    var intensity = CurrentCoda.GetLaneIntensity(i, songTime);
+                    var intensity = CurrentCoda.GetNormalizedTimeSinceLastHit(i, songTime);
+                    // intensity = 1 - (float) Math.Clamp(Math.Cos(Math.PI * intensity), 0f, 1f);
+                    // intensity = 1 - (float) Math.Clamp((Math.Tan(intensity) * -1) + 1, 0f, 1f);
+                    intensity = (float) Math.Clamp((Math.Atan(intensity * 2) * -1) + 1, 0f, 1f);
                     BRELanes[i].SetEmissionColor(intensity);
                 }
             }

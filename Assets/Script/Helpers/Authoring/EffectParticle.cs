@@ -72,19 +72,31 @@ namespace YARG.Helpers.Authoring
                 _breMode = true;
                 var particleMain = _particleSystem.main;
                 var particleEmitter = _particleSystem.emission;
+                var particleShape = _particleSystem.shape;
+                var particleRotation = _particleSystem.transform.rotation;
 
                 if (particleEmitter.burstCount > 0)
                 {
-                    particleMain.startLifetimeMultiplier = 10;
+                    particleRotation.x = 180;
+                    _particleSystem.transform.rotation = particleRotation;
+                    // particleShape.angle = 60;
+                    var speed = particleMain.startSpeed;
+                    // speed.curveMultiplier = 2;
+                    // particleMain.startSpeed = speed;
+                    particleMain.startSpeedMultiplier = 2f;
+                    // particleMain.gravityModifierMultiplier = 2f;
+                    particleMain.startLifetimeMultiplier = 1.2f;
                     particleMain.maxParticles = 10000;
                     var burst = particleEmitter.GetBurst(0);
-                    burst.minCount *= 20;
-                    burst.maxCount *= 20;
+                    burst.minCount *= 5;
+                    burst.maxCount *= 5;
                     particleEmitter.SetBurst(0, burst);
                 }
                 else
                 {
-                    particleMain.startLifetimeMultiplier = 5;
+                    particleShape.shapeType = ParticleSystemShapeType.Cone;
+                    particleShape.randomDirectionAmount = 30f;
+                    particleMain.startLifetimeMultiplier = 2;
                 }
             }
 
