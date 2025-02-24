@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using YARG.Audio;
 using YARG.Core;
@@ -16,6 +17,7 @@ using YARG.Gameplay.Visuals;
 using YARG.Helpers.Extensions;
 using YARG.Player;
 using YARG.Settings;
+using Random = UnityEngine.Random;
 
 namespace YARG.Gameplay.Player
 {
@@ -158,6 +160,8 @@ namespace YARG.Gameplay.Player
                 for (int i = 0; i < CurrentCoda.Lanes; i++)
                 {
                     var intensity = CurrentCoda.GetLaneIntensity(i, songTime);
+                    // float intensity = (float) (Math.Max(1.5, CurrentCoda.GetTimeSinceLastHit(i, songTime)) / 1.5);
+                    intensity = (float) Math.Cos(Math.PI * intensity) / 2;
                     BRELanes[i].SetEmissionColor(intensity);
                 }
             }
