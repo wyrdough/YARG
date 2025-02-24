@@ -116,11 +116,13 @@ namespace YARG.Gameplay.Player
 
             StarScoreThresholds = PopulateStarScoreThresholds(StarMultiplierThresholds, Engine.BaseScore);
 
+            var fretCount = _fiveLaneMode ? 5 : 4;
+
             // Get the proper info for four/five lane
             ColorProfile.IFretColorProvider colors = !_fiveLaneMode
                 ? Player.ColorProfile.FourLaneDrums
                 : Player.ColorProfile.FiveLaneDrums;
-            _fretArray.FretCount = !_fiveLaneMode ? 4 : 5;
+            _fretArray.FretCount = fretCount;
 
             _fretArray.Initialize(
                 Player.ThemePreset,
@@ -423,10 +425,11 @@ namespace YARG.Gameplay.Player
 
         private bool IsDrumFreestyle()
         {
-            return Engine.NoteIndex == 0 || // Can freestyle before first note is hit/missed
+            return Engine.NoteIndex == 0 ||        // Can freestyle before first note is hit/missed
                 Engine.NoteIndex >= Notes.Count || // Can freestyle after last note
-                Engine.IsWaitCountdownActive; // Can freestyle during WaitCountdown
-            // TODO: add drum fill / BRE conditions
+                Engine.IsWaitCountdownActive ||    // Can freestyle during WaitCountdown
+                Engine.IsCodaActive;               // Can freestyle during Big YARG Ending
+            // TODO: add drum fill conditions
         }
 
         public override (ReplayFrame Frame, ReplayStats Stats) ConstructReplayData()
