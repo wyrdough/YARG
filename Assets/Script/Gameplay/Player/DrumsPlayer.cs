@@ -172,9 +172,9 @@ namespace YARG.Gameplay.Player
                 }
                 // This is done in engine for guitar/bass, but it seems better to do it here for drums
                 // since we have the correct visual ordering for the pads
-                if (engine.IsCodaActive && fret != 0)
+                if (engine.IsCodaActive)
                 {
-                    CurrentCoda.HitLane(engine.CurrentTime, fret - 1);
+                    CurrentCoda.HitLane(engine.CurrentTime, fret);
                 }
             };
 
@@ -187,11 +187,13 @@ namespace YARG.Gameplay.Player
 
             StarScoreThresholds = PopulateStarScoreThresholds(StarMultiplierThresholds, Engine.BaseScore);
 
+            var fretCount = _fiveLaneMode ? 5 : 4;
+
             // Get the proper info for four/five lane
             ColorProfile.IFretColorProvider colors = !_fiveLaneMode
                 ? Player.ColorProfile.FourLaneDrums
                 : Player.ColorProfile.FiveLaneDrums;
-            _fretArray.FretCount = !_fiveLaneMode ? 4 : 5;
+            _fretArray.FretCount = fretCount;
 
             _fretArray.Initialize(
                 Player.ThemePreset,
@@ -202,7 +204,7 @@ namespace YARG.Gameplay.Player
             // Particle 0 is always kick fret
             _kickFretFlash.Initialize(colors.GetParticleColor(0).ToUnityColor());
 
-            BreLaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 5);
+            BreLaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, fretCount);
         }
 
         protected override void UpdateVisuals(double songTime)
@@ -410,10 +412,11 @@ namespace YARG.Gameplay.Player
 
         private bool IsDrumFreestyle()
         {
-            return Engine.NoteIndex == 0 || // Can freestyle before first note is hit/missed
+            return Engine.NoteIndex == 0 ||        // Can freestyle before first note is hit/missed
                 Engine.NoteIndex >= Notes.Count || // Can freestyle after last note
-                Engine.IsWaitCountdownActive; // Can freestyle during WaitCountdown
-            // TODO: add drum fill / BRE conditions
+                Engine.IsWaitCountdownActive ||    // Can freestyle during WaitCountdown
+                Engine.IsCodaActive;               // Can freestyle during Big YARG Ending
+            // TODO: add drum fill conditions
         }
 
         public override (ReplayFrame Frame, ReplayStats Stats) ConstructReplayData()

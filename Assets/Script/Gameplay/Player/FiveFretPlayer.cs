@@ -135,7 +135,7 @@ namespace YARG.Gameplay.Player
                 Player.ColorProfile.FiveFretGuitar,
                 Player.Profile.LeftyFlip);
 
-            BreLaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 6);
+            BreLaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 5);
         }
 
         public override void ResetPracticeSection()
@@ -161,7 +161,7 @@ namespace YARG.Gameplay.Player
                 {
                     var intensity = CurrentCoda.GetLaneIntensity(i, songTime);
                     // float intensity = (float) (Math.Max(1.5, CurrentCoda.GetTimeSinceLastHit(i, songTime)) / 1.5);
-                    intensity = (float) Math.Cos(Math.PI * intensity) / 2;
+                    // intensity = (float) Math.Cos(Math.PI * intensity) / 2;
                     BRELanes[i].SetEmissionColor(intensity);
                 }
             }
@@ -328,6 +328,23 @@ namespace YARG.Gameplay.Player
                 WhammyFactor = Mathf.Clamp01(input.Axis);
                 GameManager.ChangeStemWhammyPitch(_stem, WhammyFactor);
             }
+        }
+
+        private void OnLaneHit(int fret)
+        {
+            _fretArray.PlayHitAnimation(fret);
+        }
+
+        protected override void OnCodaStart(CodaSection coda)
+        {
+            base.OnCodaStart(coda);
+            CurrentCoda.OnLaneHit += OnLaneHit;
+        }
+
+        protected override void OnCodaEnd(CodaSection coda)
+        {
+            CurrentCoda.OnLaneHit -= OnLaneHit;
+            base.OnCodaEnd(coda);
         }
 
         public override (ReplayFrame Frame, ReplayStats Stats) ConstructReplayData()
