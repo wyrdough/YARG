@@ -205,7 +205,7 @@ namespace YARG.Gameplay.Visuals
                 {
                     // Set color
                     thisMaterial.color = _color;
-                    thisMaterial.SetColor(_emissionColor, _color);
+                    thisMaterial.SetColor(_emissionColor, _color * 0.01f);
 
                     // Get shader and keyword
                     _shader = thisMaterial.shader;

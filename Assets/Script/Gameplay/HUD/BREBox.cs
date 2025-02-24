@@ -43,8 +43,6 @@ namespace YARG.Gameplay.HUD
 
         private bool _showingForPreview;
 
-        // private int HitPercent => Mathf.FloorToInt((float) _solo.NotesHit / _solo.NoteCount * 100f);
-
         private Coroutine _currentCoroutine;
 
         public void StartCoda(CodaSection coda)
@@ -87,11 +85,11 @@ namespace YARG.Gameplay.HUD
             // _breBottomText.SetTextFormat("{0}/{1}", _coda.NotesHit, _coda.NoteCount);
         }
 
-        public void EndCoda(int soloBonus, Action endCallback)
+        public void EndCoda(int breBonus, Action endCallback)
         {
             StopCurrentCoroutine();
 
-            _currentCoroutine = StartCoroutine(HideCoroutine(soloBonus, endCallback));
+            _currentCoroutine = StartCoroutine(HideCoroutine(breBonus, endCallback));
         }
 
         public void ForceReset()
@@ -121,50 +119,26 @@ namespace YARG.Gameplay.HUD
             _breBox.sprite = sprite;
             _breFullText.colorGradientPreset = gradient;
 
-            // Get the correct gradient and color
-            // var (sprite, gradient) = HitPercent switch
-            // {
-            //     >= 100 => (_soloSpritePerfect, _soloGradientPerfect),
-            //     >= 60  => (_soloSpriteNormal, _soloGradientNormal),
-            //     _      => (_soloSpriteMessy, _soloGradientMessy),
-            // };
-            // _breBox.sprite = sprite;
-            // _soloFullText.colorGradientPreset = gradient;
+            _breFullText.text = Localize.KeyFormat("Gameplay.Solo.PointsResult", breBonus);
 
-            // Display final hit percentage
-            // _breFullText.SetTextFormat("{0}", _coda.TotalCodaBonus);
-            //
-            // yield return new WaitForSeconds(1f);
+            // Move the box so we aren't obscuring strong finish/full combo text
+            _breBoxCanvasGroup.transform.DOMoveY(Screen.height / 2, 0.25f);
 
-            // Show performance text
-            // string performanceKey = HitPercent switch
-            // {
-            //     > 100 => "How",
-            //       100 => "Perfect",
-            //     >= 95 => "Awesome",
-            //     >= 90 => "Great",
-            //     >= 80 => "Good",
-            //     >= 70 => "Solid",
-            //        69 => "Nice",
-            //     >= 60 => "Okay",
-            //     >= 0  => "Messy",
-            //     <  0  => "How",
-            // };
-            //
-            // _breFullText.text = Localize.Key("Gameplay.Solo.Performance", performanceKey);
-
-            yield return new WaitForSeconds(2f);
-
-            // // Show point bonus
-            // // TODO: Fix this to use BRE text
-            // _breFullText.text = Localize.KeyFormat("Gameplay.Solo.PointsResult", _coda.TotalCodaBonus);
-            //
-            // yield return new WaitForSeconds(1f);
-
-            // Fade out the box
-            yield return _breBoxCanvasGroup
-                .DOFade(0f, 0.25f)
-                .WaitForCompletion();
+            // Go away sadly if BRE failed or triumphantly engorge if successful
+            if (!_coda.Success)
+            {
+                _breBoxCanvasGroup.transform.DOScale(0.01f, 0.25f);
+                _breBoxCanvasGroup.DOFade(0f, 0.25f).WaitForCompletion();
+            }
+            else
+            {
+                _breBoxCanvasGroup.transform.DOScale(1.5f, 0.25f);
+                yield return new WaitForSeconds(2f);
+                // Fade out the box
+                yield return _breBoxCanvasGroup
+                    .DOFade(0f, 0.25f)
+                    .WaitForCompletion();
+            }
 
             _breBox.gameObject.SetActive(false);
             _currentCoroutine = null;
@@ -192,8 +166,7 @@ namespace YARG.Gameplay.HUD
                 // TODO: Fix this to use BRE text instead of solo text
                 _breFullText.text = string.Empty;
                 _breBox.sprite = _breSpriteNormal;
-                _breTopText.text = "50%";
-                _breBottomText.text = "50/100";
+                _breFullText.text = Localize.KeyFormat("Gameplay.Solo.PointsResult", 6969);
                 _breBoxCanvasGroup.alpha = 1f;
 
                 _showingForPreview = true;

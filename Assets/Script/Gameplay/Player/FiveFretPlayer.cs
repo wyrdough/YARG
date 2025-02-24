@@ -241,6 +241,8 @@ namespace YARG.Gameplay.Player
                 for (int i = 0; i < CurrentCoda.Lanes; i++)
                 {
                     var intensity = CurrentCoda.GetLaneIntensity(i, songTime);
+                    // float intensity = (float) (Math.Max(1.5, CurrentCoda.GetTimeSinceLastHit(i, songTime)) / 1.5);
+                    intensity = (float) Math.Cos(Math.PI * intensity) / 2;
                     BRELanes[i].SetEmissionColor(intensity);
                 }
             }
