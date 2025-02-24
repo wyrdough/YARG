@@ -23,8 +23,9 @@ namespace YARG.Gameplay.Visuals
 
         private readonly List<Material> _innerMaterials = new();
 
-        private bool _hasPressedParam;
-        private bool _hasSustainParam;
+        private bool  _hasPressedParam;
+        private bool  _hasSustainParam;
+        private float _particleXrotation;
 
         public void Initialize(Color top, Color inner, Color particles)
         {
@@ -80,9 +81,9 @@ namespace YARG.Gameplay.Visuals
             ThemeBind.Animator.SetTrigger(_hit);
         }
 
-        public void PlayHitParticles()
+        public void PlayHitParticles(bool breMode = false)
         {
-            ThemeBind.HitEffect.Play();
+            ThemeBind.HitEffect.Play(breMode);
         }
 
         public void SetSustained(bool sustained)

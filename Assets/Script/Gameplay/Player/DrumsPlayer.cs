@@ -159,7 +159,7 @@ namespace YARG.Gameplay.Player
 
                 if (fret != 0)
                 {
-                    _fretArray.PlayDrumAnimation(fret - 1, isDrumFreestyle);
+                    _fretArray.PlayDrumAnimation(fret - 1, isDrumFreestyle, engine.CodaHasStarted);
                 }
                 else
                 {
