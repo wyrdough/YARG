@@ -34,9 +34,10 @@ namespace YARG.Gameplay.Visuals
             _comboMesh.material.SetColor(_multiplierColorProperty, color);
         }
 
-        public void SetCombo(int multiplier, int maxMultiplier, int combo)
+        public void SetCombo(int multiplier, int maxMultiplier, int combo, bool breMode = false)
         {
-            if (multiplier != 1)
+            // We don't show multiplier once BRE mode has started, per artist team
+            if (multiplier != 1 && !breMode)
                 _multiplierText.SetTextFormat("{0}<sub>x</sub>", multiplier);
             else
                 _multiplierText.text = string.Empty;

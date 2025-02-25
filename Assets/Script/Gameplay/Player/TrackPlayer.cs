@@ -324,8 +324,8 @@ namespace YARG.Gameplay.Player
             TrackMaterial.GrooveMode = groove;
             TrackMaterial.StarpowerMode = stats.IsStarPowerActive;
 
-            ComboMeter.SetCombo(stats.ScoreMultiplier, maxMultiplier, stats.Combo);
-            StarpowerBar.SetStarpower(currentStarPowerAmount, stats.IsStarPowerActive);
+            ComboMeter.SetCombo(stats.ScoreMultiplier, maxMultiplier, stats.Combo, Engine.CodaHasStarted);
+            StarpowerBar.SetStarpower(currentStarPowerAmount, stats.IsStarPowerActive, Engine.CodaHasStarted);
             SunburstEffects.SetSunburstEffects(groove, stats.IsStarPowerActive);
 
             TrackView.UpdateNoteStreak(stats.Combo);
