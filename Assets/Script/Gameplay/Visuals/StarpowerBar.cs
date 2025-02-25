@@ -14,10 +14,19 @@ namespace YARG.Gameplay.Visuals
         private double _starpowerAmount;
         private bool _starpowerActive;
 
-        public void SetStarpower(double starpowerAmount, bool starpowerActive)
+        public void SetStarpower(double starpowerAmount, bool starpowerActive, bool breMode = false)
         {
-            _starpowerAmount = starpowerAmount;
-            _starpowerActive = starpowerActive;
+            if (!breMode)
+            {
+                // We aren't supposed to show SP after coda has started, per artist team
+                _starpowerAmount = starpowerAmount;
+                _starpowerActive = starpowerActive;
+            }
+            else
+            {
+                _starpowerAmount = 0;
+                _starpowerActive = false;
+            }
 
             _starpowerBar.material.SetFloat(_fill, (float) starpowerAmount);
         }
