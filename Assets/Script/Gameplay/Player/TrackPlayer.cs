@@ -684,7 +684,7 @@ namespace YARG.Gameplay.Player
             }
         }
 
-        protected void SpawnNote(TNote note)
+        protected virtual void SpawnNote(TNote note)
         {
             var poolable = NotePool.KeyedTakeWithoutEnabling(note);
             if (poolable == null)
