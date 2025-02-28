@@ -360,6 +360,17 @@ namespace YARG.Gameplay.Player
             _fretArray.ResetAll();
         }
 
+        protected override void SpawnNote(GuitarNote note)
+        {
+            // Don't spawn notes during BRE
+            if (note.IsBigRockEnding)
+            {
+                return;
+            }
+
+            base.SpawnNote(note);
+        }
+
         protected override void InitializeSpawnedNote(IPoolable poolable, GuitarNote note)
         {
             ((FiveFretNoteElement) poolable).NoteRef = note;
