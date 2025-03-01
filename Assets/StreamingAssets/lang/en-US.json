@@ -524,6 +524,10 @@
                 "PauseName": "Bass",
                 "Description": "Adjusts the song's bass guitar track volume. Only does something if the song is multi-track."
             },
+            "BigYargEnding": {
+                "Name": "Enable Big YARG Ending",
+                "Description": "Enables the Big YARG Ending at the end of some songs."
+            },
             "ClapsInStarpower": {
                 "Name": "Star Power Claps",
                 "Description": "Enables claps to the beat while Star Power is active."
@@ -795,6 +799,10 @@
             "ShowHitWindow": {
                 "Name": "Show Hit Window",
                 "Description": "If enabled, a box will be shown on your track that represents the \"window\" in which notes can be hit."
+            },
+            "ShowNotesDuringBigYargEnding": {
+                "Name": "Show charted notes during Big YARG Ending",
+                "Description": "If enabled, charted notes will be shown within a Big YARG Ending."
             },
             "SongTimeOnScoreBox": {
                 "Name": "Song Time On Score Box",
