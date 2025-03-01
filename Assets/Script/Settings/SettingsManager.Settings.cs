@@ -83,6 +83,8 @@ namespace YARG.Settings
 
             public ToggleSetting ReduceNoteSpeedByDifficulty { get; } = new(true);
 
+            public ToggleSetting BigYargEnding { get; } = new(true);
+
             public SliderSetting ShowCursorTimer      { get; } = new(2f, 0f, 5f);
 
             public ToggleSetting PauseOnDeviceDisconnect { get; } = new(true);
@@ -389,6 +391,8 @@ namespace YARG.Settings
             public ToggleSetting InputDeviceLogging { get; } = new(false, InputDeviceLoggingCallback);
 
             public ToggleSetting ShowAdvancedMusicLibraryOptions { get; } = new(false);
+
+            public ToggleSetting ShowNotesDuringBigYargEnding { get; } = new(false);
 
             public DropdownSetting<LogLevel> MinimumLogLevel { get; } = new(
 #if UNITY_EDITOR

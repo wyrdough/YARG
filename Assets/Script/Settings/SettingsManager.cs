@@ -46,6 +46,7 @@ namespace YARG.Settings
                 nameof(Settings.VoiceActivatedVocalStarPower),
                 nameof(Settings.EnablePracticeSP),
                 nameof(Settings.PracticeRestartDelay),
+                // nameof(Settings.BigYargEnding),
 
                 new HeaderMetadata("StatusBar"),
                 nameof(Settings.ShowBattery),
@@ -206,6 +207,7 @@ namespace YARG.Settings
                 nameof(Settings.InputDeviceLogging),
                 nameof(Settings.ShowAdvancedMusicLibraryOptions),
                 nameof(Settings.MinimumLogLevel),
+                nameof(Settings.ShowNotesDuringBigYargEnding)
             },
             new MetadataTab("Experimental", icon: "Beaker", new ExperimentalPreviewBuilder())
             {

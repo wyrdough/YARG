@@ -193,7 +193,7 @@ namespace YARG.Gameplay.Player
         protected override void SpawnNote(GuitarNote note)
         {
             // Don't spawn notes during BRE
-            if (note.IsBigRockEnding)
+            if (note.IsBigRockEnding && !SettingsManager.Settings.ShowNotesDuringBigYargEnding.Value)
             {
                 return;
             }
