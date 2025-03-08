@@ -60,6 +60,9 @@ namespace YARG.Gameplay
         [SerializeField]
         private GameObject _lyricBar;
 
+        [SerializeField]
+        private FailMeter _failMeter;
+
         [field: SerializeField]
         public VocalTrack VocalTrack { get; private set; }
 
@@ -174,6 +177,13 @@ namespace YARG.Gameplay
 
             // Update countdown display style from global settings
             CountdownDisplay.DisplayStyle = SettingsManager.Settings.CountdownDisplay.Value;
+
+            _failMeter.Initialize(EngineManager);
+
+            if (SettingsManager.Settings.NoFailMode.Value || GlobalVariables.State.IsPractice)
+            {
+                _failMeter.gameObject.SetActive(false);
+            }
         }
 
         private void OnDestroy()
@@ -305,6 +315,10 @@ namespace YARG.Gameplay
                 {
                     _pauseMenu.PushMenu(PauseMenuManager.Menu.ReplayPause);
                 }
+                else if (PlayerHasFailed)
+                {
+                    _pauseMenu.PushMenu(PauseMenuManager.Menu.FailPause);
+                }
                 else if (IsPractice)
                 {
                     _pauseMenu.PushMenu(PauseMenuManager.Menu.PracticePause);
@@ -323,6 +337,8 @@ namespace YARG.Gameplay
             // Allow sleeping
             Screen.sleepTimeout = _originalSleepTimeout;
         }
+
+        public bool PlayerHasFailed { get; set; } = false;
 
         public void Resume()
         {
@@ -581,7 +597,7 @@ namespace YARG.Gameplay
                 return null;
             }
 
-           ReplayContainer.AddEntry(replayInfo);
+            ReplayContainer.AddEntry(replayInfo);
             _isReplaySaved = true;
             return replayInfo;
         }

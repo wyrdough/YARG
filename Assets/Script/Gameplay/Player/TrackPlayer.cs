@@ -756,6 +756,11 @@ namespace YARG.Gameplay.Player
             OnStarPowerPhraseHit();
         }
 
+        protected override void OnSongFailed()
+        {
+            base.OnSongFailed();
+        }
+
         protected override void FinishDestruction()
         {
             base.FinishDestruction();
