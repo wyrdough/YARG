@@ -12,7 +12,16 @@ namespace YARG.Gameplay
 {
     public partial class GameManager
     {
-        private const double DEFAULT_VOLUME = 1.0;
+        private const double DEFAULT_VOLUME    = 1.0;
+        private const double MAX_END_SILENCE   = 0.333;
+        // This should equate to -65.22dBFS.
+        private const float  SILENCE_THRESHOLD = 16;
+
+        private double _lastAudioCheck;
+        private double _silenceLength;
+        // Apparently we need half the fft size in bins
+        private float[] _fftData = new float[128];
+
         public class StemState
         {
             public readonly double Volume;
@@ -211,6 +220,33 @@ namespace YARG.Gameplay
             // Set the pitch
             float percentActive = state.SetWhammyPitch(percent);
             GlobalAudioHandler.SetWhammyPitchSetting(stem, percentActive);
+        }
+
+        private bool CheckForSilence(double silenceTime = MAX_END_SILENCE)
+        {
+            var audioLevel = new float[1];
+            var status = _mixer.GetLevel(audioLevel);
+
+            if (status == -1)
+            {
+                // There was an error, so do the safe thing and don't indicate silence
+                return false;
+            }
+
+            if (audioLevel[0] > SILENCE_THRESHOLD)
+            {
+                return false;
+            }
+
+            _silenceLength += _songRunner.AudioTime - _lastAudioCheck;
+            _lastAudioCheck = _songRunner.AudioTime;
+
+            if (_silenceLength > silenceTime)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
