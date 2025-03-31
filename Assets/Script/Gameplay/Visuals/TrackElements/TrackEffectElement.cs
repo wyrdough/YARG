@@ -28,6 +28,8 @@ namespace YARG.Gameplay.Visuals
         [SerializeField]
         private Material _soloTrimMaterial;
         [SerializeField]
+        private Material _soloTrimTransitionMaterial;
+        [SerializeField]
         private Material _soloTransitionMaterial;
         [SerializeField]
         private Material _soloRailLeftTransitionMaterial;
@@ -40,6 +42,8 @@ namespace YARG.Gameplay.Visuals
         [SerializeField]
         private Material _unisonTrimMaterial;
         [SerializeField]
+        private Material _unisonTrimTransitionMaterial;
+        [SerializeField]
         private Material _unisonTransitionMaterial;
         [SerializeField]
         private Material _unisonRailLeftTransitionMaterial;
@@ -51,6 +55,8 @@ namespace YARG.Gameplay.Visuals
         private Material _drumFillRailMaterial;
         [SerializeField]
         private Material _drumFillTrimMaterial;
+        [SerializeField]
+        private Material _drumFillTrimTransitionMaterial;
         [SerializeField]
         private Material _drumFillTransitionMaterial;
         [SerializeField]
@@ -365,6 +371,12 @@ namespace YARG.Gameplay.Visuals
                 {
                     continue;
                 }
+
+                if (child.gameObject.name is "TrackEffectTransitionTrimLeft" or "TrackEffectTransitionTrimRight")
+                {
+                    continue;
+                }
+
                 // Change the child's scale such that their world size remains the same after the parent scales
                 var originalScale = 0.005f;
                 var newScale = originalScale / scaleFactor;
@@ -462,6 +474,16 @@ namespace YARG.Gameplay.Visuals
                     TrackEffectType.DrumFillAndUnison => _drumFillTrimMaterial,
                     _                                 => null,
                 },
+                "TrackEffectTransitionTrimLeft" => effectType switch
+                {
+                    TrackEffectType.Solo              => _soloTrimTransitionMaterial,
+                    TrackEffectType.Unison            => _unisonTrimTransitionMaterial,
+                    TrackEffectType.DrumFill          => _drumFillTrimTransitionMaterial,
+                    TrackEffectType.SoloAndUnison     => _unisonTrimTransitionMaterial,
+                    TrackEffectType.SoloAndDrumFill   => _drumFillTrimTransitionMaterial,
+                    TrackEffectType.DrumFillAndUnison => _drumFillTrimTransitionMaterial,
+                    _                                 => null,
+                },
                 "TrackEffectTrimRight" => effectType switch {
                     TrackEffectType.Solo              => _soloTrimMaterial,
                     TrackEffectType.Unison            => _unisonTrimMaterial,
@@ -469,6 +491,16 @@ namespace YARG.Gameplay.Visuals
                     TrackEffectType.SoloAndUnison     => _unisonTrimMaterial,
                     TrackEffectType.SoloAndDrumFill   => _drumFillTrimMaterial,
                     TrackEffectType.DrumFillAndUnison => _drumFillTrimMaterial,
+                    _                                 => null,
+                },
+                "TrackEffectTransitionTrimRight" => effectType switch
+                {
+                    TrackEffectType.Solo              => _soloTrimTransitionMaterial,
+                    TrackEffectType.Unison            => _unisonTrimTransitionMaterial,
+                    TrackEffectType.DrumFill          => _drumFillTrimTransitionMaterial,
+                    TrackEffectType.SoloAndUnison     => _unisonTrimTransitionMaterial,
+                    TrackEffectType.SoloAndDrumFill   => _drumFillTrimTransitionMaterial,
+                    TrackEffectType.DrumFillAndUnison => _drumFillTrimTransitionMaterial,
                     _                                 => null,
                 },
                 "TrackEffectStart" => effectType switch
