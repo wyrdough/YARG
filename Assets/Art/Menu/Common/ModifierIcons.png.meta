@@ -420,7 +420,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SoloTaps
+      name: NoVocalPercussion
       rect:
         serializedVersion: 2
         x: 1536
@@ -464,7 +464,7 @@ TextureImporter:
       ModifierIcons_6: 1497401919
       ModifierIcons_7: -1355680061
       NoKicks: -1200274759
-      SoloTaps: 1841026791
+      NoVocalPercussion: 1841026791
       TapsToHopos: 1609936924
       UnpitchedOnly: -2147107449
   spritePackingTag: 
