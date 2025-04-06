@@ -549,9 +549,11 @@ namespace YARG.Gameplay.Visuals
             {
                 var timeSinceStart = GameManager.RealVisualTime - _visibilityStartTime;
                 // Go up the track at twice the notespeed (extra parentheses for clarity)
-                var maskEndZ = (float) (StartZ + ((timeSinceStart * Player.NoteSpeed) * 2));
+                SetEffectMask((float) (StartZ + (timeSinceStart * Math.Max(10f, Player.NoteSpeed * 3))));
+
+                // var maskEndZ = (float) (StartZ + ((timeSinceStart * Player.NoteSpeed) * 2));
                 // SetEffectMask(Mathf.Lerp(_currentEndZ, EndZ, Time.deltaTime * 5f));
-                SetEffectMask(maskEndZ);
+                // SetEffectMask(maskEndZ);
             }
         }
 
