@@ -5,7 +5,7 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-namespace YARG
+namespace YARG.Gameplay
 {
     public class FSRCameraManager : MonoBehaviour
     {
@@ -17,10 +17,8 @@ namespace YARG
         // * mipmap bias
         // * reset history on camera cuts
         // * reactive mask
-        // * exposure?
         // * antighosting?
         // * fp16 mode? should improve perf but they also say almost nothing on unity
-        // * debug view?
 
         [Tooltip("Apply RCAS sharpening to the image after upscaling.")]
         public bool performSharpenPass = true;
@@ -80,6 +78,9 @@ namespace YARG
 
         private Vector2Int _displaySize;
 
+        private FSRPass _fsrPass;
+        private BlitPass _blitPass;
+
         private const GraphicsFormat _graphicsFormat = GraphicsFormat.R16G16B16A16_SFloat;
         private UniversalRenderPipelineAsset UniversalRenderPipelineAsset;
 
@@ -105,6 +106,9 @@ namespace YARG
             _context = Fsr3Upscaler.CreateContext(_displaySize, _displaySize, _assets.shaders, flags);
 
             UniversalRenderPipelineAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+
+            _fsrPass = new FSRPass(this);
+            _blitPass = new BlitPass(this);
         }
 
         private Vector2Int GetScaledRenderSize()
@@ -160,7 +164,6 @@ namespace YARG
         private void ApplyJitter()
         {
             var scaledRenderSize = GetScaledRenderSize();
-            // Debug.LogFormat("{0} {1}", _displaySize, scaledRenderSize);
 
             // Perform custom jittering of the camera's projection matrix according to FSR3's recipe
             int jitterPhaseCount = Fsr3Upscaler.GetJitterPhaseCount(scaledRenderSize.x, _displaySize.x);
@@ -183,7 +186,7 @@ namespace YARG
             return _renderCamera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
         }
 
-        void OnPreCameraRender(ScriptableRenderContext ctx, Camera cam)
+        private void OnPreCameraRender(ScriptableRenderContext ctx, Camera cam)
         {
             if (cam != _renderCamera)
             {
@@ -193,11 +196,11 @@ namespace YARG
             SetupDispatchDescription();
             ApplyJitter();
             var renderer = cam.GetUniversalAdditionalCameraData().scriptableRenderer;
-            renderer.EnqueuePass(new FSRPass(this));
-            renderer.EnqueuePass(new BlitPass(this));
+            renderer.EnqueuePass(_fsrPass);
+            renderer.EnqueuePass(_blitPass);
         }
 
-        void OnPostCameraRender(ScriptableRenderContext ctx, Camera cam)
+        private void OnPostCameraRender(ScriptableRenderContext ctx, Camera cam)
         {
             if (cam != _renderCamera)
             {
@@ -221,12 +224,18 @@ namespace YARG
                 _context.Destroy();
                 _context = null;
             }
+            if (_output != null)
+            {
+                _output.Release();
+            }
+            RenderPipelineManager.beginCameraRendering -= OnPreCameraRender;
+            RenderPipelineManager.endCameraRendering -= OnPostCameraRender;
         }
     }
 
     // Render pass to take unscaled rendered picture and FSR it into a render texture
     // This will be done before the final blit (which we'll have to overwrite later)
-    public class FSRPass : ScriptableRenderPass
+    class FSRPass : ScriptableRenderPass
     {
         private FSRCameraManager _fsr;
         private CommandBuffer cmd;
@@ -265,7 +274,7 @@ namespace YARG
     // Note that render pipeline will do its own upscaling and blit and we're
     // overwriting that basically. I don't believe there is a way to remove that builtin blit
     // without using our own render pipeline 
-    public class BlitPass : ScriptableRenderPass
+    class BlitPass : ScriptableRenderPass
     {
         private CommandBuffer cmd;
         private FSRCameraManager _fsr;
