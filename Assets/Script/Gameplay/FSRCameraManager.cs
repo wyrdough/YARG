@@ -80,12 +80,16 @@ namespace YARG.Gameplay
 
         private FSRPass _fsrPass;
         private BlitPass _blitPass;
+        private float _renderScale;
 
         private const GraphicsFormat _graphicsFormat = GraphicsFormat.R16G16B16A16_SFloat;
         private UniversalRenderPipelineAsset UniversalRenderPipelineAsset;
 
         private void Awake()
         {
+            UniversalRenderPipelineAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+            _renderScale = UniversalRenderPipelineAsset.renderScale;
+
             var descriptor = new RenderTextureDescriptor(
                 Screen.width, Screen.height, RenderTextureFormat.ARGBFloat);
             descriptor.mipCount = 0;
@@ -93,28 +97,30 @@ namespace YARG.Gameplay
             _renderCamera = GetComponent<Camera>();
             _assets = Resources.Load<Fsr3UpscalerAssets>("FSR3 Upscaler Assets");
             _renderCamera.depthTextureMode = DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
-            RenderPipelineManager.beginCameraRendering += OnPreCameraRender;
-            RenderPipelineManager.endCameraRendering += OnPostCameraRender;
-
-
-            Fsr3Upscaler.InitializationFlags flags = Fsr3Upscaler.InitializationFlags.EnableMotionVectorsJitterCancellation;
-
-            if (_renderCamera.allowHDR) flags |= Fsr3Upscaler.InitializationFlags.EnableHighDynamicRange;
-            if (enableAutoExposure) flags |= Fsr3Upscaler.InitializationFlags.EnableAutoExposure;
 
             _displaySize = new Vector2Int(_renderCamera.pixelWidth, _renderCamera.pixelHeight);
-            _context = Fsr3Upscaler.CreateContext(_displaySize, _displaySize, _assets.shaders, flags);
-
-            UniversalRenderPipelineAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
 
             _fsrPass = new FSRPass(this);
             _blitPass = new BlitPass(this);
         }
 
+        private void CreateFSRContext()
+        {
+            if (_context != null)
+            {
+                DestroyFsrContext();
+            }
+            Fsr3Upscaler.InitializationFlags flags = Fsr3Upscaler.InitializationFlags.EnableMotionVectorsJitterCancellation;
+
+            if (_renderCamera.allowHDR) flags |= Fsr3Upscaler.InitializationFlags.EnableHighDynamicRange;
+            if (enableAutoExposure) flags |= Fsr3Upscaler.InitializationFlags.EnableAutoExposure;
+
+            _context = Fsr3Upscaler.CreateContext(_displaySize, GetScaledRenderSize(), _assets.shaders, flags);
+        }
+
         private Vector2Int GetScaledRenderSize()
         {
-            var scale = UniversalRenderPipelineAsset.renderScale;
-            return new Vector2Int((int)(_renderCamera.pixelWidth * scale), (int)(_renderCamera.pixelHeight * scale));
+            return new Vector2Int((int)(_renderCamera.pixelWidth * _renderScale), (int)(_renderCamera.pixelHeight * _renderScale));
         }
 
         private void SetupDispatchDescription()
@@ -122,6 +128,7 @@ namespace YARG.Gameplay
             if (_output != null)
             {
                 _output.Release();
+                _output = null;
             }
 
             _output = RTHandles.Alloc(_renderCamera.pixelWidth, _renderCamera.pixelHeight, enableRandomWrite: true, colorFormat: _graphicsFormat, msaaSamples: MSAASamples.None, name: "fsr.output");
@@ -148,7 +155,7 @@ namespace YARG.Gameplay
             _dispatchDescription.ViewSpaceToMetersFactor = 1.0f; // 1 unit is 1 meter in Unity
             _dispatchDescription.VelocityFactor = velocityFactor;
             _dispatchDescription.Reset = false;
-            _dispatchDescription.Flags = enableDebugView ? Fsr3Upscaler.DispatchFlags.DrawDebugView : 0;;
+            _dispatchDescription.Flags = enableDebugView ? Fsr3Upscaler.DispatchFlags.DrawDebugView : 0;
 
 
             if (SystemInfo.usesReversedZBuffer)
@@ -163,6 +170,7 @@ namespace YARG.Gameplay
 
         private void ApplyJitter()
         {
+
             var scaledRenderSize = GetScaledRenderSize();
 
             // Perform custom jittering of the camera's projection matrix according to FSR3's recipe
@@ -175,8 +183,7 @@ namespace YARG.Gameplay
             jitterY = 2.0f * jitterY / scaledRenderSize.y;
 
             var jitterTranslationMatrix = Matrix4x4.Translate(new Vector3(jitterX, jitterY, 0));
-            var m_projectionMatrix = _renderCamera.projectionMatrix;
-            _renderCamera.nonJitteredProjectionMatrix = m_projectionMatrix;
+            _renderCamera.nonJitteredProjectionMatrix = _renderCamera.projectionMatrix;
             _renderCamera.projectionMatrix = jitterTranslationMatrix * _renderCamera.nonJitteredProjectionMatrix;
             _renderCamera.useJitteredProjectionMatrixForTransparentRendering = true;
         }
@@ -186,13 +193,19 @@ namespace YARG.Gameplay
             return _renderCamera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
         }
 
+
         private void OnPreCameraRender(ScriptableRenderContext ctx, Camera cam)
         {
             if (cam != _renderCamera)
             {
                 return;
             }
-
+            if (_renderScale != UniversalRenderPipelineAsset.renderScale)
+            {
+                _renderScale = UniversalRenderPipelineAsset.renderScale;
+                OnDisable();
+                OnEnable();
+            }
             SetupDispatchDescription();
             ApplyJitter();
             var renderer = cam.GetUniversalAdditionalCameraData().scriptableRenderer;
@@ -214,6 +227,20 @@ namespace YARG.Gameplay
         private void OnDisable()
         {
             DestroyFsrContext();
+            if (_output != null)
+            {
+                _output.Release();
+                _output = null;
+            }
+            RenderPipelineManager.beginCameraRendering -= OnPreCameraRender;
+            RenderPipelineManager.endCameraRendering -= OnPostCameraRender;
+        }
+
+        private void OnEnable()
+        {
+            RenderPipelineManager.beginCameraRendering += OnPreCameraRender;
+            RenderPipelineManager.endCameraRendering += OnPostCameraRender;
+            CreateFSRContext();
         }
 
         private void DestroyFsrContext()
@@ -224,12 +251,7 @@ namespace YARG.Gameplay
                 _context.Destroy();
                 _context = null;
             }
-            if (_output != null)
-            {
-                _output.Release();
-            }
-            RenderPipelineManager.beginCameraRendering -= OnPreCameraRender;
-            RenderPipelineManager.endCameraRendering -= OnPostCameraRender;
+
         }
     }
 
@@ -258,6 +280,7 @@ namespace YARG.Gameplay
 
             _fsr._dispatchDescription.Color = new FidelityFX.ResourceView(renderingData.cameraData.renderer.cameraColorTarget, RenderTextureSubElement.Color);
             _fsr._dispatchDescription.Depth = new FidelityFX.ResourceView(Shader.GetGlobalTexture(depthTexturePropertyID), RenderTextureSubElement.Depth);
+            // _fsr._dispatchDescription.Depth = new FidelityFX.ResourceView(renderingData.cameraData.renderer.cameraDepthTarget, RenderTextureSubElement.Depth);
             _fsr._dispatchDescription.MotionVectors = new FidelityFX.ResourceView(Shader.GetGlobalTexture(motionTexturePropertyID));
 
             _fsr._context.Dispatch(_fsr._dispatchDescription, cmd);

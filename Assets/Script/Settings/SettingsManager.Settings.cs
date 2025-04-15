@@ -240,9 +240,7 @@ namespace YARG.Settings
                      YARG.VenueAntiAliasingMethod.None,
                      YARG.VenueAntiAliasingMethod.FXAA,
                      YARG.VenueAntiAliasingMethod.MSAA,
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
                      YARG.VenueAntiAliasingMethod.FSR3,
-#endif
                  };
 
             public ResolutionSetting Resolution { get; } = new(ResolutionCallback);
