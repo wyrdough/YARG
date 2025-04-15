@@ -45,7 +45,7 @@ namespace YARG.Gameplay.Visuals
         private float _fadeStartTime;
         private float _fadeAmount = 0.0f;
 
-        public void Initialize(Color top, Color inner, Color particles)
+        public void Initialize(Color top, Color inner, Color particles, Color openParticles)
         {
             _originalUnityTopColor = top.ToUnityColor();
             _originalUnityInnerColor = inner.ToUnityColor();
@@ -67,6 +67,7 @@ namespace YARG.Gameplay.Visuals
 
             // Set the particle colors
             ThemeBind.HitEffect.SetColor(particles.ToUnityColor());
+            ThemeBind.OpenHitEffect.SetColor(openParticles.ToUnityColor());
             ThemeBind.SustainEffect.SetColor(particles.ToUnityColor());
             ThemeBind.PressedEffect.SetColor(particles.ToUnityColor());
 
@@ -111,6 +112,11 @@ namespace YARG.Gameplay.Visuals
         public void PlayHitParticles()
         {
             ThemeBind.HitEffect.Play();
+        }
+
+        public void PlayOpenHitParticles()
+        {
+            ThemeBind.OpenHitEffect.Play();
         }
 
         public void SetSustained(bool sustained)
