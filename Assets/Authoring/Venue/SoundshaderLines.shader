@@ -70,11 +70,12 @@
             SamplerState sampler_Yarg_SoundTex; // : register(s0); // Assumes sampler is in slot s0
 
             // Constants
-            static const float FREQ_RANGE = 512.0f;
+            static const float FREQ_RANGE = 128.0f;
             static const float PI = 3.1415f;
             static const float RADIUS = 0.5f;
-            static const float BRIGHTNESS = 0.075f;
-            static const float SPEED = 0.5f;
+            // static const float BRIGHTNESS = 0.075f;
+            static const float BRIGHTNESS = 0.025f;
+            static const float SPEED = 2.5f;
 
             // Convert HSV to RGB (HLSL version)
             float3 hsv2rgb(float3 color) {
@@ -92,13 +93,22 @@
             // Get frequency data from texture (HLSL version)
             float getFrequency(float x) {
                 // Sample the texture using the provided sampler state
-                return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(floor(x * FREQ_RANGE + 1.0f) / FREQ_RANGE, 0.25f)).x + 0.06f;
+
+                x = floor(x * FREQ_RANGE);
+                // x = x * FREQ_RANGE;
+                return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(x + 1, 0.2)).x + 0.06f;
+                // return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2((x + 1) / x, 0)).x + 0.06f;
+                // return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(floor(x + 1.0f) / FREQ_RANGE, 0)).x + 0.06f;
+                // return _Yarg_SoundTex.Load(float3(floor(x * FREQ_RANGE + 1) / FREQ_RANGE, 0, 0)).x + 0.06f;
+                // return _Yarg_SoundTex.Load(float3(x + 1, 0, 0)).x + 0.06f;
             }
 
             // Get smoothed frequency data (HLSL version)
             float getFrequency_smooth(float x) {
                 float index = floor(x * FREQ_RANGE) / FREQ_RANGE;
                 float next = floor(x * FREQ_RANGE + 1.0f) / FREQ_RANGE;
+                // float index = x;
+                // float next = x + 1;
                 // Use lerp (linear interpolation) which is HLSL's equivalent of mix
                 return lerp(getFrequency(index), getFrequency(next), smoothstep(0.0f, 1.0f, frac(x * FREQ_RANGE)));
             }
@@ -125,6 +135,7 @@
                 color += hsv2rgb(float3(h, 1.0f, 1.0f)) * ring * BRIGHTNESS;
 
                 // Use the translated getFrequency_blend
+                // float x = abs(angle / PI);
                 float frequency = max(getFrequency_blend(abs(angle / PI)) - 0.02f, 0.0f);
                 color *= frequency;
 
