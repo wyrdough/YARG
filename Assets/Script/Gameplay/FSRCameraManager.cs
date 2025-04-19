@@ -122,7 +122,7 @@ namespace YARG.Gameplay
             {
                 DestroyFsrContext();
             }
-            Fsr3Upscaler.InitializationFlags flags = Fsr3Upscaler.InitializationFlags.EnableMotionVectorsJitterCancellation;
+            Fsr3Upscaler.InitializationFlags flags = 0;
 
             if (renderCamera.allowHDR) flags |= Fsr3Upscaler.InitializationFlags.EnableHighDynamicRange;
             if (enableAutoExposure) flags |= Fsr3Upscaler.InitializationFlags.EnableAutoExposure;
@@ -132,7 +132,7 @@ namespace YARG.Gameplay
 
         private Vector2Int GetScaledRenderSize()
         {
-            return new Vector2Int((int)(renderCamera.pixelWidth * _renderScale), (int)(renderCamera.pixelHeight * _renderScale));
+            return new Vector2Int((int) (renderCamera.pixelWidth * _renderScale), (int) (renderCamera.pixelHeight * _renderScale));
         }
 
         private void SetupAutoReactiveDescription()
@@ -209,13 +209,18 @@ namespace YARG.Gameplay
         private void ApplyMipmapBias(float biasOffset)
         {
             // Apply a mipmap bias so that textures retain their sharpness
-            if (!float.IsNaN(_mipmapBiasOffset) && !float.IsInfinity(biasOffset))
+            if (!float.IsNaN(biasOffset) && !float.IsInfinity(biasOffset))
             {
                 if (textureParentObject != null)
                 {
-                    foreach (var tex in UnityEditor.EditorUtility.CollectDependencies(new []{ textureParentObject }).OfType<Texture>())
+                    foreach (var tex in textureParentObject.GetComponentsInChildren<Renderer>(true).SelectMany(r =>
+                        r.sharedMaterial.GetTexturePropertyNameIDs().Select(name => r.sharedMaterial.GetTexture(name))
+                    ).Distinct())
                     {
-                        tex.mipMapBias += _mipmapBiasOffset;
+                        if (tex != null)
+                        {
+                            tex.mipMapBias += biasOffset;
+                        }
                     }
                 }
             }
