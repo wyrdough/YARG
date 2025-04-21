@@ -1,4 +1,7 @@
-﻿Shader "SoundshaderLines"
+﻿
+// Based on https://www.shadertoy.com/view/WdfSDr
+
+Shader "SoundshaderLines"
 {
     Properties
     {
@@ -73,7 +76,7 @@
             static const float FREQ_RANGE = 128.0f;
             static const float PI = 3.1415f;
             static const float RADIUS = 0.5f;
-            // static const float BRIGHTNESS = 0.075f;
+            // static const float BRIGHTNESS = 0.15f;
             static const float BRIGHTNESS = 0.025f;
             static const float SPEED = 2.5f;
 
@@ -86,7 +89,7 @@
 
             // Calculate Luminance (HLSL version)
             float luma(float3 color) {
-              //return dot(color, float3(0.299f, 0.587f, 0.114f));
+              // return dot(color, float3(0.299f, 0.587f, 0.114f));
               return dot(color, float3(0.299f, 0.587f, 0.5f)); // Using the modified version from GLSL
             }
 
@@ -96,11 +99,11 @@
 
                 x = floor(x * FREQ_RANGE);
                 // x = x * FREQ_RANGE;
-                return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(x + 1, 0.2)).x + 0.06f;
+                // return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(x + 1, 0.2)).x + 0.06f;
                 // return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2((x + 1) / x, 0)).x + 0.06f;
-                // return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(floor(x + 1.0f) / FREQ_RANGE, 0)).x + 0.06f;
+                // return _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2((floor(x + 1.0f) / FREQ_RANGE), 0)).x + 0.06f;
                 // return _Yarg_SoundTex.Load(float3(floor(x * FREQ_RANGE + 1) / FREQ_RANGE, 0, 0)).x + 0.06f;
-                // return _Yarg_SoundTex.Load(float3(x + 1, 0, 0)).x + 0.06f;
+                return _Yarg_SoundTex.Load(float3(x + 1, 0, 0)).x + 0.06f;
             }
 
             // Get smoothed frequency data (HLSL version)
@@ -191,8 +194,8 @@
                 color += doLine(rot1, RADIUS, rot1.y); // Note: using rot1.y here as in the original GLSL
 
                 // Additive brightness based on luminance
-                color += max(Luminance(color) - 1.0f, 0.0f);
-
+                color += max(luma(color) - 1.0f, 0.0f);
+                // color += max(Luminance(color) - 1.0f, 0.0f);
                 // Return final color with alpha = 1.0
                 return float4(color, 1.0f);
             }
