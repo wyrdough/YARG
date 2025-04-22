@@ -73,7 +73,7 @@ Shader "SoundshaderLines"
             SamplerState sampler_Yarg_SoundTex; // : register(s0); // Assumes sampler is in slot s0
 
             // Constants
-            static const float FREQ_RANGE = 128.0f;
+            static const float FREQ_RANGE = 512.0f;
             static const float PI = 3.1415f;
             static const float RADIUS = 0.5f;
             // static const float BRIGHTNESS = 0.15f;
