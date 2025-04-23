@@ -72,12 +72,17 @@ Shader "SynthwaveSunset"
             float _TimeDelta;
             float jTime;
 
+            float mod(float x, float y)
+            {
+                return x - y * floor(x/y);
+            }
+
             // Previous helper functions remain the same...
 
             float4 textureMirror(sampler2D tex, float2 c)
             {
                 float2 cf = frac(c);
-                return tex2Dlod(tex, float4(lerp(cf, 1.0 - cf, fmod(floor(c), 2.0)), 0, 0));
+                return tex2Dlod(tex, float4(lerp(cf, 1.0 - cf, mod(floor(c), 2.0)), 0, 0));
             }
 
             float amp(float2 p)
@@ -265,6 +270,7 @@ Shader "SynthwaveSunset"
                 float2 uv = (2.0 * (fragCoord + float2(x,y)) - _ScreenParams.xy) / _ScreenParams.y;
 
                 float dt = frac(tex2D(_Yarg_SoundTex, float(AA) * (fragCoord + float2(x,y))/_ChannelResolution.xy).r + _Time.y);
+                jTime = mod(iTime.y-dt*_TimeDelta*.25,4000);
                 float3 ro = float3(0.0, 1.0, (-20000.0 + iTime.y * speed));
 
                 #ifdef stereo
