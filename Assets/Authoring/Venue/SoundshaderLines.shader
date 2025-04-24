@@ -77,6 +77,10 @@ Shader "VisualizerVenue/SoundshaderLines"
             static const float PI = 3.1415f;
             static const float RADIUS = 0.5f;
             // static const float BRIGHTNESS = 0.15f;
+
+            // static const float BRIGHTNESS = 0.05f;
+
+            // Below is what works best when there isn't any gamma correction
             static const float BRIGHTNESS = 0.025f;
             static const float SPEED = 2.5f;
 
@@ -196,6 +200,10 @@ Shader "VisualizerVenue/SoundshaderLines"
                 // Additive brightness based on luminance
                 color += max(luma(color) - 1.0f, 0.0f);
                 // color += max(Luminance(color) - 1.0f, 0.0f);
+
+                // Correct gamma
+                color = pow(color, 1.8);
+
                 // Return final color with alpha = 1.0
                 return float4(color, 1.0f);
             }

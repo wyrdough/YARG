@@ -1,4 +1,7 @@
-﻿Shader "VisualizerVenue/FractalSound01AI"
+﻿
+// Adapted from https://www.shadertoy.com/view/llB3W1
+
+Shader "VisualizerVenue/FractalAudio01AI"
 {
     Properties
     {
@@ -23,7 +26,7 @@
             #define iTime _Time
 
             #include "UnityCG.cginc"
-            texture2D _Yarg_SoundTex;
+            Texture2D _Yarg_SoundTex;
 
             struct appdata_t
             {
@@ -88,7 +91,7 @@
 
             float sampleMusicA(Texture2D _Yarg_SoundTex, SamplerState sampler_Yarg_SoundTex)
             {
-                return _Yarg_SoundTex.Load(float3(0, 0, 0));
+                // return _Yarg_SoundTex.Load(float3(0, 0, 0));
                 return 0.5 * (
                     _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(0.15, 0.25)).x +
                     _Yarg_SoundTex.Sample(sampler_Yarg_SoundTex, float2(0.30, 0.25)).x);
@@ -123,6 +126,7 @@
                 float4 fract01 = float4(c, 1.0);
                 float4 salida;
                 salida = fract01 / t3 + fract01 * t3 + float4(invFract, 0.6) + float4(fract4, 0.3);
+                salida = pow(salida, 2.2);
                 return salida;
             }
 

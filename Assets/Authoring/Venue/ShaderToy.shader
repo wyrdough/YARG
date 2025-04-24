@@ -25,7 +25,7 @@ Shader "VisualizerVenue/ShaderToy"
 
             #include "UnityCG.cginc"
 
-            texture2D _Yarg_SoundTex;
+            Texture2D _Yarg_SoundTex;
 
             struct appdata_t
             {
@@ -63,7 +63,7 @@ Shader "VisualizerVenue/ShaderToy"
             	float2 uv = fragCoord.xy / iResolution.xy;
 
                 // the sound texture is 512x2
-                int tx = int(uv.x*1024.0);
+                int tx = int(uv.x*512.0);
 
             	// first row is frequency data (48Khz/4 in 512 texels, meaning 23 Hz per texel)
             	float fft  = _Yarg_SoundTex.Load( int3(tx,0,0)).x;
@@ -76,6 +76,9 @@ Shader "VisualizerVenue/ShaderToy"
 
                 // add wave form on top
             	col += 1.0 -  smoothstep( 0.0, 0.15, abs(wave - uv.y) );
+
+                // correct for gamma difference between ShaderToy and Unity
+                col = pow(col, 2.2);
 
             	// output final color
             	return float4(col,1.0);

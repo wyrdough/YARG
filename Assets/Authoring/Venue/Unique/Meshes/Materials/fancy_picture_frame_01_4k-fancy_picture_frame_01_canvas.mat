@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: fancy_picture_frame_01_4k-fancy_picture_frame_01_canvas
-  m_Shader: {fileID: 4800000, guid: 8801d7adbb5049978eed3b9216722ed3, type: 3}
+  m_Shader: {fileID: 4800000, guid: 054578ab4fd4d074cb6476cb61b082f8, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4

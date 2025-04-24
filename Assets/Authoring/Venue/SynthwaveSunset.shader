@@ -320,7 +320,7 @@ Shader "VisualizerVenue/SynthwaveSunset"
                     fragColor /= float(AA * AA);
                 #endif
 
-                return fragColor;
+                return pow(fragColor, 2.2);
             }
 
             fixed4 frag(v2f _iParam) : SV_Target
