@@ -1,4 +1,4 @@
-Shader "ShaderToy"
+Shader "VisualizerVenue/ShaderToy"
 {
     Properties
     {

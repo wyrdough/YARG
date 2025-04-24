@@ -2,7 +2,7 @@
 
 // Still needs work to deal with the brightness difference between Shadertoy WebGL and Unity
 
-Shader "SynthwaveSunset"
+Shader "VisualizerVenue/SynthwaveSunset"
 {
     Properties
     {

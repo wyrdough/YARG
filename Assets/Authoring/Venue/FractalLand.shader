@@ -1,4 +1,4 @@
-﻿Shader "FractalLand"
+﻿Shader "VisualizerVenue/FractalLand"
 {
     Properties
     {

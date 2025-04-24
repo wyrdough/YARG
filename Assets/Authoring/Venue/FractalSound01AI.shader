@@ -1,4 +1,4 @@
-﻿Shader "FractalSound01AI"
+﻿Shader "VisualizerVenue/FractalSound01AI"
 {
     Properties
     {

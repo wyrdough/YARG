@@ -1,7 +1,7 @@
 ﻿
 // Based on https://www.shadertoy.com/view/WdfSDr
 
-Shader "SoundshaderLines"
+Shader "VisualizerVenue/SoundshaderLines"
 {
     Properties
     {

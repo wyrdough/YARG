@@ -1,4 +1,4 @@
-﻿Shader "AudioEclipseAI"
+﻿Shader "VisualizerVenue/AudioEclipseAI"
 {
     // Converted from https://www.shadertoy.com/view/MdsXWM
     Properties
