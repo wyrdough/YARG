@@ -39,6 +39,7 @@ Shader "SoundShaders/SoundshaderLinesObject"
             Texture2D _Yarg_SoundTex;
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float4 _Yarg_SoundTex_ST;
 
             struct appdata_t
             {
@@ -80,10 +81,12 @@ Shader "SoundShaders/SoundshaderLinesObject"
             v2f vert(appdata v)
             {
                 v2f o;
+                float intensity = _Yarg_SoundTex.Load(float3(0, 0, 0)).x;
+                float factor = lerp(-1.0, 1.0, v.uv.x);
+                v.vertex.x += intensity * (factor * 0.1);
                 o.pos = UnityObjectToClipPos(v.vertex);
-                o.scrPos = v.vertex.xyz;
-                o.scrPos = v.uv;
-                // UNITY_TRANSFER_FOG(o, o.vertex);
+                // o.scrPos = v.vertex.xyz;
+                o.scrPos = TRANSFORM_TEX(v.uv, _Yarg_SoundTex);
                 return o;
             }
 

@@ -15,7 +15,7 @@ Shader "VisualizerVenue/FractalAudio01AI"
 
             Cull Off
             ZWrite On
-            ZTest Off
+            ZTest On
 
             CGPROGRAM
             #pragma vertex vert
