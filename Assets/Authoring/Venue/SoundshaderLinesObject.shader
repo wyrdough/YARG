@@ -1,7 +1,7 @@
 ﻿
 // Based on https://www.shadertoy.com/view/WdfSDr
 
-Shader "SoundshaderLines"
+Shader "SoundShaders/SoundshaderLinesObject"
 {
     Properties
     {
@@ -14,7 +14,7 @@ Shader "SoundshaderLines"
 
             Cull Off
             ZWrite On
-            ZTest Off
+            ZTest On
 
             CGPROGRAM
 
@@ -36,7 +36,9 @@ Shader "SoundshaderLines"
             // };
 
             #include "UnityCG.cginc"
-            texture2D _Yarg_SoundTex;
+            Texture2D _Yarg_SoundTex;
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
 
             struct appdata_t
             {
@@ -47,25 +49,42 @@ Shader "SoundshaderLines"
 
             struct v2f {
                 float4 pos : SV_POSITION;
-                float4 scrPos : TEXCOORD0;
+                float2 scrPos : TEXCOORD0;
             };
 
-            v2f vert(appdata_t v)
+            struct appdata
             {
-				v2f OUT;
-                // Expects you're using the default Unity quad
-                // this makes it cover whole screen/camera
-                float4 pos = float4(v.vertex.xy * 2.0, 0.0, 1.0);
-                #if UNITY_REVERSED_Z
-                pos.z = 0.000001;
-                #else
-                pos.z = 0.999999;
-                #endif
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
 
-                OUT.pos = pos;
-                OUT.scrPos = ComputeScreenPos(pos);
+    //         v2f vert(appdata_t v)
+    //         {
+				// v2f OUT;
+    //             // Expects you're using the default Unity quad
+    //             // this makes it cover whole screen/camera
+    //             // float4 pos = float4(v.vertex.xy * 2.0, 0.0, 1.0);
+    //             float4 pos = UnityObjectToClipPos(v.vertex);
+    //             #if UNITY_REVERSED_Z
+    //             pos.z = 0.000001;
+    //             #else
+    //             pos.z = 0.999999;
+    //             #endif
+    //
+    //             OUT.pos = pos;
+    //             OUT.scrPos = ComputeScreenPos(pos);
+    //
+    //             return OUT;
+    //         }
 
-                return OUT;
+            v2f vert(appdata v)
+            {
+                v2f o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                o.scrPos = v.vertex.xyz;
+                o.scrPos = v.uv;
+                // UNITY_TRANSFER_FOG(o, o.vertex);
+                return o;
             }
 
             // HLSL Texture and Sampler declaration
@@ -166,12 +185,16 @@ Shader "SoundshaderLines"
             // HLSL Pixel Shader Entry Point
             // SV_Position provides screen coordinates (like gl_FragCoord)
             // SV_Target is the output render target
-            float4 mainImage(float2 fragCoord)
+            float4 mainImage(v2f _iParam)
             {
+                float2 fragCoord = _iParam.scrPos;
                 // Normalize coordinates and center, adjust aspect ratio
-                float2 fragPos = fragCoord.xy / iResolution.xy;
-                fragPos = (fragPos - 0.5f) * 2.0f;
-                fragPos.x *= iResolution.x / iResolution.y;
+                // float2 fragPos = fragCoord.xy / iResolution.xy;
+                float2 fragPos = fragCoord;
+                fragPos = (fragPos - 0.5f) * 4.0f;
+                // fragPos.x *= iResolution.x / iResolution.y;
+                // fragPos.x = _iParam.pos.x / _iParam.pos.y;
+                // fragPos.x = fragPos.x / fragPos.y;
 
                 float3 color = float3(0.0f, 0.0f, 0.0f);
 
@@ -201,7 +224,7 @@ Shader "SoundshaderLines"
             }
 
             fixed4 frag(v2f _iParam) : SV_Target {
-                return mainImage(gl_FragCoord);
+                return mainImage(_iParam);
             }
 
             ENDCG

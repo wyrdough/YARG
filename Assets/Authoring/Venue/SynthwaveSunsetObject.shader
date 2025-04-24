@@ -2,7 +2,7 @@
 
 // Still needs work to deal with the brightness difference between Shadertoy WebGL and Unity
 
-Shader "SynthwaveSunset"
+Shader "SoundShaders/SynthwaveSunsetObject"
 {
     Properties
     {
@@ -17,7 +17,7 @@ Shader "SynthwaveSunset"
 
             Cull Off
             ZWrite On
-            ZTest Off
+            ZTest On
 
             CGPROGRAM
             #pragma vertex vert
@@ -37,28 +37,46 @@ Shader "SynthwaveSunset"
                 float2 texcoord : TEXCOORD0;
             };
 
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
             struct v2f
             {
                 float4 pos : SV_POSITION;
                 float4 scrPos : TEXCOORD0;
+                float2 uv : TEXCOORD1;
             };
 
-            v2f vert(appdata_t v)
+            // v2f vert(appdata_t v)
+            // {
+            //     v2f OUT;
+            //     // Expects you're using the default Unity quad
+            //     // this makes it cover whole screen/camera
+            //     float4 pos = float4(v.vertex.xy * 2.0, 0.0, 1.0);
+            //     #if UNITY_REVERSED_Z
+            //     pos.z = 0.000001;
+            //     #else
+            //     pos.z = 0.999999;
+            //     #endif
+            //
+            //     OUT.pos = pos;
+            //     OUT.scrPos = ComputeScreenPos(pos);
+            //
+            //     return OUT;
+            // }
+
+            v2f vert(appdata v)
             {
-                v2f OUT;
-                // Expects you're using the default Unity quad
-                // this makes it cover whole screen/camera
-                float4 pos = float4(v.vertex.xy * 2.0, 0.0, 1.0);
-                #if UNITY_REVERSED_Z
-                pos.z = 0.000001;
-                #else
-                pos.z = 0.999999;
-                #endif
-
-                OUT.pos = pos;
-                OUT.scrPos = ComputeScreenPos(pos);
-
-                return OUT;
+                v2f o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                // o.scrPos = v.vertex.xyz;
+                o.scrPos = ComputeScreenPos(o.pos);
+                o.uv = v.uv;
+                // UNITY_TRANSFER_FOG(o, o.vertex);
+                return o;
             }
 
             SamplerState sampler_Yarg_SoundTex;
@@ -121,6 +139,9 @@ Shader "SynthwaveSunset"
                 #else
                     float w = 1.0;
                 #endif
+                return (a > 0.0 ?
+                    a * pow1d5(tex2Dlod(_Yarg_SoundTex, float2(uv.x, uv.y).r)) * w
+                    : 0.0) - (textureMirror(_Yarg_SoundTex, float2((uv.x * 29.0 + uv.y) * 0.03125, 1.0)).x) * audio_vibration_amplitude;
                 return (a > 0.0 ?
                     a * pow1d5(tex2Dlod(_Yarg_SoundTex, float2(uv.x / iResolution.x, uv.y /iResolution.y).r)) * w
                     : 0.0) - (textureMirror(_Yarg_SoundTex, float2((uv.x * 29.0 + uv.y) * 0.03125, 1.0)).x) * audio_vibration_amplitude;
@@ -254,8 +275,9 @@ Shader "SynthwaveSunset"
                 return col;
             }
 
-            float4 mainImage(float2 fragCoord)
+            float4 mainImage(v2f iParam)
             {
+                float2 fragCoord = iParam.uv;
                 float4 fragColor = float4(0, 0, 0, 0);
 
                 #ifdef AA
@@ -267,9 +289,13 @@ Shader "SynthwaveSunset"
                     const float AA = 1.0, x = 0.0, y = 0.0;
                 #endif
 
-                float2 uv = (2.0 * (fragCoord + float2(x,y)) - _ScreenParams.xy) / _ScreenParams.y;
+                // float2 uv = (2.0 * (fragCoord + float2(x,y)) - _ScreenParams.xy) / _ScreenParams.y;
+                float2 uv = 2.0 * (fragCoord + float2(x, y));
+                uv.x -= 1;
+                uv.y -= 0.5;
 
-                float dt = frac(tex2D(_Yarg_SoundTex, float(AA) * (fragCoord + float2(x,y))/_ChannelResolution.xy).r + _Time.y);
+                // float dt = frac(tex2D(_Yarg_SoundTex, float(AA) * (fragCoord + float2(x,y))/_ChannelResolution.xy).r + _Time.y);
+                float dt = frac(tex2D(_Yarg_SoundTex, float(AA) * ((fragCoord - 0.5) * 4 + float2(x, y)).r + _Time.y));
                 jTime = mod(iTime.y-dt*_TimeDelta*.25,4000);
                 float3 ro = float3(0.0, 1.0, (-20000.0 + iTime.y * speed));
 
@@ -320,12 +346,12 @@ Shader "SynthwaveSunset"
                     fragColor /= float(AA * AA);
                 #endif
 
-                return fragColor;
+                return float4(fragColor);
             }
 
             fixed4 frag(v2f _iParam) : SV_Target
             {
-                return mainImage(gl_FragCoord);
+                return mainImage(_iParam);
             }
             ENDCG
         }
