@@ -9,6 +9,10 @@ Shader "VisualizerVenue/SoundshaderLines"
     }
     SubShader
     {
+        Tags
+        {
+            "PreviewType" = "Plane"
+        }
         Pass {
             ColorMask RGB
 
