@@ -1,4 +1,4 @@
-Shader "VisualizerVenue/ShaderToy"
+Shader "ShaderToy"
 {
     Properties
     {
@@ -25,7 +25,7 @@ Shader "VisualizerVenue/ShaderToy"
 
             #include "UnityCG.cginc"
 
-            Texture2D _Yarg_SoundTex;
+            texture2D _Yarg_SoundTex;
 
             struct appdata_t
             {
@@ -77,7 +77,7 @@ Shader "VisualizerVenue/ShaderToy"
                 // add wave form on top
             	col += 1.0 -  smoothstep( 0.0, 0.15, abs(wave - uv.y) );
 
-                // correct for gamma difference between ShaderToy and Unity
+                // gamma correction for YARG
                 col = pow(col, 2.2);
 
             	// output final color
