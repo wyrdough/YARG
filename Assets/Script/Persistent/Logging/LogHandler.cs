@@ -32,6 +32,8 @@ namespace YARG.Logging
             persistentPath = PathHelper.SanitizePath(Path.Combine(persistentPath, "dev"));
 #elif YARG_NIGHTLY_BUILD
             persistentPath = PathHelper.SanitizePath(Path.Combine(persistentPath, "nightly"));
+#elif YARG_PREVIEW_BUILD
+            persistentPath = PathHelper.SanitizePath(Path.Combine(persistentPath, "preview"));
 #else
             persistentPath = PathHelper.SanitizePath(Path.Combine(persistentPath, "release"));
 #endif

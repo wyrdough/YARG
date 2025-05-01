@@ -171,7 +171,7 @@ namespace YARG
         {
 #if UNITY_EDITOR
             return LoadVersionFromGit();
-#elif YARG_TEST_BUILD || YARG_NIGHTLY_BUILD
+#elif YARG_TEST_BUILD || YARG_NIGHTLY_BUILD || YARG_PREVIEW_BUILD
             var versionFile = Resources.Load<TextAsset>("version");
             if (versionFile != null)
             {
@@ -212,7 +212,8 @@ namespace YARG
             string commit = process.StandardOutput.ReadToEnd().Trim();
             process.WaitForExit();
 
-#if YARG_NIGHTLY_BUILD
+            // Branch name is meaningless for preview, so it goes with nightly here
+#if YARG_NIGHTLY_BUILD || YARG_PREVIEW_BUILD
             return $"b{commitCount} ({commit})";
 #else
             return $"{branch} b{commitCount} ({commit})";

@@ -87,6 +87,8 @@ namespace YARG.Helpers
             PersistentDataPath = SanitizePath(Path.Combine(Application.persistentDataPath, "dev"));
 #elif YARG_NIGHTLY_BUILD
             PersistentDataPath = SanitizePath(Path.Combine(Application.persistentDataPath, "nightly"));
+#elif YARG_PREVIEW_BUILD
+            PersistentDataPath = SanitizePath(Path.Combine(Application.persistentDataPath, "preview"));
 #else
             PersistentDataPath = SanitizePath(Path.Combine(Application.persistentDataPath, "release"));
 #endif

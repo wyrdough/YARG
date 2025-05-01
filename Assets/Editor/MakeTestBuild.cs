@@ -8,6 +8,7 @@ namespace Editor
     {
         private const string YARG_TEST_BUILD = "YARG_TEST_BUILD";
         private const string YARG_NIGHTLY_BUILD = "YARG_NIGHTLY_BUILD";
+        private const string YARG_PREVIEW_BUILD = "YARG_PREVIEW_BUILD";
 
         [MenuItem("File/Make Test Build", false, 220)]
         public static void MakeTestBuildClicked()
@@ -19,6 +20,13 @@ namespace Editor
         public static void MakeNightlyBuildClicked()
         {
             MakeBuild(YARG_NIGHTLY_BUILD);
+        }
+
+        // This exists to make a nightly-like build that uses a separate user data folder
+        [MenuItem("File/Make Preview Build", false, 220)]
+        public static void MakePreviewBuildClicked()
+        {
+            MakeBuild(YARG_PREVIEW_BUILD);
         }
 
         public static void MakeBuild(string defineSymbol)

@@ -17,7 +17,8 @@ namespace YARG.Integration
 
         private const string ALBUM_API_URL = "https://api.enchor.us/album-art";
 
-#if UNITY_EDITOR || YARG_TEST_BUILD
+        // An executive decision was made to use the dev icon for preview
+#if UNITY_EDITOR || YARG_TEST_BUILD || YARG_PREVIEW_BUILD
         private const string LARGE_TEXT_KEY = "Discord.Default.LargeText.Dev";
         private const string LARGE_ICON_KEY = "icon_dev";
 #elif YARG_NIGHTLY_BUILD
