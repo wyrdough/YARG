@@ -161,18 +161,18 @@ namespace YARG.Gameplay.HUD
 
             yield return DOTween.Sequence()
                 .Append(DOTween.Sequence()
-                    .Append(_text.transform
+                    .Append(_containerRect.transform
                         .DOScale(ANIM_PEAK_SCALE, ANIM_BASE_TO_PEAK_INTERVAL)
                         .SetEase(Ease.OutCirc))
-                    .Append(_text.transform
+                    .Append(_containerRect.transform
                         .DOScale(ANIM_VALLEY_SCALE, ANIM_PEAK_TO_VALLEY_INTERVAL)
                         .SetEase(Ease.InOutSine))
                     .AppendInterval(animHoldInterval))
                 .Append(DOTween.Sequence()
-                    .Append(_text.transform
+                    .Append(_containerRect.transform
                         .DOScale(ANIM_PEAK_SCALE, ANIM_PEAK_TO_VALLEY_INTERVAL)
                         .SetEase(Ease.InOutSine))
-                    .Append(_text.transform
+                    .Append(_containerRect.transform
                         .DOScale(0f, ANIM_BASE_TO_PEAK_INTERVAL)
                         .SetEase(Ease.InCirc)))
                 .WaitForCompletion();
