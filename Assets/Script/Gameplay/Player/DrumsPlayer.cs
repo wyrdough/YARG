@@ -126,6 +126,8 @@ namespace YARG.Gameplay.Player
 
             // Particle 0 is always kick fret
             _kickFretFlash.Initialize(colors.GetParticleColor(0).ToUnityColor());
+
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, _fiveLaneMode ? 5 : 4);
         }
 
         protected override void UpdateVisuals(double songTime)
@@ -157,6 +159,51 @@ namespace YARG.Gameplay.Player
         protected override void InitializeSpawnedNote(IPoolable poolable, DrumNote note)
         {
             ((DrumsNoteElement) poolable).NoteRef = note;
+        }
+
+        protected override int GetLaneIndex(DrumNote note)
+        {
+            int laneIndex = note.Pad;
+
+            if (!_fiveLaneMode && laneIndex >= (int) FourLaneDrumPad.YellowCymbal)
+            {
+                laneIndex -= 3;
+            }
+
+            return laneIndex;
+        }
+
+        protected override void InitializeSpawnedLane(LaneElement lane, int index)
+        {
+            Color laneColor;
+            int totalLanes;
+
+            if (_fiveLaneMode)
+            {
+                laneColor = Player.ColorProfile.FiveLaneDrums.GetNoteColor(index).ToUnityColor();
+                totalLanes = 5;
+            }
+            else
+            {
+                laneColor = Player.ColorProfile.FourLaneDrums.GetNoteColor(index).ToUnityColor();
+                totalLanes = 4;
+            }
+
+            lane.SetAppearance(Player.Profile.CurrentInstrument, index, totalLanes, laneColor);
+            
+        }
+
+        protected override void ModifyLaneFromNote(LaneElement lane, DrumNote note)
+        {
+            if (note.Pad == 0)
+            {
+                lane.ToggleOpen(true);
+            }
+            else
+            {
+                // Correct size of lane slightly for padding in fret array
+                lane.MultiplyScale(0.97f);
+            }
         }
 
         protected override void OnNoteHit(int index, DrumNote note)
