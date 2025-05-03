@@ -26,9 +26,10 @@ namespace YARG.Gameplay.Visuals
         private readonly List<Material> _topMaterials   = new();
         private readonly List<Material> _innerMaterials = new();
 
-        private bool _hasPressedParam;
-        private bool _hasSustainParam;
-        private bool _hasOpenMissTrigger;
+        private bool  _hasPressedParam;
+        private bool  _hasSustainParam;
+        private bool  _hasOpenMissTrigger;
+        private float _particleXrotation;
 
         // These need to be saved since the colors can now change during play
         // They are saved as Unity colors to avoid having to repeatedly convert
@@ -113,9 +114,9 @@ namespace YARG.Gameplay.Visuals
             ThemeBind.Animator.SetTrigger(_hit);
         }
 
-        public void PlayHitParticles()
+        public void PlayHitParticles(bool breMode = false)
         {
-            ThemeBind.HitEffect.Play();
+            ThemeBind.HitEffect.Play(breMode);
         }
 
         public void PlayOpenHitParticles()

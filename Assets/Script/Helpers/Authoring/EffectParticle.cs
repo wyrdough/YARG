@@ -25,8 +25,9 @@ namespace YARG.Helpers.Authoring
         [SerializeField]
         private float _emissionColorMultiplier = 1f;
 
-        private ParticleSystem _particleSystem;
+        private ParticleSystem         _particleSystem;
         private ParticleSystemRenderer _particleSystemRenderer;
+        private bool                   _breMode;
 
         private void Awake()
         {
@@ -60,10 +61,44 @@ namespace YARG.Helpers.Authoring
             material.SetColor(_emissionColor, color * _emissionColorMultiplier);
         }
 
-        public void Play()
+        public void Play(bool breMode = false)
         {
             // Prevent double starts
             if (_particleSystem.main.loop && _particleSystem.isEmitting) return;
+
+            // Double the duration of all effects in BRE mode
+            if (breMode && !_breMode && (_particleSystem.name == "Sparkles" || _particleSystem.name == "Shards"))
+            {
+                _breMode = true;
+                var particleMain = _particleSystem.main;
+                var particleEmitter = _particleSystem.emission;
+                var particleShape = _particleSystem.shape;
+                var particleRotation = _particleSystem.transform.rotation;
+
+                if (particleEmitter.burstCount > 0)
+                {
+                    particleRotation.x = 180;
+                    _particleSystem.transform.rotation = particleRotation;
+                    // particleShape.angle = 60;
+                    var speed = particleMain.startSpeed;
+                    // speed.curveMultiplier = 2;
+                    // particleMain.startSpeed = speed;
+                    particleMain.startSpeedMultiplier = 2f;
+                    // particleMain.gravityModifierMultiplier = 2f;
+                    particleMain.startLifetimeMultiplier = 1.2f;
+                    particleMain.maxParticles = 10000;
+                    var burst = particleEmitter.GetBurst(0);
+                    burst.minCount *= 5;
+                    burst.maxCount *= 5;
+                    particleEmitter.SetBurst(0, burst);
+                }
+                else
+                {
+                    particleShape.shapeType = ParticleSystemShapeType.Cone;
+                    particleShape.randomDirectionAmount = 30f;
+                    particleMain.startLifetimeMultiplier = 2;
+                }
+            }
 
             _particleSystem.Play();
         }

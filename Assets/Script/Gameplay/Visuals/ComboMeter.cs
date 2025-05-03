@@ -46,10 +46,10 @@ namespace YARG.Gameplay.Visuals
             _comboMesh.material.SetColor(_multiplierColorProperty, color);
         }
 
-        public void SetCombo(int multiplier, int maxMultiplier, int combo)
+        public void SetCombo(int multiplier, int maxMultiplier, int combo, bool breMode = false)
         {
             _multiplierText.enabled = false;
-            if (multiplier > 1)
+            if (multiplier > 1 && !breMode)
             {
                 _multiplierText = _textCache[multiplier - 2];
                 _multiplierText.enabled = true;
