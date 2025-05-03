@@ -28,15 +28,23 @@ namespace YARG.Gameplay.Visuals
 
         private static Dictionary<Instrument,float> _scaleByInstrument = new();
 
-        public static void DefineLaneScale(Instrument instrument, int subdivisions)
+        public static void DefineLaneScale(Instrument instrument, int subdivisions, bool rescaling = false)
         {
-            if (_scaleByInstrument.ContainsKey(instrument))
+            if (_scaleByInstrument.ContainsKey(instrument) && !rescaling)
             {
                 return;
             }
 
             float laneScaleX = TrackPlayer.TRACK_WIDTH / subdivisions;
-            _scaleByInstrument.Add(instrument, laneScaleX);
+
+            if (rescaling)
+            {
+                _scaleByInstrument[instrument] = laneScaleX;
+            }
+            else
+            {
+                _scaleByInstrument.Add(instrument, laneScaleX);
+            }
         }
 
         [SerializeField]

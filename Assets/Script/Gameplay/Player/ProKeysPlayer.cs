@@ -139,7 +139,7 @@ namespace YARG.Gameplay.Player
                 _rangeShiftIndex++;
             }
 
-            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, WHITE_KEY_VISIBLE_COUNT); // 
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, WHITE_KEY_VISIBLE_COUNT); //
         }
 
         public override void ResetPracticeSection()
@@ -401,7 +401,7 @@ namespace YARG.Gameplay.Player
 
             // Get the group index (two groups per octave)
             int group = octaveIndex * 2 + (ProKeysUtilities.IsLowerHalfKey(noteIndex) ? 0 : 1);
-            
+
             lane.SetAppearance(Player.Profile.CurrentInstrument, key, _keysArray.GetKeyX(key), Player.ColorProfile.ProKeys.GetOverlayColor(group).ToUnityColor());
             lane.OffsetXPosition(_currentOffset);
         }
@@ -413,9 +413,9 @@ namespace YARG.Gameplay.Player
                 // Trills between adjacent white and black keys should have a single, wider lane
                 int leftKey = Math.Min(note.Key, note.NextNote.Key);
                 int rightKey = Math.Max(note.Key, note.NextNote.Key);
-                
+
                 bool keysAreSameType = ProKeysUtilities.IsBlackKey(leftKey % 12) == ProKeysUtilities.IsBlackKey(rightKey % 12);
-                
+
                 if (!keysAreSameType && rightKey - leftKey == 1)
                 {
                     lane.SetIndexRange(leftKey, rightKey);
@@ -432,7 +432,7 @@ namespace YARG.Gameplay.Player
                     lane.MultiplyScale(0.9f);
                 }
             }
-            
+
             if (ProKeysUtilities.IsWhiteKey(note.Key % 12))
             {
                 // White notes are slightly wider than the lane
@@ -463,6 +463,11 @@ namespace YARG.Gameplay.Player
 
             ((ProKeysChordBarElement) poolable).NoteRef = parentNote;
             poolable.EnableFromPool();
+        }
+
+        protected override void RescaleLanesForBRE()
+        {
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, WHITE_KEY_VISIBLE_COUNT + 1, true);
         }
 
         protected override bool InterceptInput(ref GameInput input)

@@ -528,6 +528,9 @@ namespace YARG.Gameplay.Player
             //  BREs should probably be handled some other way
             if (nextEffect.EffectType == TrackEffectType.BigRockEnding)
             {
+                // Rescale the lanes for BRE. (This assumes there are no lanes after the BRE!)
+                RescaleLanesForBRE();
+
                 if (!LanePool.CanSpawnAmount(BRELanes.Length))
                 {
                     return;
@@ -852,6 +855,8 @@ namespace YARG.Gameplay.Player
         protected abstract void InitializeSpawnedNote(IPoolable poolable, TNote note);
         protected abstract void InitializeSpawnedLane(LaneElement lane, int index);
         protected virtual void ModifyLaneFromNote(LaneElement lane, TNote note) {}
+
+        protected abstract void RescaleLanesForBRE();
 
         protected virtual void OnNoteHit(int index, TNote note)
         {

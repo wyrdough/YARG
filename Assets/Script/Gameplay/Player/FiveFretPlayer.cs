@@ -400,6 +400,11 @@ namespace YARG.Gameplay.Player
             }
         }
 
+        protected override void RescaleLanesForBRE()
+        {
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 5, true);
+        }
+
         protected override void OnNoteHit(int index, GuitarNote chordParent)
         {
             base.OnNoteHit(index, chordParent);
