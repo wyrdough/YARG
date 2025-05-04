@@ -315,7 +315,7 @@ namespace YARG.Settings.Preview
 
             // Update camera presets
             _trackMaterial.Initialize(3f, cameraPreset.FadeLength, highwayPreset);
-            _cameraPositioner.Initialize(cameraPreset);
+            _cameraPositioner.Initialize(cameraPreset, true);
 
             // Update color profiles
             if (!CurrentGameModeInfo.UseProKeys)

@@ -43,7 +43,7 @@ namespace YARG.Gameplay.Visuals
             }
         }
 
-        public void Initialize(CameraPreset preset)
+        public void Initialize(CameraPreset preset, bool preview = false)
         {
             // FOV
             GetComponent<Camera>().fieldOfView = preset.FieldOfView;
@@ -61,6 +61,8 @@ namespace YARG.Gameplay.Visuals
             _preset = preset;
 
             // Animate the highway raise
+            if (preview) return;
+
             _coroutine = StartCoroutine(RaiseHighway(_preset, true));
         }
 
