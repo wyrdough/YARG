@@ -228,7 +228,7 @@ namespace YARG.Gameplay.Player
 
         protected override void RescaleLanesForBRE()
         {
-            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, _fiveLaneMode ? 6 : 5, true);
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, _fiveLaneMode ? 5 : 4, true);
         }
 
         protected override void OnNoteHit(int index, DrumNote note)
