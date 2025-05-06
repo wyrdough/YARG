@@ -78,7 +78,7 @@ namespace YARG.Gameplay.Player
 
         private float _spawnAheadDelay;
 
-        protected LaneElement[] BRELanes;
+        protected LaneElement[] BRELanes = Array.Empty<LaneElement>();
 
         public virtual void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? lastHighScore)
@@ -535,6 +535,7 @@ namespace YARG.Gameplay.Player
                 {
                     return;
                 }
+
                 // Completely different handling, we use lanes instead of a track effect
                 for (int i = 0; i < BRELanes.Length; i++)
                 {
@@ -949,6 +950,8 @@ namespace YARG.Gameplay.Player
         protected virtual void OnCodaStart(CodaSection coda)
         {
             CurrentCoda = coda;
+            // Commenting out the call, but leaving the code in case minds change later
+            // SunburstEffects.OnCodaStart();
             TrackView.StartCoda(coda);
         }
 
