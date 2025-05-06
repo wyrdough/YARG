@@ -16,6 +16,7 @@ using YARG.Core.Replays;
 using YARG.Gameplay.HUD;
 using YARG.Gameplay.Visuals;
 using YARG.Helpers;
+using YARG.Helpers.Extensions;
 using YARG.Player;
 using YARG.Settings;
 using Random = UnityEngine.Random;
@@ -92,6 +93,9 @@ namespace YARG.Gameplay.Player
             {
                 _stem = SongStem.Rhythm;
             }
+
+            BRELanes = new LaneElement[5];
+
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
 
@@ -139,6 +143,9 @@ namespace YARG.Gameplay.Player
             engine.OnSoloStart += OnSoloStart;
             engine.OnSoloEnd += OnSoloEnd;
 
+            engine.OnCodaStart += OnCodaStart;
+            engine.OnCodaEnd += OnCodaEnd;
+
             engine.OnStarPowerPhraseHit += OnStarPowerPhraseHit;
             engine.OnStarPowerStatus += OnStarPowerStatus;
 
@@ -169,6 +176,9 @@ namespace YARG.Gameplay.Player
 
             InitializeRangeShift();
             GameManager.BeatEventHandler.Subscribe(_fretArray.PulseFretColors);
+
+            // TODO: During a BRE, the subdivisions value actually needs to be 5 to get the right size
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 4);
         }
 
         public override void ResetPracticeSection()
@@ -223,6 +233,20 @@ namespace YARG.Gameplay.Player
             for (var fret = GuitarAction.GreenFret; fret <= GuitarAction.OrangeFret; fret++)
             {
                 _fretArray.SetPressed((int) fret, Engine.IsFretHeld(fret));
+            }
+
+            if (Engine.IsCodaActive)
+            {
+                // Set emission color of BRE lanes depending on currently available score value
+                for (int i = 0; i < CurrentCoda.Lanes; i++)
+                {
+                    var intensity = CurrentCoda.GetNormalizedTimeSinceLastHit(i, songTime);
+                    // intensity = (float) Math.Clamp(Math.Cos(Math.PI * intensity), 0f, 1f);
+                    // intensity = (float) Math.Clamp((Math.Tan(intensity) * -1) + 1, 0f, 1f);
+                    // intensity = (float) Math.Clamp((Math.Atan(intensity * 3) * -1.8) + 2, 0f, 2f);
+                    intensity = (float) (1 - Math.Sin(Math.Pow(intensity, 1 / 2.4) * 2));
+                    BRELanes[i].SetEmissionColor(intensity);
+                }
             }
         }
 
@@ -336,9 +360,49 @@ namespace YARG.Gameplay.Player
             _fretArray.ResetAll();
         }
 
+        protected override void SpawnNote(GuitarNote note)
+        {
+            // Don't spawn notes during BRE
+            if (note.IsBigRockEnding && !SettingsManager.Settings.ShowNotesDuringBigYargEnding.Value)
+            {
+                return;
+            }
+
+            base.SpawnNote(note);
+        }
+
         protected override void InitializeSpawnedNote(IPoolable poolable, GuitarNote note)
         {
             ((FiveFretNoteElement) poolable).NoteRef = note;
+        }
+
+        protected override int GetLaneIndex(GuitarNote note)
+        {
+            return note.Fret;
+        }
+
+        protected override void InitializeSpawnedLane(LaneElement lane, int fret)
+        {
+            lane.SetAppearance(Player.Profile.CurrentInstrument, fret, 5,
+                               Player.ColorProfile.FiveFretGuitar.GetNoteColor(fret).ToUnityColor());
+        }
+
+        protected override void ModifyLaneFromNote(LaneElement lane, GuitarNote note)
+        {
+            if (note.Fret == (int) FiveFretGuitarFret.Open)
+            {
+                lane.ToggleOpen(true);
+            }
+            else
+            {
+                // Correct size of lane slightly for padding in fret array
+                lane.MultiplyScale(0.85f);
+            }
+        }
+
+        protected override void RescaleLanesForBRE()
+        {
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, 5, true);
         }
 
         protected override void OnNoteHit(int index, GuitarNote chordParent)
@@ -503,6 +567,23 @@ namespace YARG.Gameplay.Player
                 WhammyFactor = Mathf.Clamp01(input.Axis);
                 GameManager.ChangeStemWhammyPitch(_stem, WhammyFactor);
             }
+        }
+
+        private void OnLaneHit(int fret)
+        {
+            _fretArray.PlayHitAnimation(fret, true);
+        }
+
+        protected override void OnCodaStart(CodaSection coda)
+        {
+            base.OnCodaStart(coda);
+            CurrentCoda.OnLaneHit += OnLaneHit;
+        }
+
+        protected override void OnCodaEnd(CodaSection coda)
+        {
+            CurrentCoda.OnLaneHit -= OnLaneHit;
+            base.OnCodaEnd(coda);
         }
 
         public override (ReplayFrame Frame, ReplayStats Stats) ConstructReplayData()

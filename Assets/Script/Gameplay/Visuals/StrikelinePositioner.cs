@@ -25,6 +25,11 @@ namespace YARG.Gameplay.Visuals
         private void Start()
         {
             _zOffset = transform.localPosition.z;
+            // Hack to figure out if we're on the preview screen and not in gameplay
+            if (FindObjectOfType<GameManager>() == null)
+            {
+                return;
+            }
             _coroutine = StartCoroutine(RaiseStrikeline(true));
         }
 

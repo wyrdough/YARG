@@ -47,6 +47,7 @@ namespace YARG.Gameplay.Player
         {
             // Before we do anything, see if we're in five lane mode or not
             _fiveLaneMode = player.Profile.CurrentInstrument == Instrument.FiveLaneDrums;
+            BRELanes = new LaneElement[_fiveLaneMode ? 5 : 4];
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
 
@@ -96,6 +97,9 @@ namespace YARG.Gameplay.Player
             engine.OnSoloStart += OnSoloStart;
             engine.OnSoloEnd += OnSoloEnd;
 
+            engine.OnCodaStart += OnCodaStart;
+            engine.OnCodaEnd += OnCodaEnd;
+
             engine.OnStarPowerPhraseHit += OnStarPowerPhraseHit;
             engine.OnStarPowerStatus += OnStarPowerStatus;
 
@@ -112,11 +116,13 @@ namespace YARG.Gameplay.Player
 
             StarScoreThresholds = PopulateStarScoreThresholds(StarMultiplierThresholds, Engine.BaseScore);
 
+            var fretCount = _fiveLaneMode ? 5 : 4;
+
             // Get the proper info for four/five lane
             ColorProfile.IFretColorProvider colors = !_fiveLaneMode
                 ? Player.ColorProfile.FourLaneDrums
                 : Player.ColorProfile.FiveLaneDrums;
-            _fretArray.FretCount = !_fiveLaneMode ? 4 : 5;
+            _fretArray.FretCount = fretCount;
 
             _fretArray.Initialize(
                 Player.ThemePreset,
@@ -126,11 +132,27 @@ namespace YARG.Gameplay.Player
 
             // Particle 0 is always kick fret
             _kickFretFlash.Initialize(colors.GetParticleColor(0).ToUnityColor());
+
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, _fiveLaneMode ? 5 : 4);
         }
 
         protected override void UpdateVisuals(double songTime)
         {
             UpdateBaseVisuals(Engine.EngineStats, EngineParams, songTime);
+
+            if (Engine.IsCodaActive)
+            {
+                var lanes = _fiveLaneMode ? 5 : 4;
+                // Set emission color of BRE lanes depending on time since last hit
+                for (int i = 0; i < lanes; i++)
+                {
+                    var intensity = CurrentCoda.GetNormalizedTimeSinceLastHit(i, songTime);
+                    // intensity = 1 - (float) Math.Clamp(Math.Cos(Math.PI * intensity), 0f, 1f);
+                    // intensity = 1 - (float) Math.Clamp((Math.Tan(intensity) * -1) + 1, 0f, 1f);
+                    intensity = (float) Math.Clamp((Math.Atan(intensity * 2) * -1) + 1, 0f, 1f);
+                    BRELanes[i].SetEmissionColor(intensity);
+                }
+            }
         }
 
         public override void SetStemMuteState(bool muted)
@@ -157,6 +179,56 @@ namespace YARG.Gameplay.Player
         protected override void InitializeSpawnedNote(IPoolable poolable, DrumNote note)
         {
             ((DrumsNoteElement) poolable).NoteRef = note;
+        }
+
+        protected override int GetLaneIndex(DrumNote note)
+        {
+            int laneIndex = note.Pad;
+
+            if (!_fiveLaneMode && laneIndex >= (int) FourLaneDrumPad.YellowCymbal)
+            {
+                laneIndex -= 3;
+            }
+
+            return laneIndex;
+        }
+
+        protected override void InitializeSpawnedLane(LaneElement lane, int index)
+        {
+            Color laneColor;
+            int totalLanes;
+
+            if (_fiveLaneMode)
+            {
+                laneColor = Player.ColorProfile.FiveLaneDrums.GetNoteColor(index).ToUnityColor();
+                totalLanes = 5;
+            }
+            else
+            {
+                laneColor = Player.ColorProfile.FourLaneDrums.GetNoteColor(index).ToUnityColor();
+                totalLanes = 4;
+            }
+
+            lane.SetAppearance(Player.Profile.CurrentInstrument, index, totalLanes, laneColor);
+
+        }
+
+        protected override void ModifyLaneFromNote(LaneElement lane, DrumNote note)
+        {
+            if (note.Pad == 0)
+            {
+                lane.ToggleOpen(true);
+            }
+            else
+            {
+                // Correct size of lane slightly for padding in fret array
+                lane.MultiplyScale(0.97f);
+            }
+        }
+
+        protected override void RescaleLanesForBRE()
+        {
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, _fiveLaneMode ? 5 : 4, true);
         }
 
         protected override void OnNoteHit(int index, DrumNote note)
@@ -310,6 +382,12 @@ namespace YARG.Gameplay.Player
                     CameraPositioner.Bounce();
                 }
             }
+            // This is done in engine for guitar/bass, but it seems better to do it here for drums
+            // since we have the correct visual ordering for the pads
+            if (Engine.IsCodaActive && fret != 0)
+            {
+                CurrentCoda.HitLane(Engine.CurrentTime, fret - 1);
+            }
         }
 
         protected override bool InterceptInput(ref GameInput input)
@@ -355,10 +433,11 @@ namespace YARG.Gameplay.Player
 
         private bool IsDrumFreestyle()
         {
-            return Engine.NoteIndex == 0 || // Can freestyle before first note is hit/missed
+            return Engine.NoteIndex == 0 ||        // Can freestyle before first note is hit/missed
                 Engine.NoteIndex >= Notes.Count || // Can freestyle after last note
-                Engine.IsWaitCountdownActive; // Can freestyle during WaitCountdown
-            // TODO: add drum fill / BRE conditions
+                Engine.IsWaitCountdownActive ||    // Can freestyle during WaitCountdown
+                Engine.IsCodaActive;               // Can freestyle during Big YARG Ending
+            // TODO: add drum fill conditions
         }
 
         public override (ReplayFrame Frame, ReplayStats Stats) ConstructReplayData()
