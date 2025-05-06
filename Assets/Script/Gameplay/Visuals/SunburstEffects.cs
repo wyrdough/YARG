@@ -41,6 +41,7 @@ namespace YARG.Gameplay.Visuals
 
         private bool _groove;
         private bool _starpower;
+        private bool _coda;
 
         private const float TRANSITION_DURATION = 0.433f;
 
@@ -163,7 +164,7 @@ namespace YARG.Gameplay.Visuals
 
         private void PulseSunburst(Beatline beatline)
         {
-            if (!_groove && !_starpower)
+            if (!_groove && !_starpower && !_coda)
             {
                 return;
             }
@@ -247,6 +248,26 @@ namespace YARG.Gameplay.Visuals
         {
             _sunburstEffect.SetActive(false);
             _lightEffect.SetActive(false);
+        }
+
+        public void OnCodaStart()
+        {
+            _coda = true;
+            _sunburstDisableSequence.Restart();
+        }
+
+        public void OnCodaEnd()
+        {
+            _coda = false;
+            // In case we're somehow in SP
+            if (_starpower)
+            {
+                ActivateStarpowerSunburst();
+            }
+            else
+            {
+                ActivateGrooveSunburst();
+            }
         }
 
         protected override void GameplayDestroy()
