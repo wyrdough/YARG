@@ -139,7 +139,13 @@ namespace YARG.Gameplay.Player
                 _rangeShiftIndex++;
             }
 
-            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, WHITE_KEY_VISIBLE_COUNT); //
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, WHITE_KEY_VISIBLE_COUNT);
+
+            // Everybody else has this in Initialize(), but it should be fine in FinishInitialization()
+            // BRELanes = new List<LaneElement>(new LaneElement[WHITE_KEY_VISIBLE_COUNT]);
+            // We happen to know this is 3 for the test chart, so use that for now
+            // TODO: Figure this out on the fly
+            BRELanes = new List<LaneElement>(new LaneElement[3]);
         }
 
         public override void ResetPracticeSection()
@@ -394,6 +400,249 @@ namespace YARG.Gameplay.Player
             ((ProKeysNoteElement) poolable).NoteRef = note;
         }
 
+        private enum ColorGroup
+        {
+            Red,
+            Yellow,
+            Blue,
+            Green,
+            Orange
+        }
+
+        private struct Lanes
+        {
+            public int Count;
+            public int Key;
+        }
+
+        protected override void InitializeBRELane(LaneElement lane, int laneIndex)
+        {
+            int[] redGroup =
+            {
+                0,
+                // 1,
+                2,
+                // 3,
+                4
+            };
+
+            int[] yellowGroup =
+            {
+                5,
+                // 6,
+                7,
+                // 8,
+                9,
+                // 10,
+                11
+            };
+
+            int[] blueGroup =
+            {
+                12,
+                // 13,
+                14,
+                // 15,
+                16
+            };
+
+            int[] greenGroup =
+            {
+                17,
+                // 18,
+                19,
+                // 20,
+                21,
+                // 22,
+                23
+            };
+
+            int[] orangeGroup =
+            {
+                24
+            };
+
+            // This takes an actual key, not a lane index
+            int[] GetColorGroup(int key)
+            {
+                int noteIndex = key % 12;
+                int octaveIndex = key / 12;
+                int group = octaveIndex * 2 + (ProKeysUtilities.IsLowerHalfKey(noteIndex) ? 0 : 1);
+
+                return group switch
+                {
+                    0 => redGroup,
+                    1 => yellowGroup,
+                    2 => blueGroup,
+                    3 => greenGroup,
+                    4 => orangeGroup,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
+
+            // All of the possible white keys
+            int[] whiteKeys = { 0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24 };
+
+            // We need to adjust "key" here to ensure that it is a value that is
+            // on the currently displayed part of the track
+            // This will have something to do with _currentOffset, I think?
+
+            laneIndex -= 1; // We need to be zero index, but because all the other players are 1 indexed we have to make this adjustment here
+            int totalKeys = 18; // There are 18 keys shown at any given time
+
+            int currentRange = laneIndex; // An absurd default, but we need something
+
+            // Get the current range
+            if (_rangeShifts.Count > 0)
+            {
+                currentRange = _rangeShifts[Math.Min(_rangeShiftIndex, _rangeShifts.Count - 1)].Key;
+            }
+
+            var lowColorGroup = GetColorGroup(currentRange);
+            var lowColorFraction = (lowColorGroup.Length - Array.IndexOf(lowColorGroup, currentRange)) / (float) lowColorGroup.Length;
+            int lowColorIndex = Array.IndexOf(lowColorGroup, currentRange);
+            int lowColorCount = lowColorGroup.Length - lowColorIndex - 1;
+
+            // This is not the way, but it should work for now
+            // Of course, this means BRELanes will need to be a list instead of an array since Pro Keys could have
+            // either 3 or 4 groups rather than a fixed number of lanes
+            // TODO: We really shouldn't be calculating this for every lane index, but whatever
+
+
+            List<Lanes> laneCounts = new();
+            // int keys = 0;
+            int keys = Array.IndexOf(whiteKeys, currentRange);
+            int keyCount = 0;
+            for (int i = 0; i < BRELanes.Count; i++)
+            {
+                var colorGroup = GetColorGroup(whiteKeys[keys]);
+                int colorIndex = Array.IndexOf(colorGroup, whiteKeys[keys]);
+                int colorCount = colorGroup.Length - colorIndex;
+
+                Lanes newLane = new();
+                newLane.Count = (keyCount + colorCount) <= WHITE_KEY_VISIBLE_COUNT ? colorCount : WHITE_KEY_VISIBLE_COUNT - keyCount;
+                newLane.Key = colorGroup[0];
+                laneCounts.Add(newLane);
+
+                // This should handle the case where the rightmost group isn't fully visible
+                keyCount += colorCount;
+                keys = (keys + colorCount) <= WHITE_KEY_VISIBLE_COUNT ? keys + colorCount : WHITE_KEY_VISIBLE_COUNT - keys;
+            }
+
+            // So now we just need to figure out the correct lane scale for a single key and do the obvious multiplication
+            // It turns out that as long as DefineLaneScale was called with 10, we can just set the x scale to n for n white keys of required width
+            // There's all kinds of weirdness in the child object scales, but it doesn't matter for our purposes,
+            // we can just set the scale of the parent and it's fine
+
+            // Not actually fine, because the endcaps are not scaled properly
+
+            var whiteKeyWidth = _keysArray.GetKeyX(24) - _keysArray.GetKeyX(23);
+            float rightX = -1;
+            for (int i = 0; i < laneCounts.Count; i++)
+            {
+                rightX += laneCounts[i].Count * whiteKeyWidth;
+                if (i == laneIndex)
+                {
+                    break;
+                }
+            }
+
+            // rightX now has the x position of the rightmost visible key in the group
+            float laneX = rightX - ((laneCounts[laneIndex].Count * whiteKeyWidth) / 2);
+
+            // laneX now has the x position of the center of the lane
+
+            int laneScale = laneCounts[laneIndex].Count;
+
+            // laneScale now has the number of keys in the lane, which is the X scale we need to set on the parent object
+
+            // The problem we now have is figuring out which color this laneIndex should take...
+            // I guess laneCounts actually needs to hold a count and a color (actually a group index, 0 = red, 1 = yellow, etc)
+
+            var anOctave = laneCounts[laneIndex].Key / 12;
+            var aGroup = anOctave * 2 + (ProKeysUtilities.IsLowerHalfKey(laneCounts[laneIndex].Key % 12) ? 0 : 1);
+            var laneColor = Player.ColorProfile.ProKeys.GetOverlayColor(aGroup);
+
+            // Maybe this will work?
+            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, (int) Math.Floor((double) WHITE_KEY_VISIBLE_COUNT / laneScale), true);
+            lane.SetAppearance(Player.Profile.CurrentInstrument, laneCounts[laneIndex].Key, laneX, laneColor.ToUnityColor());
+            // Shrink the scale slightly to prevent clipping
+            lane.MultiplyScale(0.9f);
+            // lane.transform.localScale.WithX(laneScale);
+
+            return;
+
+            // Just as a test
+            int GetWhiteKeyIndex(int index)
+            {
+                // Now we need to scale based on BRELanes.Length. When at its maximum of 10, we're creating one
+                // lane per white key, but if it were 5, we'd want to distribute them evenly across the keys,
+                // so (for example, if currentRange was 5), we would want lanes on keys 7, 11, 14, 17, and 19
+                // (not really, but that's the best we can do)
+                // At range 5 the keys on screen are 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, so if there were 3 lanes,
+                // we would want them at 12 or 14 for the middle one, then 11 and 17 or 19 (really we'd want them
+                // on the black keys 10, 15, and 20 in this case, I guess? (21 - 5) / 3 * index
+
+                // This would be so much easier if we could go backwards from a track relative x pos to the closest
+                // white key
+
+                // Ideally, they'd actually be dynamically sized based on the visible portion of each group, so let's
+                // try to work that out...
+
+                // We are guaranteed that 23 and 24 will always be positive X, so we'll use that to get the distance between keys
+                // float whiteKeyDistance = _keysArray.GetKeyX(24) - _keysArray.GetKeyX(23);
+
+                // Sadly, there could be 3 or 4 groups visible depending on position
+                // We do, however, know that either blue or yellow will always be on the left since range shifts
+                // only go up to 9.
+
+                int idx;
+
+                // There is probably a way to do this without a loop, but we'll have to live with it for now
+                for (idx = 0; idx < whiteKeys.Length; idx++)
+                {
+                    if (whiteKeys[idx] == currentRange)
+                    {
+                        break;
+                    }
+                }
+
+                // idx now contains the index of the start of the current range
+                // Therefore, idx + index should return the white key for the given index
+                return whiteKeys[index + idx];
+            }
+
+            // I believe that currentRange should contain the index of the lowest key in the current range
+            // We need to put the lanes on each of the white keys in the range, but for testing what we'll do
+            // is just have n lanes spread across the track and use the group color of the key that corresponds to
+            // the center of the lane
+
+            // what we really want is for the lanes to cover whatever groups are currently visible
+
+            // Limit the number of spawned visual lanes to 12 in any case
+            var laneCount = Math.Min(BRELanes.Count, WHITE_KEY_VISIBLE_COUNT);
+
+            int adjustedKey = GetWhiteKeyIndex(laneIndex); // + currentRange;
+
+            int noteIndex = adjustedKey % 12;
+            int octaveIndex = adjustedKey / 12;
+
+            int group = octaveIndex * 2 + (ProKeysUtilities.IsLowerHalfKey(noteIndex) ? 0 : 1);
+
+            // I believe x position for the visible part of the track ranges from -1 to +1
+            // so if there were 3 lanes, we would have a total of 6 units to cover, with the middle lane being at 0
+            // and the first and last lanes being at -2/3 and + 2/3 respectively.
+            laneIndex %= laneCount;
+            float laneXPosition = -1f + (1f / laneCount) + (2f / laneCount) * laneIndex;
+
+            var keyX = _keysArray.GetKeyX(adjustedKey);
+            var color = Player.ColorProfile.ProKeys.GetOverlayColor(group).ToUnityColor();
+            var realX = _keysArray.GetKeyX(adjustedKey) + _currentOffset;
+
+            // The overlay color here is wrong, but whatever, this will suffice for testing
+            lane.SetAppearance(Player.Profile.CurrentInstrument, adjustedKey, realX, Player.ColorProfile.ProKeys.GetOverlayColor(group).ToUnityColor());
+        }
+
         protected override void InitializeSpawnedLane(LaneElement lane, int key)
         {
             int noteIndex = key % 12;
@@ -467,7 +716,8 @@ namespace YARG.Gameplay.Player
 
         protected override void RescaleLanesForBRE()
         {
-            LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, WHITE_KEY_VISIBLE_COUNT + 1, true);
+            // LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, BRELanes.Length, true);
+            // LaneElement.DefineLaneScale(Player.Profile.CurrentInstrument, WHITE_KEY_VISIBLE_COUNT, true);
         }
 
         protected override bool InterceptInput(ref GameInput input)

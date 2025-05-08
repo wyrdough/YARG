@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using YARG.Core;
@@ -47,7 +48,7 @@ namespace YARG.Gameplay.Player
         {
             // Before we do anything, see if we're in five lane mode or not
             _fiveLaneMode = player.Profile.CurrentInstrument == Instrument.FiveLaneDrums;
-            BRELanes = new LaneElement[_fiveLaneMode ? 5 : 4];
+            BRELanes = new List<LaneElement>(new LaneElement[_fiveLaneMode ? 5 : 4]);
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -78,7 +78,9 @@ namespace YARG.Gameplay.Player
 
         private float _spawnAheadDelay;
 
-        protected LaneElement[] BRELanes = Array.Empty<LaneElement>();
+        // This shouldn't really need to be initialized, but it's here in case some new TrackPlayer derivative comes
+        // along and doesn't do the initialization itself. This way it will just be Count zero and not throw.
+        protected List<LaneElement> BRELanes = new();
 
         public virtual void Initialize(int index, YargPlayer player, SongChart chart, TrackView trackView,
             StemMixer mixer, int? lastHighScore)
@@ -522,6 +524,13 @@ namespace YARG.Gameplay.Player
             }
         }
 
+        // This is required because Pro Keys needs to be able to override to do things differently
+        // Everybody else can just pass the call through to InitializeSpawnedLane directly
+        protected virtual void InitializeBRELane(LaneElement lane, int laneIndex)
+        {
+            InitializeSpawnedLane(lane, laneIndex);
+        }
+
         private void SpawnEffect(TrackEffect nextEffect, bool seeking)
         {
             // TODO: This is just a placeholder to get lanes working for the BREs
@@ -531,13 +540,13 @@ namespace YARG.Gameplay.Player
                 // Rescale the lanes for BRE. (This assumes there are no lanes after the BRE!)
                 RescaleLanesForBRE();
 
-                if (!LanePool.CanSpawnAmount(BRELanes.Length))
+                if (!LanePool.CanSpawnAmount(BRELanes.Count))
                 {
                     return;
                 }
 
                 // Completely different handling, we use lanes instead of a track effect
-                for (int i = 0; i < BRELanes.Length; i++)
+                for (int i = 0; i < BRELanes.Count; i++)
                 {
                     var newLane = (LaneElement) LanePool.TakeWithoutEnabling();
 
@@ -546,7 +555,7 @@ namespace YARG.Gameplay.Player
 
                     newLane.SetTimeRange(startTime, endTime);
                     // Purplo's lanes are 1 indexed (odd to me, but whatever)
-                    InitializeSpawnedLane(newLane, i + 1);
+                    InitializeBRELane(newLane, i + 1);
                     newLane.EnableFromPool();
 
                     // Need to keep a reference so we can tell it to do things later

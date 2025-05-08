@@ -94,7 +94,7 @@ namespace YARG.Gameplay.Player
                 _stem = SongStem.Rhythm;
             }
 
-            BRELanes = new LaneElement[5];
+            BRELanes = new List<LaneElement>(new LaneElement[5]);
 
             base.Initialize(index, player, chart, trackView, mixer, currentHighScore);
         }
