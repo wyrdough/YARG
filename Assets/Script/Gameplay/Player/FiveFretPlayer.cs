@@ -201,6 +201,7 @@ namespace YARG.Gameplay.Player
         public override void SetReplayTime(double time)
         {
             ResetRangeShift(time);
+
             base.SetReplayTime(time);
         }
 
@@ -222,6 +223,23 @@ namespace YARG.Gameplay.Player
             }
 
             InitializeRangeShift(time);
+        }
+
+        protected override void ResetCodaSection(double time)
+        {
+            if (!Engine.IsCodaActive)
+            {
+                return;
+            }
+
+            if (CurrentCoda is not null && time < CurrentCoda.StartTime)
+            {
+                CurrentCoda.OnLaneHit -= OnLaneHit;
+                CurrentCoda.Reset();
+                CurrentCoda = null;
+            }
+
+            base.ResetCodaSection(time);
         }
 
         protected override void UpdateVisuals(double songTime)

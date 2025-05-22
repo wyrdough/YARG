@@ -45,10 +45,16 @@ namespace YARG.Gameplay.HUD
 
         private Coroutine _currentCoroutine;
 
+        private Vector3 _originalPosition;
+        private Vector3 _originalScale;
+
         public void StartCoda(CodaSection coda)
         {
             // Don't even bother if the solo has no points
             // if (coda.NoteCount == 0) return;
+
+            // _originalScale = _breBoxCanvasGroup.transform.localScale;
+            _originalPosition = _breBoxCanvasGroup.transform.localPosition;
 
             _coda = coda;
             _breEnded = false;
@@ -74,6 +80,9 @@ namespace YARG.Gameplay.HUD
             yield return _breBoxCanvasGroup
                 .DOFade(1f, 0.25f)
                 .WaitForCompletion();
+
+            _originalScale = _breBoxCanvasGroup.transform.localScale;
+            _originalPosition = _breBoxCanvasGroup.transform.localPosition;
         }
 
         private void Update()
@@ -97,7 +106,12 @@ namespace YARG.Gameplay.HUD
             StopCurrentCoroutine();
             _breEnded = true;
 
-            _breBox.gameObject.SetActive(false);
+            _breFullText.colorGradientPreset = _breGradientNormal;
+            _breBoxCanvasGroup.transform.localScale = Vector3.one;
+            _breBoxCanvasGroup.transform.localPosition = _originalPosition;
+
+            // TODO: Probably need to save the tweens so we can kill them here
+            gameObject.SetActive(false);
             _currentCoroutine = null;
             _coda = null;
         }

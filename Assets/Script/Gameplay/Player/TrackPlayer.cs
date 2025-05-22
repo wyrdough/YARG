@@ -814,6 +814,7 @@ namespace YARG.Gameplay.Player
 
             // Reset the solo overlay
             ResetTrackEffectOverlay(time);
+            ResetCodaSection(time);
 
             base.SetReplayTime(time);
         }
@@ -839,6 +840,21 @@ namespace YARG.Gameplay.Player
                     SpawnEffect(effect, true);
                 }
             }
+        }
+
+        protected virtual void ResetCodaSection(double time)
+        {
+            // Actually getting the score completely right is...difficult, but we can at least
+            // reset all the coda stuff and make sure the lanes are spawned if we're already in the coda time
+
+            // If we're still in the coda, give up now, there's no reasonable way to roll back or forward right now
+            if (Engine.IsCodaActive)
+            {
+                return;
+            }
+
+            // TODO: Make sure coda lanes are actually spawned from the normal lane pool
+            LanePool.ReturnAllObjects();
         }
 
         protected virtual void SpawnNote(TNote note)
