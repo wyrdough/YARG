@@ -248,6 +248,7 @@ namespace YARG.Gameplay
                 player.UpdateWithTimes(_songRunner.InputTime);
 
                 totalScore += player.Score;
+                totalScore += player.BandBonusScore;
                 totalCombo += player.Combo;
                 totalStars += player.Stars;
             }

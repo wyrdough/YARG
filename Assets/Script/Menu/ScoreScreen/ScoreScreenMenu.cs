@@ -130,6 +130,7 @@ namespace YARG.Menu.ScoreScreen
 
         private void CreateScoreCards(ScoreScreenStats scoreScreenStats)
         {
+            bool singleplayer = scoreScreenStats.PlayerScores.Length == 1;
             foreach (var score in scoreScreenStats.PlayerScores)
             {
                 switch (score.Player.Profile.CurrentInstrument.ToGameMode())
@@ -138,7 +139,7 @@ namespace YARG.Menu.ScoreScreen
                     {
                         var card = Instantiate(_guitarCardPrefab, _cardContainer);
                         card.Initialize(score.IsHighScore, score.Player, score.Stats as GuitarStats);
-                        card.SetCardContents();
+                        card.SetCardContents(singleplayer);
                         break;
                     }
                     case GameMode.FourLaneDrums:
@@ -146,21 +147,21 @@ namespace YARG.Menu.ScoreScreen
                     {
                         var card = Instantiate(_drumsCardPrefab, _cardContainer);
                         card.Initialize(score.IsHighScore, score.Player, score.Stats as DrumsStats);
-                        card.SetCardContents();
+                        card.SetCardContents(singleplayer);
                         break;
                     }
                     case GameMode.Vocals:
                     {
                         var card = Instantiate(_vocalsCardPrefab, _cardContainer);
                         card.Initialize(score.IsHighScore, score.Player, score.Stats as VocalsStats);
-                        card.SetCardContents();
+                        card.SetCardContents(singleplayer);
                         break;
                     }
                     case GameMode.ProKeys:
                     {
                         var card = Instantiate(_proKeysCardPrefab, _cardContainer);
                         card.Initialize(score.IsHighScore, score.Player, score.Stats as ProKeysStats);
-                        card.SetCardContents();
+                        card.SetCardContents(singleplayer);
                         break;
                     }
                 }

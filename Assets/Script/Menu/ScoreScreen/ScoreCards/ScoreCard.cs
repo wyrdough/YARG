@@ -57,6 +57,12 @@ namespace YARG.Menu.ScoreScreen
         [SerializeField]
         private TextMeshProUGUI _starpowerPhrases;
 
+        [Space]
+        [SerializeField]
+        private GameObject _bandBonusContainer;
+        [SerializeField]
+        private TextMeshProUGUI _bandBonusScore;
+
         private ScoreCardColorizer _colorizer;
 
         protected bool IsHighScore;
@@ -75,7 +81,7 @@ namespace YARG.Menu.ScoreScreen
             Stats = stats;
         }
 
-        public virtual void SetCardContents()
+        public virtual void SetCardContents(bool singleplayer = true)
         {
             _playerName.text = Player.Profile.Name;
 
@@ -110,6 +116,15 @@ namespace YARG.Menu.ScoreScreen
 
             _score.text = Stats.TotalScore.ToString("N0");
             _starView.SetStars((int) Stats.Stars);
+            if (singleplayer)
+            {
+                _bandBonusContainer.SetActive(false);
+            }
+            else
+            {
+                _bandBonusContainer.SetActive(true);
+                _bandBonusScore.text = Stats.BandBonusScore.ToString("N0");
+            }
 
             _notesHit.text = $"{WrapWithColor(Stats.NotesHit)} / {Stats.TotalNotes}";
             _maxStreak.text = WrapWithColor(Stats.MaxCombo);
