@@ -469,9 +469,9 @@ namespace YARG.Menu.DifficultySelect
             foreach (var instrument in allowedInstruments)
             {
                 bool invalidInstrument = false;
-                foreach (var showSong in songlist)
+                foreach (var showsong in GlobalVariables.State.ShowSongs)
                 {
-                    if (!HasPlayableInstrument(showSong, instrument))
+                    if (!HasPlayableInstrument(showsong, instrument))
                     {
                         invalidInstrument = true;
                         break;
