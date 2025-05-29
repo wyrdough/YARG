@@ -330,7 +330,7 @@ namespace YARG.Gameplay
         {
             if (showMenu)
             {
-                if (ReplayInfo != null)
+                if (!GlobalVariables.State.PlayingWithReplay && ReplayInfo != null)
                 {
                     _pauseMenu.PushMenu(PauseMenuManager.Menu.ReplayPause);
                 }
@@ -449,7 +449,7 @@ namespace YARG.Gameplay
                 _mixer.FadeOut(0.5);
             }
 
-            if (ReplayInfo != null)
+            if (!GlobalVariables.State.PlayingWithReplay && ReplayInfo != null)
             {
                 Pause(false);
                 return true;
@@ -523,6 +523,7 @@ namespace YARG.Gameplay
                     NotesHit = player.BaseStats.NotesHit,
                     NotesMissed = player.BaseStats.NotesMissed,
                     IsFc = player.IsFc,
+                    IsReplay = player.Player.IsReplay,
 
                     Percent = player.BaseStats.Percent
                 });
@@ -544,7 +545,8 @@ namespace YARG.Gameplay
                 BandScore = BandScore,
                 BandStars = StarAmountHelper.GetStarsFromInt((int) BandStars),
 
-                SongSpeed = SongSpeed
+                SongSpeed = SongSpeed,
+                PlayedWithReplay = GlobalVariables.State.PlayingWithReplay,
             }, playerEntries);
         }
 
