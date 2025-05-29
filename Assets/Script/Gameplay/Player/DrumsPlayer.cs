@@ -185,6 +185,12 @@ namespace YARG.Gameplay.Player
         {
             int laneIndex = note.Pad;
 
+            // Hope this works for five lane, too
+            if (Player.Profile.LeftyFlip)
+            {
+                laneIndex = _fiveLaneMode ? 6 - laneIndex : 5 - laneIndex;
+            }
+
             if (!_fiveLaneMode && laneIndex >= (int) FourLaneDrumPad.YellowCymbal)
             {
                 laneIndex -= 3;
