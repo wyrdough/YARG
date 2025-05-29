@@ -202,19 +202,18 @@ namespace YARG.Gameplay.Visuals
 
             for (int i = 0; i < _frets.Count; i++)
             {
-                if (_activeFrets[i] == frets[i])
+                if (_activeFrets[i] != frets[i])
                 {
-                    continue;
+                    if (frets[i])
+                    {
+                        _frets[i].ResetColor(true);
+                    }
+                    else
+                    {
+                        _frets[i].DimColor(true);
+                    }
                 }
 
-                if (frets[i])
-                {
-                    _frets[i].ResetColor(true);
-                }
-                else
-                {
-                    _frets[i].DimColor(true);
-                }
                 _activeFrets[i] = frets[i];
             }
         }

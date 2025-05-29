@@ -9,30 +9,32 @@ namespace YARG.Helpers
     public class FiveFretRangeShift
     {
         public double Time         { get; private set; }
-        public int    Range        { get; private set; }
+        public int    Position     { get; private set; }
         public int    Size         { get; private set; }
         public double BeatDuration { get; set; }
 
         public bool   Shown = false;
 
-        private FiveFretRangeShift(double time, int range, int size)
+        private FiveFretRangeShift(double time, int position, int size)
         {
             Time = time;
-            Range = range;
+            Position = position;
             Size = size;
         }
 
-        public static List<FiveFretRangeShift> GetRangeShiftEvents(
+        public static FiveFretRangeShift[] GetRangeShiftEvents(
             InstrumentDifficulty<GuitarNote> instrumentDifficulty)
         {
-            var shiftEvents = new List<FiveFretRangeShift>();
+            var shiftEvents = instrumentDifficulty.RangeShiftEvents;
+            FiveFretRangeShift[] shifts = new FiveFretRangeShift[shiftEvents.Count];
 
-            foreach (var shift in instrumentDifficulty.RangeShiftEvents)
+
+            for (int i = 0; i < shifts.Length; i++)
             {
-                shiftEvents.Add(new FiveFretRangeShift(shift.Time, shift.Range, shift.Size));
+                shifts[i] = new FiveFretRangeShift(shiftEvents[i].Time, shiftEvents[i].Range, shiftEvents[i].Size);
             }
 
-            return shiftEvents;
+            return shifts;
         }
     }
 }
