@@ -49,24 +49,6 @@ namespace YARG.Gameplay.Visuals
         private float _fadeStartTime;
         private float _fadeAmount = 0.0f;
 
-        // These need to be saved since the colors can now change during play
-        // They are saved as Unity colors to avoid having to repeatedly convert
-        // when transitioning between active and inactive states
-        private UnityEngine.Color _originalUnityTopColor;
-        private UnityEngine.Color _originalUnityInnerColor;
-
-        // TODO: Consider making this customizable or perhaps just a desaturated and dimmed version of the base color
-        private UnityEngine.Color _inactiveColor = new(0.321f, 0.321f, 0.321f, 1.0f);
-
-        private bool _active             = true;
-        private bool _colorChangeEnabled = false;
-        private bool _fadeDirection      = true;
-        // True is pulsing, false is fading
-        private bool  _pulseOrFade  = true;
-        private float _fadeDuration = 0.25f;
-        private float _fadeStartTime;
-        private float _fadeAmount = 0.0f;
-
         public void Initialize(Color top, Color inner, Color particles, Color openParticles)
         {
             _originalUnityTopColor = top.ToUnityColor();
