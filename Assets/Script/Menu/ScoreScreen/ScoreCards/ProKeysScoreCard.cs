@@ -10,9 +10,9 @@ namespace YARG.Menu.ScoreScreen
         [SerializeField]
         private TextMeshProUGUI _overhits;
 
-        public override void SetCardContents()
+        public override void SetCardContents(bool singleplayer = true)
         {
-            base.SetCardContents();
+            base.SetCardContents(singleplayer);
 
             _overhits.text = WrapWithColor(Stats.Overhits);
         }

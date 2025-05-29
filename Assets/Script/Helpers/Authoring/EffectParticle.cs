@@ -29,6 +29,15 @@ namespace YARG.Helpers.Authoring
         private ParticleSystemRenderer _particleSystemRenderer;
         private bool                   _breMode;
 
+        private Quaternion           _initialRotation;
+        private float                _initialSpeedMultiplier;
+        private float                _initialLifetimeMultiplier;
+        private float                _initialStartSpeedMultiplier;
+        private int                  _initialMaxParticles;
+        private ParticleSystem.Burst _initialBurst;
+        private ParticleSystemShapeType _initialShapeType;
+
+
         private void Awake()
         {
             _particleSystem = GetComponent<ParticleSystem>();
@@ -67,13 +76,37 @@ namespace YARG.Helpers.Authoring
             if (_particleSystem.main.loop && _particleSystem.isEmitting) return;
 
             // Double the duration of all effects in BRE mode
-            if (breMode && !_breMode && (_particleSystem.name == "Sparkles" || _particleSystem.name == "Shards"))
+            if (breMode != _breMode && (_particleSystem.name == "Sparkles" || _particleSystem.name == "Shards"))
+            {
+                SetBREMode(breMode);
+            }
+
+            _particleSystem.Play();
+        }
+
+        private void SetBREMode(bool active)
+        {
+            if (active == _breMode) return;
+
+            var particleMain = _particleSystem.main;
+            var particleEmitter = _particleSystem.emission;
+            var particleShape = _particleSystem.shape;
+            var particleRotation = _particleSystem.transform.rotation;
+
+            if (active)
             {
                 _breMode = true;
-                var particleMain = _particleSystem.main;
-                var particleEmitter = _particleSystem.emission;
-                var particleShape = _particleSystem.shape;
-                var particleRotation = _particleSystem.transform.rotation;
+
+                _initialRotation = _particleSystem.transform.rotation;
+                _initialSpeedMultiplier = particleMain.startSpeedMultiplier;
+                _initialLifetimeMultiplier = particleMain.startLifetimeMultiplier;
+                _initialStartSpeedMultiplier = particleMain.startSpeedMultiplier;
+                _initialMaxParticles = particleMain.maxParticles;
+                _initialShapeType = particleShape.shapeType;
+                if (particleEmitter.burstCount > 0)
+                {
+                    _initialBurst = particleEmitter.GetBurst(0);
+                }
 
                 if (particleEmitter.burstCount > 0)
                 {
@@ -87,10 +120,13 @@ namespace YARG.Helpers.Authoring
                     // particleMain.gravityModifierMultiplier = 2f;
                     particleMain.startLifetimeMultiplier = 1.2f;
                     particleMain.maxParticles = 10000;
-                    var burst = particleEmitter.GetBurst(0);
-                    burst.minCount *= 5;
-                    burst.maxCount *= 5;
-                    particleEmitter.SetBurst(0, burst);
+                    if (particleEmitter.burstCount > 0)
+                    {
+                        var burst = particleEmitter.GetBurst(0);
+                        burst.minCount *= 5;
+                        burst.maxCount *= 5;
+                        particleEmitter.SetBurst(0, burst);
+                    }
                 }
                 else
                 {
@@ -99,8 +135,22 @@ namespace YARG.Helpers.Authoring
                     particleMain.startLifetimeMultiplier = 2;
                 }
             }
+            else
+            {
+                _breMode = false;
 
-            _particleSystem.Play();
+                particleRotation = _initialRotation;
+                _particleSystem.transform.rotation = particleRotation;
+                particleMain.startSpeedMultiplier = _initialSpeedMultiplier;
+                particleMain.startLifetimeMultiplier = _initialLifetimeMultiplier;
+                particleMain.startSpeedMultiplier = _initialStartSpeedMultiplier;
+                particleMain.maxParticles = _initialMaxParticles;
+                particleShape.shapeType = _initialShapeType;
+                if (particleEmitter.burstCount > 0)
+                {
+                    particleEmitter.SetBurst(0, _initialBurst);
+                }
+            }
         }
 
         public void Stop()

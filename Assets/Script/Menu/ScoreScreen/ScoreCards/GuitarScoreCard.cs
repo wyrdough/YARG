@@ -16,9 +16,9 @@ namespace YARG.Menu.ScoreScreen
         [SerializeField]
         private TextMeshProUGUI _ghostInputs;
 
-        public override void SetCardContents()
+        public override void SetCardContents(bool singleplayer = true)
         {
-            base.SetCardContents();
+            base.SetCardContents(singleplayer);
 
             _overstrums.text = WrapWithColor(Stats.Overstrums);
             _hoposStrummed.text = WrapWithColor(Stats.HoposStrummed);

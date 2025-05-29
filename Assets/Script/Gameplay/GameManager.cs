@@ -149,6 +149,9 @@ namespace YARG.Gameplay
         private double  _lastNoteEndTime;
         private bool    _endIsAudioEnd = false;
 
+        public bool PlayingAShow => GlobalVariables.State.PlayingAShow;
+        public int  ShowIndex = 0;
+
         private void Awake()
         {
             // Set references
@@ -248,6 +251,7 @@ namespace YARG.Gameplay
                 player.UpdateWithTimes(_songRunner.InputTime);
 
                 totalScore += player.Score;
+                totalScore += player.BandBonusScore;
                 totalCombo += player.Combo;
                 totalStars += player.Stars;
             }
@@ -329,7 +333,7 @@ namespace YARG.Gameplay
         {
             if (showMenu)
             {
-                if (ReplayInfo != null)
+                if (!GlobalVariables.State.PlayingWithReplay && ReplayInfo != null)
                 {
                     _pauseMenu.PushMenu(PauseMenuManager.Menu.ReplayPause);
                 }
@@ -448,7 +452,7 @@ namespace YARG.Gameplay
                 _mixer.FadeOut(0.5);
             }
 
-            if (ReplayInfo != null)
+            if (!GlobalVariables.State.PlayingWithReplay && ReplayInfo != null)
             {
                 Pause(false);
                 return true;
@@ -522,6 +526,7 @@ namespace YARG.Gameplay
                     NotesHit = player.BaseStats.NotesHit,
                     NotesMissed = player.BaseStats.NotesMissed,
                     IsFc = player.IsFc,
+                    IsReplay = player.Player.IsReplay,
 
                     Percent = player.BaseStats.Percent
                 });
@@ -543,7 +548,8 @@ namespace YARG.Gameplay
                 BandScore = BandScore,
                 BandStars = StarAmountHelper.GetStarsFromInt((int) BandStars),
 
-                SongSpeed = SongSpeed
+                SongSpeed = SongSpeed,
+                PlayedWithReplay = GlobalVariables.State.PlayingWithReplay,
             }, playerEntries);
         }
 

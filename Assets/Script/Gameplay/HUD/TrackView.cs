@@ -159,6 +159,7 @@ namespace YARG.Gameplay.HUD
             _textNotifications.SetActive(true);
 
             _soloBox.ForceReset();
+            _breBox.ForceReset();
             _textNotifications.ForceReset();
             _countdownDisplay.ForceReset();
         }

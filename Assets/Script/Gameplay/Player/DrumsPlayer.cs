@@ -67,7 +67,7 @@ namespace YARG.Gameplay.Player
                 _                        => throw new Exception("Unreachable.")
             };
 
-            if (GameManager.ReplayInfo == null)
+            if (!Player.IsReplay)
             {
                 // Create the engine params from the engine preset
                 EngineParams = Player.EnginePreset.Drums.Create(StarMultiplierThresholds, mode);
@@ -184,6 +184,12 @@ namespace YARG.Gameplay.Player
         protected override int GetLaneIndex(DrumNote note)
         {
             int laneIndex = note.Pad;
+
+            // Hope this works for five lane, too
+            if (Player.Profile.LeftyFlip)
+            {
+                laneIndex = _fiveLaneMode ? 6 - laneIndex : 5 - laneIndex;
+            }
 
             if (!_fiveLaneMode && laneIndex >= (int) FourLaneDrumPad.YellowCymbal)
             {
