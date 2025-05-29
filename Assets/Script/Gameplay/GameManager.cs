@@ -149,6 +149,9 @@ namespace YARG.Gameplay
         private double  _lastNoteEndTime;
         private bool    _endIsAudioEnd = false;
 
+        public bool PlayingAShow => GlobalVariables.State.PlayingAShow;
+        public int  ShowIndex = 0;
+
         private void Awake()
         {
             // Set references

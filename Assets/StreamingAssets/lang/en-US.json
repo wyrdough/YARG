@@ -255,6 +255,8 @@
             "PlayableSongs": "PLAYABLE SONGS",
             "RandomSong": "RANDOM SONG",
             "Playlists": "PLAYLISTS",
+            "Favorites": "Favorites",
+            "YourPlaylists": "YOUR PLAYLISTS",
             "Popup": {
                 "Header": {
                     "SortBy": "Sort By...",
@@ -267,14 +269,26 @@
                     "GoToSection": "Go To Section...",
                     "AddToFavorites": "Add To Favorites",
                     "RemoveFromFavorites": "Remove From Favorites",
+                    "AddToPlaylist": "Add To Playlist...",
+                    "RemoveFromPlaylist": "Remove From Playlist",
+                    "CreateNewPlaylist": "Create New...",
+                    "RemovePlaylist": "Remove Playlist",
                     "ViewSongFolder": "View Song Folder",
-                    "CopySongChecksum": "Copy Song Checksum"
+                    "CopySongChecksum": "Copy Song Checksum",
                 }
             },
             "Back": "BACK",
             "NoPlayersConnected": "No players connected! Go to the profiles menu to connect a player.",
             "Play": "Play Song",
             "Search": "Search",
+            "CurrentSetlist": "Current Setlist",
+            "AddToSet": "Add To Setlist",
+            "AddToSetWithHold": "<align=left><size=80%>Add To Setlist<br>(Hold) Start The Set</size></align>",
+            "AddedToSet": "Added To Setlist",
+            "PlaylistAddedToSet": "Added {0:N0} Songs From Playlist To Setlist",
+            "StartSet": "Start The Set",
+            "NoSongsInPlaylist": "No Songs In Playlist",
+            "CannotAddToSelf": "No, I will not create an ouroboros for you. Nice try, Jaden.",
             "MoreOptions": "<align=left><size=80%>More Options<br>(Hold) Navigate Sections</size></align>"
         },
         "ProfileInfo": {
