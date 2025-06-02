@@ -200,6 +200,10 @@
                 "Title": "Experimental Features Notice",
                 "Description": "The options about to be displayed represent a work in progress. These features are subject to change, may contain bugs, and <b>could even cause major problems if enabled</b>.",
                 "Confirm": "I Understand"
+            },
+            "ShowDialog": {
+                "Title": "Choose Your Fate",
+                "Select": "That's Plenty"
             }
         },
         "DifficultySelect": {
@@ -279,7 +283,7 @@
             "Play": "Play Song",
             "Search": "Search",
             "CurrentSetlist": "Current Setlist",
-            "AddToSet": "Add To Setlist",
+            "AddToSet": "<align=left><size=80%>Add To Setlist<br>(Hold) Play A Show</size></align>",
             "AddToSetWithHold": "<align=left><size=80%>Add To Setlist<br>(Hold) Start The Set</size></align>",
             "AddedToSet": "Added To Setlist",
             "PlaylistAddedToSet": "Added {0:N0} Songs From Playlist To Setlist",
