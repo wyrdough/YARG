@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Triggers;
 using UnityEngine;
+using UnityEngine.Events;
 using YARG.Localization;
 using YARG.Menu.Data;
 using YARG.Menu.Dialogs;
@@ -29,6 +30,8 @@ namespace YARG.Menu.Persistent
         private ConfirmDeleteDialog _confirmDeleteDialog;
         [SerializeField]
         private ColorPickerDialog _colorPickerDialog;
+        [SerializeField]
+        private OnboardingProfileDialog _onboardingProfileDialog;
         [SerializeField]
         private SongPickerListDialog _playAShowDialog;
 
@@ -75,6 +78,25 @@ namespace YARG.Menu.Persistent
                 MenuData.Colors.ConfirmButton,
                 ClearDialog
             );
+
+            return dialog;
+        }
+
+        /// <summary>
+        /// Displays and returns the onboarding dialog
+        /// </summary>
+        /// <param name="localizationKey"></param>
+        /// <param name="dontShowAgainAction"></param>
+        /// <param name="okAction"></param>
+        /// <returns></returns>
+        public OnboardingProfileDialog ShowOnboardingMessage(string localizationKey, Action dontShowAgainAction, Action okAction)
+        {
+            var dialog = ShowDialog(_onboardingProfileDialog);
+
+            dialog.Title.text = Localize.Key(localizationKey, "Title");
+            dialog.Message.text = Localize.Key(localizationKey, "Description");
+
+            dialog.DontShowAgainAction = dontShowAgainAction;
 
             return dialog;
         }
