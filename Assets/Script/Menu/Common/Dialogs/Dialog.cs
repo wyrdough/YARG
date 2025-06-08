@@ -22,7 +22,7 @@ namespace YARG.Menu.Dialogs
         [field: SerializeField]
         public TextMeshProUGUI Title { get; private set; }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             Navigator.Instance.PushScheme(GetNavigationScheme());
         }

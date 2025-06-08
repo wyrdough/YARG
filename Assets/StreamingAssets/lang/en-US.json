@@ -180,6 +180,18 @@
                 "Description": "<b>YARG stands firmly against all forms of piracy.</b> We neither support nor endorse piracy, as it is a violation of copyright law with serious legal consequences. Our platform's importable content—designed for creators to share their work and for educational purposes—does not justify or excuse piracy.\n\nYARG itself <b>does not</b> use any ripped/pirated assets or music and never will. By using YARG, users agree not to promote or endorse piracy in any way through our platform. Upholding these principles ensures a community that respects copyright, creativity, and legal standards.\n\nYARG stands for \"Yet Another Rhythm Game\" and NOT for pirates.",
                 "Confirm": "I Understand"
             },
+            "FirstTimePlayer": {
+                "Title": "Let's Get Started!",
+                "Description": "Welcome to YARG!\n\nSince YARG supports a wide variety of instruments from other games, we'll need to set you up with a profile before you can play.",
+                "DeviceNotConnected": "If you haven't plugged in your instrument yet, please do so now. If you're using a MIDI drum kit or MIDI keyboard you'll have to add it manually, sorry about that.",
+                "MIDIInstructions": "To add your MIDI device, open the profiles menu, create a new profile by clicking on the green button in the upper right corner, then click the connect button next to your new profile's name. After that, you will need to make sure your new profile is selected and bind each key to the correct input using the green edit profile and binds button in the sidebar.",
+                "OneDeviceConnected": "I see you have a {0} connected. Click the green button to get set up!",
+                "MultipleDevicesConnected": "I see you have connected {0} instruments. Click the green button to set them up!",
+                "StepTwo": "We've automatically created profiles for each of your connected plastic band instruments. They are using default names, which you can change by opening the profile menu, clicking on the profile, then choosing the edit button in the sidebar.\n\nIf you're using MIDI instruments, you will have to create a profile yourself by opening the profile menu, clicking the green button in the upper right of the screen to create the profile, then clicking the connect button next to your new profile and choosing your MIDI device from the list. Once that is done, you must bind its inputs manually by clicking on the edit profile and binds button.",
+                "Confirm": "Got it!",
+                "Close": "All Done!",
+                "Skip": "No thanks!"
+            },
             "BadSongs": {
                 "Title": "Some Songs Could Not Be Scanned",
                 "Description": "One or more of the songs you scanned were corrupted, formatted incorrectly, or encrypted, and <b>could not be loaded into the game.</b>\n\nFor more info, please check the file located at \"{0}\"."

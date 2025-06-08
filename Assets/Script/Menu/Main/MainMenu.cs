@@ -3,10 +3,12 @@ using UnityEngine;
 using YARG.Core.Input;
 using YARG.Helpers;
 using YARG.Localization;
+using YARG.Menu.Dialogs;
 using YARG.Menu.MusicLibrary;
 using YARG.Menu.Settings;
 using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
+using YARG.Player;
 using YARG.Settings;
 
 namespace YARG.Menu.Main
@@ -18,7 +20,9 @@ namespace YARG.Menu.Main
         [SerializeField]
         private TextMeshProUGUI _versionText;
 
-        private void Start()
+        private Onboarding _onboardingDialog;
+
+        private async void Start()
         {
             _versionText.text = GlobalVariables.Instance.CurrentVersion;
 
@@ -26,7 +30,7 @@ namespace YARG.Menu.Main
             // Also only show it once per game launch
             if (!_antiPiracyDialogShown && SettingsManager.Settings.ShowAntiPiracyDialog)
             {
-                DialogManager.Instance.ShowOneTimeMessage(
+                var dialog = DialogManager.Instance.ShowOneTimeMessage(
                     "Menu.Dialog.AntiPiracy",
                     () =>
                     {
@@ -35,6 +39,14 @@ namespace YARG.Menu.Main
                     });
 
                 _antiPiracyDialogShown = true;
+
+                await dialog.WaitUntilClosed();
+            }
+
+            if (!SettingsManager.Settings.FirstTimeDialogShown && PlayerContainer.Profiles.Count == 0)
+            {
+                _onboardingDialog = new Onboarding(this);
+                _onboardingDialog.ShowOnboardingFlow();
             }
         }
 

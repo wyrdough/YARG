@@ -37,9 +37,10 @@ namespace YARG.Settings
 
             public List<string> SongFolders = new();
 
-            public bool ShowAntiPiracyDialog = true;
+            public bool ShowAntiPiracyDialog          = true;
             public bool ShowEngineInconsistencyDialog = true;
             public bool ShowExperimentalWarningDialog = true;
+            public bool FirstTimeDialogShown          = false;
 
             public SortAttribute LibrarySort = SortAttribute.Name;
             public SortAttribute PreviousLibrarySort = SortAttribute.Name;
