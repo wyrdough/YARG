@@ -179,8 +179,8 @@ namespace YARG.Gameplay.Player
 
             (NotePool.GetByKey(note) as DrumsNoteElement)?.HitNote();
 
-            // Four and five lane drums have the same kick value
-            if (note.Pad != (int) FourLaneDrumPad.Kick)
+            // Four and five lane drums have the same kick and wildcard value
+            if (note.Pad != (int) FourLaneDrumPad.Kick && note.Pad != (int) FourLaneDrumPad.Wildcard)
             {
                 int fret;
                 if (!_fiveLaneMode)

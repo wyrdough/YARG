@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7137662299531785058}
   m_Layer: 6
-  m_Name: Open
+  m_Name: FiveFretWildcard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,9 +43,9 @@ GameObject:
   - component: {fileID: 5312122841397978341}
   - component: {fileID: 4132597056536066752}
   - component: {fileID: 2920260908173878507}
-  - component: {fileID: 2790340711707932363}
+  - component: {fileID: 6761769704635755267}
   m_Layer: 0
-  m_Name: Full
+  m_Name: Open
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95,7 +95,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e059236123aed23458b6a1a0ef73403c, type: 2}
-  - {fileID: 2100000, guid: 58da9d225f612af438aead0e3c970fe9, type: 2}
+  - {fileID: 2100000, guid: da1c6ef2ca7c4e8468fefd44ddd80156, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -117,7 +117,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &2790340711707932363
+--- !u!64 &6761769704635755267
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

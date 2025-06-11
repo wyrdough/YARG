@@ -14,7 +14,7 @@ namespace YARG.Gameplay.Visuals
 
             var noteGroups = NoteRef.IsStarPower ? StarPowerNoteGroups : NoteGroups;
 
-            if (NoteRef.Pad != 0)
+            if (NoteRef.Pad != 0 && NoteRef.Pad != (int) FourLaneDrumPad.Wildcard)
             {
                 // Deal with non-kick notes
 
@@ -54,6 +54,12 @@ namespace YARG.Gameplay.Visuals
                 // Get which note model to use
                 NoteGroup = noteGroups[GetNoteGroup(isCymbal)];
             }
+            else if (NoteRef.Pad == (int) FourLaneDrumPad.Wildcard)
+            {
+                // Deal with wildcard notes
+                transform.localPosition = Vector3.zero;
+                NoteGroup = noteGroups[(int) NoteType.Wildcard];
+            }
             else
             {
                 // Deal with kick notes
@@ -87,6 +93,7 @@ namespace YARG.Gameplay.Visuals
                     FourLaneDrumPad.YellowCymbal => (int) FourLaneDrumPad.BlueCymbal,
                     FourLaneDrumPad.BlueCymbal   => (int) FourLaneDrumPad.YellowCymbal,
                     FourLaneDrumPad.GreenCymbal  => 8, // The forbidden red cymbal
+                    FourLaneDrumPad.Wildcard     => (int) FourLaneDrumPad.Wildcard,
                     _                            => throw new Exception("Unreachable.")
                 };
             }

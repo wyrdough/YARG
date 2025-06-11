@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: OpenMiddle
-  m_Shader: {fileID: -6465566751694194690, guid: 0c474304b74472f4a8b212da29713486,
+  m_Name: WildcardMiddle
+  m_Shader: {fileID: -6465566751694194690, guid: 34a717105ad3be84484f2e6d7302e2c6,
     type: 3}
   m_ValidKeywords:
   - _EMISSION_ENABLED
@@ -17,7 +17,7 @@ Material:
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: 2975
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -93,7 +93,6 @@ Material:
     - _Blend: 0
     - _BlendOp: 0
     - _BumpScale: 1
-    - _CastShadows: 1
     - _ClearCoat: 0
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -114,12 +113,12 @@ Material:
     - _Outline_Thickness: 0.1
     - _Parallax: 0.02
     - _QueueControl: 0
-    - _QueueOffset: 0
+    - _QueueOffset: -25
     - _ReceiveShadows: 1
     - _SHINE: 0
     - _ShineAmount: 0
     - _Shininess: 0
-    - _Smoothness: 1
+    - _Smoothness: 0.506
     - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
@@ -128,13 +127,11 @@ Material:
     - _Surface: 0
     - _UVSec: 0
     - _WorkflowMode: 1
-    - _ZTest: 4
     - _ZWrite: 1
-    - _ZWriteControl: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 0.30320853, b: 0, a: 1}
     - _Color: {r: 1, g: 0.30320844, b: 0, a: 1}
-    - _EmissionColor: {r: 4, g: 0.53333336, b: 0, a: 1}
+    - _EmissionColor: {r: 1.399162, g: 0.19046184, b: 0, a: 1}
     - _Outline_Color: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
