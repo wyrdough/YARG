@@ -524,6 +524,12 @@ namespace YARG.Menu.DifficultySelect
                     continue;
                 }
 
+                if (difficulty == Difficulty.Easy && profile.CurrentInstrument is Instrument.FiveFretGuitar
+                    or Instrument.FiveFretBass or Instrument.FiveFretRhythm or Instrument.FourLaneDrums or Instrument.FiveLaneDrums)
+                {
+                    // Add a beginner difficulty option (will be auto-created from the easy track if selected and one does not exist in the chart)
+                    _possibleDifficulties.Add(Difficulty.Beginner);
+                }
                 _possibleDifficulties.Add(difficulty);
             }
 
@@ -633,7 +639,7 @@ namespace YARG.Menu.DifficultySelect
             // For vocals, insert special difficulties
             if (instrument is Instrument.Vocals or Instrument.Harmony)
             {
-                return difficulty is not (Difficulty.Beginner or Difficulty.ExpertPlus);
+                return difficulty is not Difficulty.ExpertPlus;
             }
 
             // Otherwise, we can do this

@@ -165,8 +165,8 @@ namespace YARG.Gameplay.Player
 
             (NotePool.GetByKey(note) as DrumsNoteElement)?.HitNote();
 
-            // Four and five lane drums have the same kick value
-            if (note.Pad != (int) FourLaneDrumPad.Kick)
+            // Four and five lane drums have the same kick and wildcard value
+            if (note.Pad != (int) FourLaneDrumPad.Kick && note.Pad != (int) FourLaneDrumPad.Wildcard)
             {
                 int fret;
                 if (!_fiveLaneMode)
@@ -256,6 +256,7 @@ namespace YARG.Gameplay.Player
                     DrumsAction.YellowDrum or DrumsAction.YellowCymbal => 2,
                     DrumsAction.BlueDrum or DrumsAction.BlueCymbal     => 3,
                     DrumsAction.GreenDrum or DrumsAction.GreenCymbal   => 4,
+                    DrumsAction.WildcardPad                            => 0,
                     _                                                  => -1
                 };
             }
@@ -269,6 +270,7 @@ namespace YARG.Gameplay.Player
                     DrumsAction.BlueDrum     => 3,
                     DrumsAction.OrangeCymbal => 4,
                     DrumsAction.GreenDrum    => 5,
+                    DrumsAction.WildcardPad  => 0,
                     _                        => -1
                 };
             }
