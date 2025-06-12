@@ -107,7 +107,7 @@ Material:
     - _Glossiness: 1
     - _GlossinessSource: 0
     - _GlossyReflections: 1
-    - _Metallic: 0
+    - _Metallic: 1
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Outline_Thickness: 0.1
@@ -118,7 +118,7 @@ Material:
     - _SHINE: 0
     - _ShineAmount: 0
     - _Shininess: 0
-    - _Smoothness: 0
+    - _Smoothness: 1
     - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
@@ -130,8 +130,8 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 0.30320853, b: 0, a: 1}
-    - _Color: {r: 1, g: 0.3032085, b: 0, a: 1}
-    - _EmissionColor: {r: 4, g: 0.53333336, b: 0, a: 5}
+    - _Color: {r: 1, g: 0.30320844, b: 0, a: 1}
+    - _EmissionColor: {r: 4, g: 0.53333336, b: 0, a: 1}
     - _Outline_Color: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

@@ -428,7 +428,7 @@ namespace YARG.Gameplay.Player
             {
                 (NotePool.GetByKey(note) as FiveFretNoteElement)?.HitNote();
 
-                if (note.Fret != (int) FiveFretGuitarFret.Open)
+                if (note.Fret != (int) FiveFretGuitarFret.Open && note.Fret != (int) FiveFretGuitarFret.Wildcard)
                 {
                     _fretArray.PlayHitAnimation(note.Fret - 1);
                 }
@@ -516,7 +516,7 @@ namespace YARG.Gameplay.Player
                     continue;
                 }
 
-                if (note.Fret != (int) FiveFretGuitarFret.Open)
+                if (note.Fret != (int) FiveFretGuitarFret.Open && note.Fret != (int) FiveFretGuitarFret.Wildcard)
                 {
                     _fretArray.SetSustained(note.Fret - 1, true);
                 }
@@ -537,7 +537,7 @@ namespace YARG.Gameplay.Player
 
                 (NotePool.GetByKey(note) as FiveFretNoteElement)?.SustainEnd(finished);
 
-                if (note.Fret != (int) FiveFretGuitarFret.Open)
+                if (note.Fret != (int) FiveFretGuitarFret.Open && note.Fret != (int) FiveFretGuitarFret.Wildcard)
                 {
                     _fretArray.SetSustained(note.Fret - 1, false);
                 }
