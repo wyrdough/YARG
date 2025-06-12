@@ -40,6 +40,7 @@ namespace YARG.Helpers.Extensions
         {
             return difficulty switch
             {
+                Difficulty.Beginner   => "Beginner",
                 Difficulty.Easy       => "Easy",
                 Difficulty.Medium     => "Medium",
                 Difficulty.Hard       => "Hard",
