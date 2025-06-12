@@ -37,10 +37,11 @@ namespace YARG.Menu.MusicLibrary
     {
         Library,
         PlaylistSelect,
-        Playlist
+        Playlist,
+        Show
     }
 
-    public class MusicLibraryMenu : ListMenu<ViewType, SongView>
+    public partial class MusicLibraryMenu : ListMenu<ViewType, SongView>
     {
         private const int RANDOM_SONG_ID = 0;
         private const int PLAYLIST_ID = 1;
@@ -56,9 +57,10 @@ namespace YARG.Menu.MusicLibrary
         private static SongEntry[]? _recommendedSongs;
 #nullable disable
 
-        private static string _currentSearch = string.Empty;
-        private static int _savedIndex;
+        private static string                  _currentSearch = string.Empty;
+        private static int                     _savedIndex;
         private static MusicLibraryReloadState _reloadState = MusicLibraryReloadState.Full;
+        private static Playlist                _savedPlaylist;
 
         public bool PlaylistMode => SelectedPlaylist != null;
 
@@ -100,7 +102,6 @@ namespace YARG.Menu.MusicLibrary
         private List<HoldContext> _heldInputs = new();
 
         // Doesn't go through PlaylistContainer because it is ephemeral
-        public Playlist        ShowPlaylist { get; set; } = new(true);
 
         private int _primaryHeaderIndex;
 
@@ -136,6 +137,14 @@ namespace YARG.Menu.MusicLibrary
             }
             else if (_reloadState == MusicLibraryReloadState.Partial)
             {
+                // Note that the order matters here: SelectedPlaylist must be set before calling UpdateSearch,
+                // but SelectedIndex must be set _after_ calling UpdateSearch
+                SelectedPlaylist = _savedPlaylist;
+                if (SelectedPlaylist != null)
+                {
+                    MenuState = MenuState.Playlist;
+                }
+
                 UpdateSearch(true);
                 SelectedIndex = _savedIndex;
             }
@@ -170,8 +179,6 @@ namespace YARG.Menu.MusicLibrary
                 // Name makes a good fallback?
                 ChangeSort(SortAttribute.Name);
             }
-
-            MenuState = MenuState.Library;
         }
 
         // Public because PopupMenu may need to reset the navigation scheme
@@ -269,6 +276,7 @@ namespace YARG.Menu.MusicLibrary
                 MenuState.Library        => CreateNormalViewList(),
                 MenuState.PlaylistSelect => CreatePlaylistSelectViewList(),
                 MenuState.Playlist       => CreatePlaylistViewList(),
+                MenuState.Show           => CreateShowViewList(),
                 _                        => throw new Exception("Unreachable.")
             };
 
@@ -276,65 +284,6 @@ namespace YARG.Menu.MusicLibrary
             HasSortHeaders = _sortedSongs is not null && _sortedSongs.Length > 1;
 
             return viewList;
-        }
-
-        private List<ViewType> CreatePlaylistSelectViewList()
-        {
-            SongCategory[] emptyCategory = Array.Empty<SongCategory>();
-            int id = BACK_ID + 1;
-            var list = new List<ViewType>
-            {
-                new ButtonViewType(Localize.Key("Menu.MusicLibrary.Back"),
-                    "MusicLibraryIcons[Back]", () =>
-                    {
-                        SelectedPlaylist = null;
-                        MenuState = MenuState.Library;
-                        Refresh();
-                    }, BACK_ID)
-            };
-
-            list.Add(new ButtonViewType("YARG", "MusicLibraryIcons[Playlists]", () => { }));;
-            // Favorites is always on top
-            list.Add(new PlaylistViewType(
-                Localize.Key("Menu.MusicLibrary.Favorites"),
-                PlaylistContainer.FavoritesPlaylist,
-                () =>
-                {
-                    SelectedPlaylist = PlaylistContainer.FavoritesPlaylist;
-                    MenuState = MenuState.Playlist;
-                    Refresh();
-                }, PLAYLIST_ID));
-
-
-            list.Add(new ButtonViewType(Localize.Key("Menu.MusicLibrary.YourPlaylists"),
-                "MusicLibraryIcons[Playlists]", () => { }));
-
-            // Add the setlist "playlist" if there are any songs currently in it
-            if (ShowPlaylist.Count > 0)
-            {
-                list.Add(new PlaylistViewType(Localize.Key("Menu.MusicLibrary.CurrentSetlist"), ShowPlaylist,
-                    () =>
-                    {
-                        SelectedPlaylist = ShowPlaylist;
-                        MenuState = MenuState.Playlist;
-                        Refresh();
-                    }, id));
-                id++;
-            }
-
-            // Add any other user defined playlists
-            foreach (var playlist in PlaylistContainer.Playlists)
-            {
-                list.Add(new PlaylistViewType(playlist.Name, playlist, () =>
-                {
-                    SelectedPlaylist = playlist;
-                    MenuState = MenuState.Playlist;
-                    Refresh();
-                }, id));
-                id++;
-            }
-
-            return list;
         }
 
         private List<ViewType> CreateNormalViewList()
@@ -462,62 +411,6 @@ namespace YARG.Menu.MusicLibrary
             }
             CalculateCategoryHeaderIndices(list);
             return list;
-        }
-
-        private List<ViewType> CreatePlaylistViewList()
-        {
-            var list = new List<ViewType>
-            {
-                new ButtonViewType(Localize.Key("Menu.MusicLibrary.Back"),
-                    "MusicLibraryIcons[Back]", ExitPlaylistView, BACK_ID)
-            };
-
-            // If `_sortedSongs` is null, then this function is being called during very first initialization,
-            // which means the song list hasn't been constructed yet.
-            if (_sortedSongs is null || SongContainer.Count <= 0 ||
-                !_sortedSongs.Any(section => section.Songs.Length > 0))
-            {
-                return list;
-            }
-
-            bool allowdupes = SettingsManager.Settings.AllowDuplicateSongs.Value;
-            foreach (var section in _sortedSongs)
-            {
-                list.Add(new SortHeaderViewType(
-                    section.Category.ToUpperInvariant(),
-                    section.Songs.Length,
-                    section.CategoryGroup));
-
-                foreach (var song in section.Songs)
-                {
-                    if (allowdupes || !song.IsDuplicate)
-                    {
-                        list.Add(new SongViewType(this, song));
-                    }
-                }
-            }
-
-            CalculateCategoryHeaderIndices(list);
-            return list;
-        }
-
-        private void ExitPlaylistView()
-        {
-            SelectedPlaylist = null;
-            MenuState = MenuState.PlaylistSelect;
-            Refresh();
-
-            // Select playlist button
-            // TODO: Fix this to select the playlist we entered from, not favorites
-            SetIndexTo(i => i is ButtonViewType { ID: PLAYLIST_ID });
-        }
-
-        private void ExitPlaylistSelect()
-        {
-            MenuState = MenuState.Library;
-            Refresh();
-
-            SetIndexTo(i => i is ButtonViewType { ID: PLAYLIST_ID });
         }
 
         private void ExitLibrary()
@@ -683,8 +576,9 @@ namespace YARG.Menu.MusicLibrary
         {
             if (Navigator.Instance == null) return;
 
-            // Save index
+            // Save state
             _savedIndex = SelectedIndex;
+            _savedPlaylist = SelectedPlaylist;
 
             Navigator.Instance.PopScheme();
 
@@ -741,91 +635,6 @@ namespace YARG.Menu.MusicLibrary
                 _popupMenu.gameObject.SetActive(true);
 
             _heldInputs.RemoveAll(i => i.Context.IsSameAs(ctx));
-        }
-
-        private void OnAddButtonHit(NavigationContext ctx)
-        {
-            _heldInputs.Add(new HoldContext(ctx));
-        }
-
-        private void OnAddButtonRelease(NavigationContext ctx) {
-            var holdContext = _heldInputs.FirstOrDefault(i => i.Context.IsSameAs(ctx));
-
-            if (ctx.Action == MenuAction.Yellow && (holdContext?.Timer > 0 || ctx.Player is null))
-            {
-                _heldInputs.RemoveAll(i => i.Context.IsSameAs(ctx));
-                if (CurrentSelection is PlaylistViewType playlist)
-                {
-                    if (playlist.Playlist.SongHashes.Count == 0)
-                    {
-                        ToastManager.ToastError(Localize.Key("Menu.MusicLibrary.EmptyPlaylist"));
-                        return;
-                    }
-
-                    if (playlist.Playlist.Ephemeral)
-                    {
-                        // No, we won't add the setlist to itself, thanksgiving
-                        ToastManager.ToastError(Localize.Key("Menu.MusicLibrary.CannotAddToSelf"));
-                        return;
-                    }
-
-                    var i = 0;
-
-                    foreach (var song in playlist.Playlist.ToList())
-                    {
-                        ShowPlaylist.AddSong(song);
-                        i++;
-                    }
-
-                    if (i > 0)
-                    {
-                        ToastManager.ToastSuccess(Localize.KeyFormat("Menu.MusicLibrary.PlaylistAddedToSet", i));
-                    }
-                    else
-                    {
-                        ToastManager.ToastWarning(Localize.Key("Menu.MusicLibrary.NoSongsInPlaylist"));
-                        ;
-                    }
-
-                    if (i > 0 && ShowPlaylist.Count == i)
-                    {
-                        // We need to rebuild the navigation scheme the first time we add song(s)
-                        SetNavigationScheme(true);
-                    }
-
-                    // If we are in the playlist view, we need to refresh the view
-                    if (MenuState == MenuState.PlaylistSelect)
-                    {
-                        RefreshAndReselect();
-                    }
-
-                    return;
-                }
-
-                if (CurrentSelection is SongViewType selection)
-                {
-                    ShowPlaylist.AddSong(selection.SongEntry);
-                    if (ShowPlaylist.Count == 1)
-                    {
-                        // We need to rebuild the navigation scheme after adding the first song
-                        SetNavigationScheme(true);
-                    }
-
-                    ToastManager.ToastSuccess(Localize.Key("Menu.MusicLibrary.AddedToSet"));
-                }
-            }
-            else
-            {
-                _heldInputs.RemoveAll(i => i.Context.IsSameAs(ctx));
-                if (ShowPlaylist.Count > 0)
-                {
-                    GlobalVariables.State.PlayingAShow = true;
-                    GlobalVariables.State.ShowSongs = ShowPlaylist.ToList();
-                    GlobalVariables.State.CurrentSong = GlobalVariables.State.ShowSongs.First();
-                    GlobalVariables.State.ShowIndex = 0;
-                    MenuManager.Instance.PushMenu(MenuManager.Menu.DifficultySelect);
-                }
-            }
         }
 
         private void GoToNextSection()

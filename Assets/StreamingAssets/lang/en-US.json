@@ -203,6 +203,10 @@
                 "Title": "Experimental Features Notice",
                 "Description": "The options about to be displayed represent a work in progress. These features are subject to change, may contain bugs, and <b>could even cause major problems if enabled</b>.",
                 "Confirm": "I Understand"
+            },
+            "ShowDialog": {
+                "Title": "Choose Your Fate",
+                "Select": "That's Plenty"
             }
         },
         "DifficultySelect": {
@@ -275,7 +279,7 @@
                     "CreateNewPlaylist": "Create New...",
                     "RemovePlaylist": "Remove Playlist",
                     "ViewSongFolder": "View Song Folder",
-                    "CopySongChecksum": "Copy Song Checksum",
+                    "CopySongChecksum": "Copy Song Checksum"
                 }
             },
             "Back": "BACK",
@@ -283,14 +287,30 @@
             "Play": "Play Song",
             "Search": "Search",
             "CurrentSetlist": "Current Setlist",
-            "AddToSet": "Add To Setlist",
+            "AddToSet": "<align=left><size=80%>Add To Setlist<br>(Hold) Play A Show</size></align>",
             "AddToSetWithHold": "<align=left><size=80%>Add To Setlist<br>(Hold) Start The Set</size></align>",
             "AddedToSet": "Added To Setlist",
             "PlaylistAddedToSet": "Added {0:N0} Songs From Playlist To Setlist",
             "StartSet": "Start The Set",
+            "StartShow": "Play Me Show, Mateys!",
             "NoSongsInPlaylist": "No Songs In Playlist",
             "CannotAddToSelf": "No, I will not create an ouroboros for you. Nice try, Jaden.",
-            "MoreOptions": "<align=left><size=80%>More Options<br>(Hold) Navigate Sections</size></align>"
+            "MoreOptions": "<align=left><size=80%>More Options<br>(Hold) Navigate Sections</size></align>",
+            "PlayAShow": {
+                "LongSong": "A Long Song",
+                "RandomSong": "A Random Song",
+                "ShortSong": "A Short Song",
+                "SongFromArtist": "A Song By {0}",
+                "SongFromDecade": "A Song From The {0}",
+                "SongFromFavorites": "One Of Your Favorite Songs",
+                "SongFromAnGenre": "An {0} Song",
+                "SongFromGenre": "A {0} Song",
+                "SongFromPlaylist": "A Song From Your Playlist {0}",
+                "SongFromSource": "A Song From {0}",
+                "StartsWithLetter": "A Song Starting With The Letter \"{0}\"",
+                "StartsWithNumber": "A Song Starting With A Number",
+                "StartsWithOther": "A Song Starting With Something Non-Alphanumeric"
+            }
         },
         "ProfileInfo": {
             "Name": "Edit Profile",
