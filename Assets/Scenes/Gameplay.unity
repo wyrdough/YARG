@@ -2186,6 +2186,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6849187231015787278, guid: 303b1a6a6e4a69c478f59759e786787d,
+        type: 3}
+      propertyPath: <Menu>k__BackingField
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 303b1a6a6e4a69c478f59759e786787d, type: 3}
 --- !u!224 &354419373 stripped
@@ -5989,8 +5994,8 @@ RectTransform:
   - {fileID: 459816309}
   - {fileID: 1405426188}
   - {fileID: 387423407}
-  - {fileID: 354419373}
   - {fileID: 12608431}
+  - {fileID: 354419373}
   m_Father: {fileID: 1650395555}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
