@@ -108,6 +108,12 @@ MonoBehaviour:
     m_Scale: 1
     m_Name: ExpertPlus
     m_HashCode: -994053164
+  - m_ElementType: 2
+    m_Unicode: 65534
+    m_GlyphIndex: 20
+    m_Scale: 1
+    m_Name: Beginner
+    m_HashCode: -278377026
   m_SpriteGlyphTable:
   - m_Index: 0
     m_Metrics:
@@ -241,15 +247,15 @@ MonoBehaviour:
     m_Metrics:
       m_Width: 512
       m_Height: 512
-      m_HorizontalBearingX: 0
-      m_HorizontalBearingY: 375
-      m_HorizontalAdvance: 600
+      m_HorizontalBearingX: -256
+      m_HorizontalBearingY: 256
+      m_HorizontalAdvance: 512
     m_GlyphRect:
       m_X: 0
       m_Y: 512
       m_Width: 512
       m_Height: 512
-    m_Scale: 1.3
+    m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
     sprite: {fileID: -212029294, guid: 66fae0a679753ea4a9110a183b8d2af9, type: 3}
@@ -429,5 +435,21 @@ MonoBehaviour:
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
     sprite: {fileID: -25976495, guid: f3ceabe704bcf1745866d8e7135c98ab, type: 3}
+  - m_Index: 20
+    m_Metrics:
+      m_Width: 512
+      m_Height: 512
+      m_HorizontalBearingX: 0
+      m_HorizontalBearingY: 402
+      m_HorizontalAdvance: 600
+    m_GlyphRect:
+      m_X: 0
+      m_Y: 512
+      m_Width: 512
+      m_Height: 512
+    m_Scale: 1.3
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
+    sprite: {fileID: -774061238, guid: f3ceabe704bcf1745866d8e7135c98ab, type: 3}
   spriteInfoList: []
   fallbackSpriteAssets: []
