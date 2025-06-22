@@ -525,7 +525,8 @@ namespace YARG.Menu.DifficultySelect
                 }
 
                 if (difficulty == Difficulty.Easy && profile.CurrentInstrument is Instrument.FiveFretGuitar
-                    or Instrument.FiveFretBass or Instrument.FiveFretRhythm or Instrument.FourLaneDrums or Instrument.FiveLaneDrums)
+                    or Instrument.FiveFretBass or Instrument.FiveFretRhythm or Instrument.FourLaneDrums or Instrument.FiveLaneDrums
+                    && !_possibleDifficulties.Contains(Difficulty.Beginner))
                 {
                     // Add a beginner difficulty option (will be auto-created from the easy track if selected and one does not exist in the chart)
                     _possibleDifficulties.Add(Difficulty.Beginner);
