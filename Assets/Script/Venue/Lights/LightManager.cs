@@ -26,21 +26,17 @@ namespace YARG.Venue
             public float Delta;
         }
 
-        private Dictionary<Performer, VenueSpotLightLocation> _spotlightLocations = new()
-        {
-            { Performer.Bass, VenueSpotLightLocation.Bass },
-            { Performer.Drums, VenueSpotLightLocation.Drums },
-            { Performer.Guitar, VenueSpotLightLocation.Guitar },
-            { Performer.Vocals, VenueSpotLightLocation.Vocals },
-        };
-
         public LightingType Animation { get; private set; }
         public int AnimationFrame { get; private set; }
 
         private LightState[] _lightStates;
-        // Double because spots stay on for the duration of the event and then turn off without an off event, so we store time
-        private double[] _spotlightStates;
-        public  LightState   GenericLightState => _lightStates[(int) VenueLightLocation.Generic];
+        public LightState GenericLightState => _lightStates[(int) VenueLightLocation.Generic];
+		public LightState LeftLightState => _lightStates[(int) VenueLightLocation.Left];
+		public LightState RightLightState => _lightStates[(int) VenueLightLocation.Right];
+		public LightState FrontLightState => _lightStates[(int) VenueLightLocation.Front];
+		public LightState BackLightState => _lightStates[(int) VenueLightLocation.Center];
+		public LightState CenterLightState => _lightStates[(int) VenueLightLocation.Back];
+		public LightState CrowdLightState => _lightStates[(int) VenueLightLocation.Crowd];
 
         [SerializeField]
         private float _gradientLightingSpeed = 0.125f;
@@ -60,7 +56,6 @@ namespace YARG.Venue
         private Color _silhouetteColor;
 
         private List<LightingEvent> _lightingEvents;
-        private List<PerformerEvent> _performerEvents;
 
         private Gradient _warmGradient;
         private Gradient _coolGradient;
@@ -68,16 +63,13 @@ namespace YARG.Venue
         private Gradient _harmoniousGradient;
 
         private int _lightingEventIndex;
-        private int _performerEventIndex;
         private int _beatIndex;
 
         protected override void OnChartLoaded(SongChart chart)
         {
             _lightStates = new LightState[EnumExtensions<VenueLightLocation>.Count];
-            _spotlightStates = new double[EnumExtensions<VenueSpotLightLocation>.Count];
 
             _lightingEvents = chart.VenueTrack.Lighting;
-            _performerEvents = chart.VenueTrack.Performer;
 
             // If the color arrays are empty, add basic ones for safety
 
@@ -175,27 +167,6 @@ namespace YARG.Venue
                 _lightingEventIndex++;
             }
 
-            // Look for new performer events
-            // TODO: Fix the event parsing so that Time and TimeEnd aren't backwards (with the attendant negative length)
-            while (_performerEventIndex < _performerEvents.Count &&
-                _performerEvents[_performerEventIndex].TimeEnd <= GameManager.VisualTime)
-            {
-                var current = _performerEvents[_performerEventIndex];
-                if (current.Type != PerformerEventType.Spotlight)
-                {
-                    _performerEventIndex++;
-                    continue;
-                }
-                if (!_spotlightLocations.TryGetValue(current.Performers, out var location))
-                {
-                    _performerEventIndex++;
-                    continue;
-                }
-                _spotlightStates[(int) location] = current.TimeLength * -1;
-
-                _performerEventIndex++;
-            }
-
             UpdateLightStates();
         }
 
@@ -238,16 +209,6 @@ namespace YARG.Venue
                     case LightingType.BlackoutSlow:
                         _lightStates[i] = BlackOut(_lightStates[i], 10f);
                         break;
-                    case LightingType.BlackoutSpotlight:
-                        _lightStates[i] = BlackOut(_lightStates[i], 15f);
-                        for (int j = 1; j < _spotlightStates.Length; j++)
-                        {
-                            // Arbitrary guess
-                            // TODO: Figure out how to calculate this properly
-                            _spotlightStates[j] = 10;
-                        }
-
-                        break;
                     case LightingType.BigRockEnding:
                     case LightingType.Dischord:
                     case LightingType.Frenzy:
@@ -267,14 +228,7 @@ namespace YARG.Venue
                         _lightStates[i] = AutoGradient(_lightStates[i], _harmoniousGradient);
                         break;
                     case LightingType.Silhouettes:
-                        _lightStates[i] = Silhouette(_lightStates[i], location);
-                        break;
                     case LightingType.SilhouettesSpotlight:
-                        for (int j = 1; j < _spotlightStates.Length - 1; j++)
-                        {
-                            _spotlightStates[j] = 10;
-                        }
-
                         _lightStates[i] = Silhouette(_lightStates[i], location);
                         break;
                     case LightingType.StrobeFast:
@@ -293,29 +247,11 @@ namespace YARG.Venue
                         break;
                 }
             }
-
-            for (int i = 1; i < _spotlightStates.Length; i++)
-            {
-                var location = (VenueSpotLightLocation) i;
-                if (_spotlightStates[i] > 0)
-                {
-                    _spotlightStates[i] -= Time.deltaTime;
-                }
-                else
-                {
-                    _spotlightStates[i] = 0;
-                }
-            }
         }
 
         public LightState GetLightStateFor(VenueLightLocation location)
         {
             return _lightStates[(int) location];
-        }
-
-        public bool GetSpotlightStateFor(VenueSpotLightLocation location)
-        {
-            return _spotlightStates[(int) location] > 0;
         }
 
         private static Gradient CreateGradient(Color[] colors)
