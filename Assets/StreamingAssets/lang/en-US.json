@@ -287,11 +287,11 @@
             "Play": "Play Song",
             "Search": "Search",
             "CurrentSetlist": "Current Setlist",
-            "AddToSet": "<align=left><size=80%>Add To Setlist<br>(Hold) Play A Show</size></align>",
-            "AddToSetWithHold": "<align=left><size=80%>Add To Setlist<br>(Hold) Start The Set</size></align>",
+            "AddToSet": "Add To Setlist",
             "AddedToSet": "Added To Setlist",
             "PlaylistAddedToSet": "Added {0:N0} Songs From Playlist To Setlist",
             "StartSet": "Start The Set",
+            "PlayShow": "Play A Show",
             "StartShow": "Play Me Show, Mateys!",
             "NoSongsInPlaylist": "No Songs In Playlist",
             "CannotAddToSelf": "No, I will not create an ouroboros for you. Nice try, Jaden.",
@@ -520,6 +520,7 @@
             "Export": "Export",
             "PathsAndFolders": "Paths and Folders",
             "MusicLibrary": "Music Library",
+            "PlayAShow": "Play A Show",
             "ScanningOptions": "Scanning Options",
             "RB3E": "RB3E Settings",
             "Customization": "Buffer Customization",
@@ -801,6 +802,14 @@
                     "Frequent": "50, 100, 200, 300, ...",
                     "Sparse": "50, 100, 250, 500, ..."
                 }
+            },
+            "PlayAShowTimeout": {
+                "Name": "Show Selection Timeout",
+                "Description": "The amount of time to wait for votes before picking a song or refreshing the categories."
+            },
+            "RequireAllDifficulties": {
+                "Name": "Require All Difficulties",
+                "Description": "Require show songs to have at least Easy, Medium, Hard, and Expert difficulties"
             },
             "PracticeRestartDelay": {
                 "Name": "Practice Restart Delay",
