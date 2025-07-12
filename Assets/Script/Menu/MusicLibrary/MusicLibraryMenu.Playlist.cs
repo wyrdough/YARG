@@ -166,10 +166,8 @@ namespace YARG.Menu.MusicLibrary
                 new NavigationScheme.Entry(MenuAction.Green, "Menu.Common.Confirm",
                     () => CurrentSelection?.PrimaryButtonClick()),
                 new NavigationScheme.Entry(MenuAction.Red, "Menu.Common.Back", LeaveShowMode),
-                new NavigationScheme.Entry(MenuAction.Yellow, "Menu.MusicLibrary.StartShow",
+                new NavigationScheme.Entry(MenuAction.Blue, "Menu.MusicLibrary.StartShow",
                     OnPlayShowHit),
-                new NavigationScheme.Entry(MenuAction.Blue, "Menu.MusicLibrary.Search",
-                    () => _searchField.Focus()),
                 new NavigationScheme.Entry(MenuAction.Orange, "Menu.MusicLibrary.MoreOptions",
                     OnButtonHit, OnButtonRelease),
             }, false));
