@@ -347,7 +347,7 @@ namespace YARG.Gameplay.Player
                 }
 
                 // Not sure if this should be index or index + 1
-                var packedNotes = new int[index + 1];
+                var packedNotes = new int[index];
 
                 for (var i = 0; i < index; i++)
                 {
