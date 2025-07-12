@@ -40,6 +40,9 @@ namespace YARG.Gameplay.Visuals
         // Make sure the remove it later if it has a sustain
         protected override float RemovePointOffset => (float) NoteRef.TimeLength * Player.NoteSpeed;
 
+        private const float CHORD_DIM_MARGIN = 0.02f;
+        private const float ONE_FRET_WIDTH   = 0.2f;
+
         public override void SetThemeModels(
             Dictionary<ThemeNoteType, GameObject> models,
             Dictionary<ThemeNoteType, GameObject> starPowerModels)
@@ -128,6 +131,7 @@ namespace YARG.Gameplay.Visuals
 
             float lower;
             float upper;
+            int row = 0;
 
             for (int i = 0; i < frets.Length; i++)
             {
@@ -137,8 +141,9 @@ namespace YARG.Gameplay.Visuals
                 if (i + 1 < frets.Length && frets[i] == frets[i + 1] - 1)
                 {
                     // Use lower from current fret and upper from next fret
-                    lower = (frets[i] - 1) * (1 / 5f);
-                    upper = lower + (2f / 5f);
+                    lower = (frets[i] - 1) * ONE_FRET_WIDTH;
+                    // two because we're coalescing two frets here
+                    upper = lower + ONE_FRET_WIDTH * 2;
 
                     _chordMatrix[i, 0] = lower;
                     _chordMatrix[i, 1] = upper;
@@ -148,13 +153,15 @@ namespace YARG.Gameplay.Visuals
                 }
                 else
                 {
-                    lower = (frets[i] - 1) * (1 / 5f);
-                    upper = lower + (1f / 5f);
+                    lower = (frets[i] - 1) * ONE_FRET_WIDTH;
+                    upper = lower + ONE_FRET_WIDTH;
                 }
 
                 // These are being inverted, so instead of 0 = lower, 1 = upper it's 0 = 1 - upper, 1 = 1 - lower
-                _chordMatrix[i, 0] = (1 - upper) - 0.02f;
-                _chordMatrix[i, 1] = (1 - lower) + 0.02f;
+                _chordMatrix[row, 0] = (1 - upper) - CHORD_DIM_MARGIN;
+                _chordMatrix[row, 1] = (1 - lower) + CHORD_DIM_MARGIN;
+
+                row++;
             }
 
             return _chordMatrix;
@@ -225,6 +232,12 @@ namespace YARG.Gameplay.Visuals
 
             _normalSustainLine.gameObject.SetActive(false);
             _openSustainLine.gameObject.SetActive(false);
+        }
+
+        public override void DisableIntoPool()
+        {
+            OpenChordFrets = Array.Empty<int>();
+            base.DisableIntoPool();
         }
     }
 }

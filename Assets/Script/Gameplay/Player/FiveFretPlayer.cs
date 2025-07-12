@@ -327,22 +327,16 @@ namespace YARG.Gameplay.Player
         {
             ((FiveFretNoteElement) poolable).NoteRef = note;
 
-            // if (note.Fret == (int) FiveFretGuitarFret.Open) {
-            //     // If open, pretend we are PGY
-            //     int[] frets = {1, 3};
-            //
-            //     ((FiveFretNoteElement) poolable).OpenChordFrets = frets;
-            // }
-
             // Have to do a little more work in the case of open chords
-            if (note.IsChord && note.Fret == (int) FiveFretGuitarFret.Open)
+            // Note that we have to check both IsChord and IsChild because IsChord is not set on child notes
+            if ((note.IsChord || note.IsChild) && note.Fret == (int) FiveFretGuitarFret.Open)
             {
                 // Allocate a six position array to be sure we can hold all notes, then pack it down
                 // Otherwise, we'd have to enumerate AllNotes twice
                 var notes = new int[6];
 
                 var index = 0;
-                foreach (var n in note.AllNotes)
+                foreach (var n in note.ParentOrSelf.AllNotes)
                 {
                     if (n.Fret == (int) FiveFretGuitarFret.Open)
                     {
