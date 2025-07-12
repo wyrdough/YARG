@@ -558,19 +558,15 @@ namespace YARG.Menu.DifficultySelect
                     }
                 }
 
-                if (!invalidDifficulty)
+                if (difficulty == Difficulty.Easy && profile.CurrentInstrument is Instrument.FiveFretGuitar
+                    or Instrument.FiveFretBass or Instrument.FiveFretRhythm or Instrument.FourLaneDrums or Instrument.FiveLaneDrums
+                    && !_possibleDifficulties.Contains(Difficulty.Beginner))
                 {
-                    if (difficulty == Difficulty.Easy && profile.CurrentInstrument is Instrument.FiveFretGuitar
-                        or Instrument.FiveFretBass or Instrument.FiveFretRhythm or Instrument.FourLaneDrums or Instrument.FiveLaneDrums)
-                    {
-                        // Add a beginner difficulty option (will be auto-created from the easy track if selected and one does not exist in the chart)
-                        _possibleDifficulties.Add(Difficulty.Beginner);
-                    }
-                    _possibleDifficulties.Add(difficulty);
+                    // Add a beginner difficulty option (will be auto-created from the easy track if selected and one does not exist in the chart)
+                    _possibleDifficulties.Add(Difficulty.Beginner);
                 }
+                _possibleDifficulties.Add(difficulty);
             }
-
-            // TODO: Handle difficulty fallback better in play a show mode
 
             var diff = (int) profile.DifficultyFallback;
             while (diff >= (int) Difficulty.Beginner && !_possibleDifficulties.Contains((Difficulty) diff))
