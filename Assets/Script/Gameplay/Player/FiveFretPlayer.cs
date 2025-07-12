@@ -326,6 +326,42 @@ namespace YARG.Gameplay.Player
         protected override void InitializeSpawnedNote(IPoolable poolable, GuitarNote note)
         {
             ((FiveFretNoteElement) poolable).NoteRef = note;
+
+            // if (note.Fret == (int) FiveFretGuitarFret.Open) {
+            //     // If open, pretend we are PGY
+            //     int[] frets = {1, 3};
+            //
+            //     ((FiveFretNoteElement) poolable).OpenChordFrets = frets;
+            // }
+
+            // Have to do a little more work in the case of open chords
+            if (note.IsChord && note.Fret == (int) FiveFretGuitarFret.Open)
+            {
+                // Allocate a six position array to be sure we can hold all notes, then pack it down
+                // Otherwise, we'd have to enumerate AllNotes twice
+                var notes = new int[6];
+
+                var index = 0;
+                foreach (var n in note.AllNotes)
+                {
+                    if (n.Fret == (int) FiveFretGuitarFret.Open)
+                    {
+                        continue;
+                    }
+
+                    notes[index++] = n.Fret;
+                }
+
+                // Not sure if this should be index or index + 1
+                var packedNotes = new int[index + 1];
+
+                for (var i = 0; i < index; i++)
+                {
+                    packedNotes[i] = notes[i];
+                }
+
+                ((FiveFretNoteElement) poolable).OpenChordFrets = packedNotes;
+            }
         }
 
         protected override void OnNoteHit(int index, GuitarNote chordParent)

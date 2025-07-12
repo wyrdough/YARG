@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 using YARG.Core.Chart;
 using YARG.Gameplay.Player;
 using YARG.Helpers.Extensions;
 using YARG.Themes;
+using Matrix4x4 = UnityEngine.Matrix4x4;
+using Vector3 = UnityEngine.Vector3;
 
 namespace YARG.Gameplay.Visuals
 {
@@ -28,6 +31,11 @@ namespace YARG.Gameplay.Visuals
         private SustainLine _openSustainLine;
 
         private SustainLine _sustainLine;
+
+        // Only for five fret, so it's defined here
+        public int[] OpenChordFrets { get; set; } = Array.Empty<int>();
+
+        private Matrix4x4 _chordMatrix = new();
 
         // Make sure the remove it later if it has a sustain
         protected override float RemovePointOffset => (float) NoteRef.TimeLength * Player.NoteSpeed;
@@ -88,6 +96,8 @@ namespace YARG.Gameplay.Visuals
                 _sustainLine = _openSustainLine;
             }
 
+            NoteGroup.NotePositions = SetOpenChordInfo(OpenChordFrets);
+
             // Show and set material properties
             NoteGroup.SetActive(true);
             NoteGroup.Initialize();
@@ -103,6 +113,51 @@ namespace YARG.Gameplay.Visuals
 
             // Set note and sustain color
             UpdateColor();
+        }
+
+        private Matrix4x4 SetOpenChordInfo(int[] frets)
+        {
+            // Take frets and pack them into the matrix representing uv values that need to be dimmed
+            // We want to leave the outer 0.05 always bright, so we have to scale the 1 to 5 fret values to 0.05 to 0.95
+            // We also have to coalesce adjacent frets into a single entry
+
+            // We will make sure that the array is in ascending numerical order
+
+            // Zero the matrix
+            _chordMatrix = new Matrix4x4();
+
+            float lower;
+            float upper;
+
+            for (int i = 0; i < frets.Length; i++)
+            {
+                // This will work if there is only one adjacent fret, but how to deal with larger groups?
+                // Actually, I think this will work OK since there are only 5 frets, so we will end up with no
+                // more than 3 groups in any case
+                if (i + 1 < frets.Length && frets[i] == frets[i + 1] - 1)
+                {
+                    // Use lower from current fret and upper from next fret
+                    lower = (frets[i] - 1) * (1 / 5f);
+                    upper = lower + (2f / 5f);
+
+                    _chordMatrix[i, 0] = lower;
+                    _chordMatrix[i, 1] = upper;
+
+                    // Skip the next fret since we already accounted for it
+                    i++;
+                }
+                else
+                {
+                    lower = (frets[i] - 1) * (1 / 5f);
+                    upper = lower + (1f / 5f);
+                }
+
+                // These are being inverted, so instead of 0 = lower, 1 = upper it's 0 = 1 - upper, 1 = 1 - lower
+                _chordMatrix[i, 0] = (1 - upper) - 0.02f;
+                _chordMatrix[i, 1] = (1 - lower) + 0.02f;
+            }
+
+            return _chordMatrix;
         }
 
         public override void HitNote()

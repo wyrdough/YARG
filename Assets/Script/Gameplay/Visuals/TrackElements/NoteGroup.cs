@@ -29,6 +29,14 @@ namespace YARG.Gameplay.Visuals
         private static readonly int _randomFloat = Shader.PropertyToID("_RandomFloat");
         private static readonly int _randomVector = Shader.PropertyToID("_RandomVector");
 
+        private static readonly int _notePositions = Shader.PropertyToID("_NotePositions");
+        private static readonly int _fadeAmount = Shader.PropertyToID("_OpenFadeAmount");
+        // These are only for testing since the matrix stuff isn't working for some reason
+        private static readonly int _posHi = Shader.PropertyToID("_PosHi");
+        private static readonly int _posLo = Shader.PropertyToID("_PosLo");
+
+        public Matrix4x4 NotePositions { get; set; } = Matrix4x4.zero;
+
         // If we want info to be copied over when we copy the prefab,
         // we must make them SerializeFields.
         [SerializeField]
@@ -59,6 +67,36 @@ namespace YARG.Gameplay.Visuals
                 if (material.HasVector(_randomVector))
                 {
                     material.SetVector(_randomVector, randomVector);
+                }
+            }
+
+            SetChordFade();
+        }
+
+        private void SetChordFade()
+        {
+            foreach (var info in _allColoredCache)
+            {
+                var material = info.MaterialCache;
+
+                material.SetMatrix(_notePositions, NotePositions);
+
+                if (material.HasFloat(_fadeAmount))
+                {
+                    material.SetFloat(_fadeAmount, 0.05f);
+                }
+
+                // For testing, copy the first two matrix entries into PosLo and PosHi
+                var vec1 = NotePositions.GetRow(0);
+
+                if (material.HasFloat(_posLo))
+                {
+                    material.SetFloat(_posLo, vec1.x);
+                }
+
+                if (material.HasFloat(_posHi))
+                {
+                    material.SetFloat(_posHi, vec1.y);
                 }
             }
         }
