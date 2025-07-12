@@ -81,11 +81,6 @@ namespace YARG.Gameplay.Visuals
 
                 material.SetMatrix(_notePositions, NotePositions);
 
-                if (material.HasFloat(_fadeAmount))
-                {
-                    material.SetFloat(_fadeAmount, 0.05f);
-                }
-
                 // For testing, copy the first two matrix entries into PosLo and PosHi
                 var vec1 = NotePositions.GetRow(0);
 
