@@ -15596,7 +15596,7 @@ MonoBehaviour:
   <NoteType>k__BackingField: 3
   <StarPowerVariant>k__BackingField: 0
   _coloredMaterials:
-  - Mesh: {fileID: 2965676175829406929}
+  - Mesh: {fileID: 7022074374842727402}
     MaterialIndex: 1
     EmissionMultiplier: 8
     EmissionAddition: 0
@@ -62600,15 +62600,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fe392cfdbbef8f8428ac78058034b599, type: 3}
---- !u!23 &2965676175829406929 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7495751276970190262, guid: fe392cfdbbef8f8428ac78058034b599,
-    type: 3}
-  m_PrefabInstance: {fileID: 4696815528492904807}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3893790674174785978 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8586100777300330717, guid: fe392cfdbbef8f8428ac78058034b599,
+    type: 3}
+  m_PrefabInstance: {fileID: 4696815528492904807}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7022074374842727402 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2332050585676941965, guid: fe392cfdbbef8f8428ac78058034b599,
     type: 3}
   m_PrefabInstance: {fileID: 4696815528492904807}
   m_PrefabAsset: {fileID: 0}

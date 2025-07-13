@@ -1,13 +1,14 @@
 ﻿#ifndef OPENCHORDFADE_CGINC
 #define OPENCHORDFADE_CGINC
 
-void Fade_float(float2 uv, float3x3 RegionBounds, float FadedAlpha, float FadeDistance, out float Alpha)
+void Fade_float(float2 uv, float vFlip, float3x3 RegionBounds, float FadedAlpha, float FadeDistance, out float Alpha)
 {
 
     // Start with fully opaque
     Alpha = 1.0;
 
-    float clampedY = clamp(uv.y, 0.0, 1.0);
+    float clampedY = clamp(lerp(uv.y, 1.0 - uv.y, vFlip), 0.0, 1.0);
+    // float clampedY = clamp(flippedY, 0.0, 1.0);
 
     // Process each possible region row
     for (int i = 0; i < 3; i++)
@@ -31,7 +32,7 @@ void Fade_float(float2 uv, float3x3 RegionBounds, float FadedAlpha, float FadeDi
         }
 
         // Lower transition zone with smoothstep
-        if (uv.y >= lowerFade && uv.y < lower)
+        if (clampedY >= lowerFade && clampedY < lower)
         {
             float factor = smoothstep(lowerFade, lower, clampedY);
             float lowerFadeAlpha = lerp(0.5, FadedAlpha, factor);
