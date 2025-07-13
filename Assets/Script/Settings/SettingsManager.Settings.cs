@@ -10,6 +10,7 @@ using YARG.Integration;
 using YARG.Integration.RB3E;
 using YARG.Integration.Sacn;
 using YARG.Integration.StageKit;
+using YARG.Menu;
 using YARG.Menu.MusicLibrary;
 using YARG.Menu.Persistent;
 using YARG.Menu.Settings;
@@ -106,6 +107,9 @@ namespace YARG.Settings
             public ToggleSetting UseFullDirectoryForPlaylists { get; } = new(false);
 
             public ToggleSetting ShowFavoriteButton { get; } = new(true);
+
+            public SliderSetting PlayAShowTimeout { get; } = new (10.0f, 1.0f, 30.0f);
+            public ToggleSetting RequireAllDifficulties { get; } = new(true);
 
             public DropdownSetting<DifficultyRingMode> DifficultyRings { get; }
                 = new(DifficultyRingMode.Classic)
