@@ -31,9 +31,6 @@ namespace YARG.Gameplay.Visuals
 
         private static readonly int _notePositions = Shader.PropertyToID("_NotePositions");
         private static readonly int _fadeAmount = Shader.PropertyToID("_OpenFadeAmount");
-        // These are only for testing since the matrix stuff isn't working for some reason
-        private static readonly int _posHi = Shader.PropertyToID("_PosHi");
-        private static readonly int _posLo = Shader.PropertyToID("_PosLo");
 
         public Matrix4x4 NotePositions { get; set; } = Matrix4x4.zero;
 
@@ -45,12 +42,15 @@ namespace YARG.Gameplay.Visuals
         private MaterialInfo[] _coloredMaterialCache;
         private MaterialInfo[] _coloredMaterialNoStarPowerCache;
         private MaterialInfo[] _allColoredCache;
+        private Material[] _allMaterials;
 
         public void Initialize()
         {
             _coloredMaterialCache ??= _themeNote.ColoredMaterials.Select(MaterialInfo.From).ToArray();
             _coloredMaterialNoStarPowerCache ??= _themeNote.ColoredMaterialsNoStarPower.Select(MaterialInfo.From).ToArray();
             _allColoredCache ??= _coloredMaterialCache.Concat(_coloredMaterialNoStarPowerCache).ToArray();
+
+            _allMaterials ??= _themeNote.transform.GetComponentsInChildren<MeshRenderer>().SelectMany(meshrenderer => meshrenderer.materials).ToArray();
 
             // Set random values
             var randomFloat = Random.Range(-1f, 1f);
@@ -75,24 +75,21 @@ namespace YARG.Gameplay.Visuals
 
         private void SetChordFade()
         {
+            // Most annoyingly, circular theme does not work well with this, so we have to fade out all three parts
+            // and we don't have indexes to them all, so we'll just go rooting around in _themeNote's children for the
+            // all the materials for now
+            // TODO: Think of a better way to do this..likely caching when this is first made active or assigning
+            // in editor or something
+            foreach (var material in _allMaterials)
+            {
+                material.SetMatrix(_notePositions, NotePositions);
+            }
+
             foreach (var info in _allColoredCache)
             {
                 var material = info.MaterialCache;
 
                 material.SetMatrix(_notePositions, NotePositions);
-
-                // For testing, copy the first two matrix entries into PosLo and PosHi
-                var vec1 = NotePositions.GetRow(0);
-
-                if (material.HasFloat(_posLo))
-                {
-                    material.SetFloat(_posLo, vec1.x);
-                }
-
-                if (material.HasFloat(_posHi))
-                {
-                    material.SetFloat(_posHi, vec1.y);
-                }
             }
         }
 

@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: OpenNoteMiddle
-  m_Shader: {fileID: -6465566751694194690, guid: 0c474304b74472f4a8b212da29713486,
+  m_Shader: {fileID: -6465566751694194690, guid: d0287f22867bc5f45b56747bb8ac32ba,
     type: 3}
   m_ValidKeywords:
   - _EMISSION_DISABLED
@@ -109,13 +109,17 @@ Material:
     - _DstBlend: 0
     - _EMISSION: 0
     - _EnvironmentReflections: 1
+    - _FadeDistance: 0.2
     - _GlossMapScale: 1
     - _Glossiness: 1
     - _GlossyReflections: 1
     - _Metallic: 0.2
     - _Mode: 0
     - _OcclusionStrength: 1
+    - _OpenFadeAmount: 0.05
     - _Parallax: 0.02
+    - _PosHi: 0
+    - _PosLo: 0
     - _QueueControl: 0
     - _QueueOffset: -25
     - _ReceiveShadows: 1
@@ -129,6 +133,7 @@ Material:
     - _UVSec: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
+    - _vFlip: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Base_Color: {r: 1, g: 1, b: 1, a: 1}
