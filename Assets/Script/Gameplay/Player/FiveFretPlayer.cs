@@ -329,6 +329,7 @@ namespace YARG.Gameplay.Player
 
             // Have to do a little more work in the case of open chords
             // Note that we have to check both IsChord and IsChild because IsChord is not set on child notes
+            // TODO: Change chart parsing to add a flag to chord notes to make this easier
             if ((note.IsChord || note.IsChild) && note.Fret == (int) FiveFretGuitarFret.Open)
             {
                 // Allocate a six position array to be sure we can hold all notes, then pack it down
@@ -346,7 +347,6 @@ namespace YARG.Gameplay.Player
                     notes[index++] = n.Fret;
                 }
 
-                // Not sure if this should be index or index + 1
                 var packedNotes = new int[index];
 
                 for (var i = 0; i < index; i++)

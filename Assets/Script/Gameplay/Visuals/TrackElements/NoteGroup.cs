@@ -50,6 +50,8 @@ namespace YARG.Gameplay.Visuals
             _coloredMaterialNoStarPowerCache ??= _themeNote.ColoredMaterialsNoStarPower.Select(MaterialInfo.From).ToArray();
             _allColoredCache ??= _coloredMaterialCache.Concat(_coloredMaterialNoStarPowerCache).ToArray();
 
+            // If ever we have a theme that has an open note that has some part on the track that shouldn't be dimmed
+            // when it is an open chord this will have to change...
             _allMaterials ??= _themeNote.transform.GetComponentsInChildren<MeshRenderer>().SelectMany(meshrenderer => meshrenderer.materials).ToArray();
 
             // Set random values
@@ -75,11 +77,6 @@ namespace YARG.Gameplay.Visuals
 
         private void SetChordFade()
         {
-            // Most annoyingly, circular theme does not work well with this, so we have to fade out all three parts
-            // and we don't have indexes to them all, so we'll just go rooting around in _themeNote's children for the
-            // all the materials for now
-            // TODO: Think of a better way to do this..likely caching when this is first made active or assigning
-            // in editor or something
             foreach (var material in _allMaterials)
             {
                 material.SetMatrix(_notePositions, NotePositions);

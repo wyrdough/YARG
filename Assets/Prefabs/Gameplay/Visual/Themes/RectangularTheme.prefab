@@ -15598,7 +15598,7 @@ MonoBehaviour:
   _coloredMaterials:
   - Mesh: {fileID: 7022074374842727402}
     MaterialIndex: 1
-    EmissionMultiplier: 8
+    EmissionMultiplier: 4
     EmissionAddition: 0
   _coloredMaterialsNoStarPower: []
 --- !u!1 &2852395855816787385

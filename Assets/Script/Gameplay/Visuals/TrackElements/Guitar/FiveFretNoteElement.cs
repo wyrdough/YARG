@@ -99,7 +99,10 @@ namespace YARG.Gameplay.Visuals
                 _sustainLine = _openSustainLine;
             }
 
-            NoteGroup.NotePositions = SetOpenChordInfo(OpenChordFrets);
+            if (NoteRef.Fret == (int) FiveFretGuitarFret.Open)
+            {
+                NoteGroup.NotePositions = SetOpenChordInfo(OpenChordFrets);
+            }
 
             // Show and set material properties
             NoteGroup.SetActive(true);
@@ -121,12 +124,7 @@ namespace YARG.Gameplay.Visuals
         private Matrix4x4 SetOpenChordInfo(int[] frets)
         {
             // Take frets and pack them into the matrix representing uv values that need to be dimmed
-            // We want to leave the outer 0.05 always bright, so we have to scale the 1 to 5 fret values to 0.05 to 0.95
-            // We also have to coalesce adjacent frets into a single entry
 
-            // We will make sure that the array is in ascending numerical order
-
-            // Zero the matrix
             _chordMatrix = new Matrix4x4();
 
             float lower;
@@ -135,9 +133,8 @@ namespace YARG.Gameplay.Visuals
 
             for (int i = 0; i < frets.Length; i++)
             {
-                // This will work if there is only one adjacent fret, but how to deal with larger groups?
-                // Actually, I think this will work OK since there are only 5 frets, so we will end up with no
-                // more than 3 groups in any case
+                // This only combines adjacent frets, but that's all we need since we just need to get it down
+                // to no more than 3 dimmed regions for the shader
                 if (i + 1 < frets.Length && frets[i] == frets[i + 1] - 1)
                 {
                     // Use lower from current fret and upper from next fret
