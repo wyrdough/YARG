@@ -21,6 +21,7 @@ namespace YARG.Venue
 		public class NeonFullColor {
 			public Material Material;
 			public VenueLightLocation Location;
+			public VenueSpotLightLocation SpotLocation;
 			[System.NonSerialized] 
 			public Color InitialColor;
 		}
@@ -41,17 +42,10 @@ namespace YARG.Venue
 
         private void Update()
         {
-			var lightState = _lightManager.GenericLightState;
-			var lightStateLeft = _lightManager.LeftLightState;
-			var lightStateRight = _lightManager.RightLightState;
-			var lightStateFront = _lightManager.FrontLightState;
-			var lightStateBack = _lightManager.BackLightState;
-			var lightStateCenter = _lightManager.CenterLightState;
-			var lightStateCrowd = _lightManager.CrowdLightState;
-
             // Update all of the materials
             foreach (var material in _neonMaterials)
             {
+				var lightState = _lightManager.GenericLightState;
 				material.SetFloat(_emissionMultiplier, lightState.Intensity);
 
                 if (lightState.Color == null)
@@ -66,41 +60,72 @@ namespace YARG.Venue
 			
             for (int i = 0; i < _neonMaterialsFullColor.Length; i++) 
                 {
-                if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Generic)
+                if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Generic && _neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.None)
                 {
+					var lightState = _lightManager.GenericLightState;
 					_neonMaterialsFullColor[i].Material.SetColor(_emissionColor, lightState.Color ?? _neonMaterialsFullColor[i].InitialColor);
 					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, lightState.Intensity);
                 }
-				else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Left)
+				else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Left && _neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.None)
                 {
+					var lightStateLeft = _lightManager.LeftLightState;
 					_neonMaterialsFullColor[i].Material.SetColor(_emissionColor, lightStateLeft.Color ?? _neonMaterialsFullColor[i].InitialColor);
 					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, lightStateLeft.Intensity);
                 }
-                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Right)
+                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Right && _neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.None)
                 {
+					var lightStateRight = _lightManager.RightLightState;
 					_neonMaterialsFullColor[i].Material.SetColor(_emissionColor, lightStateRight.Color ?? _neonMaterialsFullColor[i].InitialColor);
 					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, lightStateRight.Intensity);
                 }
-                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Front)
+                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Front && _neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.None)
                 {
+					var lightStateFront = _lightManager.FrontLightState;
 					_neonMaterialsFullColor[i].Material.SetColor(_emissionColor, lightStateFront.Color ?? _neonMaterialsFullColor[i].InitialColor);
 					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, lightStateFront.Intensity);
                 }
-                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Back)
+                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Back && _neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.None)
                 {
+					var lightStateBack = _lightManager.BackLightState;
 					_neonMaterialsFullColor[i].Material.SetColor(_emissionColor, lightStateBack.Color ?? _neonMaterialsFullColor[i].InitialColor);
 					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, lightStateBack.Intensity);
                 }
-                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Center)
+                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Center && _neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.None)
                 {
+					var lightStateCenter = _lightManager.CenterLightState;
 					_neonMaterialsFullColor[i].Material.SetColor(_emissionColor, lightStateCenter.Color ?? _neonMaterialsFullColor[i].InitialColor);
 					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, lightStateCenter.Intensity);
                 }
-                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Crowd)
+                else if (_neonMaterialsFullColor[i].Location == VenueLightLocation.Crowd && _neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.None)
                 {
+					var lightStateCrowd = _lightManager.CrowdLightState;
 					_neonMaterialsFullColor[i].Material.SetColor(_emissionColor, lightStateCrowd.Color ?? _neonMaterialsFullColor[i].InitialColor);
 					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, lightStateCrowd.Intensity);
                 }
+				if (_neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.Bass)
+				{
+					var lightStateBass = _lightManager.GetSpotlightStateFor(VenueSpotLightLocation.Bass);
+					float Bass = lightStateBass ? 1f : 0f;
+					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, Bass);
+				}
+				else if (_neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.Drums)
+				{
+					var lightStateDrums = _lightManager.GetSpotlightStateFor(VenueSpotLightLocation.Drums);
+					float Drums = lightStateDrums ? 1f : 0f;
+					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, Drums);
+				}
+				else if (_neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.Guitar)
+				{
+					var lightStateGuitar = _lightManager.GetSpotlightStateFor(VenueSpotLightLocation.Guitar);
+					float Guitar = lightStateGuitar ? 1f : 0f;
+					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, Guitar);
+				}
+				else if (_neonMaterialsFullColor[i].SpotLocation == VenueSpotLightLocation.Vocals)
+				{
+					var lightStateVocals = _lightManager.GetSpotlightStateFor(VenueSpotLightLocation.Vocals);
+					float Vocals = lightStateVocals ? 1f : 0f;
+					_neonMaterialsFullColor[i].Material.SetFloat(_emissionMultiplier, Vocals);
+				}
             }
         }
     }
