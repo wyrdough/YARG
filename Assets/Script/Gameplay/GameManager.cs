@@ -36,6 +36,13 @@ namespace YARG.Gameplay
 
         public bool IsSeekingReplay;
 
+        private Vector3 _defaultLightRot = new Vector3(46.004f, 15.64f, 22.272f);
+        private Vector3 _startLightRot   = new Vector3(0f, 15.64f, 22.272f);
+        private Vector3 _endLightRot     = new Vector3(175.0f, 15.64f, 22.272f);
+        private float   _normalizedTime  = 0.0f;
+
+        private Transform _lightTransform;
+
         [Header("References")]
         [SerializeField]
         private TrackViewManager _trackViewManager;
@@ -117,7 +124,7 @@ namespace YARG.Gameplay
         public int   BandScore { get; private set; }
         public int   BandCombo { get; private set; }
         public float BandStars { get; private set; }
-        
+
         public ReplayInfo ReplayInfo { get; private set; }
         public ReplayData ReplayData { get; private set; }
 
@@ -168,6 +175,9 @@ namespace YARG.Gameplay
 
             // Update countdown display style from global settings
             CountdownDisplay.DisplayStyle = SettingsManager.Settings.CountdownDisplay.Value;
+
+            // Find the directional light's transform
+            _lightTransform = GameObject.Find("Directional Light").transform;
         }
 
         private void OnDestroy()
@@ -247,6 +257,11 @@ namespace YARG.Gameplay
                     return;
                 }
             }
+
+            // Update the directional light's rotation
+            _normalizedTime = (float) (_songRunner.SongTime / SongLength);
+            var rot = Vector3.Slerp(_startLightRot, _endLightRot, _normalizedTime);
+            _lightTransform.rotation = Quaternion.Euler(rot);
         }
 
         public void SetSongTime(double time, double delayTime = SONG_START_DELAY)
