@@ -17,7 +17,6 @@ namespace YARG.Gameplay.Visuals
             Tap      = 2,
             Open     = 3,
             OpenHOPO = 4,
-            Wildcard = 5,
 
             Count
         }
@@ -44,7 +43,6 @@ namespace YARG.Gameplay.Visuals
             AssignNoteGroup(models, starPowerModels, (int) NoteType.Tap,      ThemeNoteType.Tap);
             AssignNoteGroup(models, starPowerModels, (int) NoteType.Open,     ThemeNoteType.Open);
             AssignNoteGroup(models, starPowerModels, (int) NoteType.OpenHOPO, ThemeNoteType.OpenHOPO);
-            AssignNoteGroup(models, starPowerModels, (int) NoteType.Wildcard, ThemeNoteType.Wildcard);
         }
 
         protected override void InitializeElement()
@@ -53,7 +51,7 @@ namespace YARG.Gameplay.Visuals
 
             var noteGroups = NoteRef.IsStarPower ? StarPowerNoteGroups : NoteGroups;
 
-            if (NoteRef.Fret != (int) FiveFretGuitarFret.Open && NoteRef.Fret != (int) FiveFretGuitarFret.Wildcard)
+            if (NoteRef.Fret != (int) FiveFretGuitarFret.Open)
             {
                 // Deal with non-open notes
 
@@ -86,12 +84,6 @@ namespace YARG.Gameplay.Visuals
                     GuitarNoteType.Tap   => noteGroups[(int) NoteType.OpenHOPO],
                     _ => throw new ArgumentOutOfRangeException(nameof(NoteRef.Type))
                 };
-
-                // That was a lie, we have to account for the wildcard
-                if (NoteRef.Fret == (int) FiveFretGuitarFret.Wildcard)
-                {
-                    NoteGroup = noteGroups[(int) NoteType.Wildcard];
-                }
 
                 _sustainLine = _openSustainLine;
             }
