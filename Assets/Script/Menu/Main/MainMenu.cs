@@ -43,11 +43,11 @@ namespace YARG.Menu.Main
                 await dialog.WaitUntilClosed();
             }
 
-            if (!SettingsManager.Settings.FirstTimeDialogShown && PlayerContainer.Profiles.Count == 0)
-            {
+            // if (!SettingsManager.Settings.FirstTimeDialogShown && PlayerContainer.Profiles.Count == 0)
+            // {
                 _onboardingDialog = new Onboarding(this);
                 _onboardingDialog.ShowOnboardingFlow();
-            }
+            // }
         }
 
         private void OnEnable()
