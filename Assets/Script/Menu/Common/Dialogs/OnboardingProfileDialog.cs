@@ -106,6 +106,12 @@ namespace YARG.Menu.Dialogs
                 }
 
                 player.Bindings.AddDevice(device);
+
+                if (!player.Bindings.ContainsBindingsForDevice(device))
+                {
+                    // TODO: make this work with devices that show up as a gamepad (like CRKD mode 1)
+                    player.Bindings.SetDefaultBinds(device);
+                }
             }
 
             StatsManager.Instance.UpdateActivePlayers();
