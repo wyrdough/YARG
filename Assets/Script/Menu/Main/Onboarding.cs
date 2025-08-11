@@ -19,12 +19,7 @@ namespace YARG.Menu.Main
         public void ShowOnboardingFlow()
         {
             _onboardingDialog = DialogManager.Instance.ShowOnboardingMessage(
-                "Menu.Dialog.FirstTimePlayer",
-                () =>
-                {
-                    SettingsManager.Settings.FirstTimeDialogShown = true;
-                    SettingsManager.SaveSettings();
-                }, ShowOnboardingStepTwo);
+                "Menu.Dialog.FirstTimePlayer", ShowOnboardingStepTwo);
             _onboardingDialog.ClearButtons();
             _onboardingDialog.AddDialogButton(
                 Localize.Key("Menu.Dialog.FirstTimePlayer.Skip"),

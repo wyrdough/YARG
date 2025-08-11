@@ -64,7 +64,11 @@ namespace YARG.Menu.Main
 
         private void OnDisable()
         {
-            Navigator.Instance.PopScheme();
+            // Check for null so we don't get spurious errors on exit when navigator happens to be destroyed first
+            if (Navigator.Instance != null)
+            {
+                Navigator.Instance.PopScheme();
+            }
         }
 
         public void CurrentlyPlaying()

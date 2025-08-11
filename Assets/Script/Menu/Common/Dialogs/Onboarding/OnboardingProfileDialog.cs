@@ -10,6 +10,7 @@ using YARG.Core.Logging;
 using YARG.Input;
 using YARG.Localization;
 using YARG.Menu.Data;
+using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
 using YARG.Menu.ProfileList;
 using YARG.Player;
@@ -17,7 +18,7 @@ using YARG.Player;
 namespace YARG.Menu.Dialogs
 {
 
-    public class OnboardingProfileDialog : OneTimeMessageDialog
+    public class OnboardingProfileDialog : DiscreteProgressDialog
     {
         [SerializeField]
         private TextMeshProUGUI _deviceText;
@@ -28,10 +29,12 @@ namespace YARG.Menu.Dialogs
         private readonly List<InputDevice> _manualDevices = new();
         private          ColoredButton     _getStartedButton;
         private          ColoredButton     _closeButton;
+        private          ColoredButton     _testButton;
         private readonly List<InputDevice> _midiDevices = new();
 
-        protected override void OnEnable()
+        public override void Initialize()
         {
+            base.Initialize();
             InputManager.DeviceAdded += OnDeviceAdded;
             InputManager.DeviceRemoved += OnDeviceRemoved;
             GenerateDeviceText();
@@ -42,11 +45,12 @@ namespace YARG.Menu.Dialogs
                 MenuData.Colors.ConfirmButton,
                 StepTwo
             );
-            base.OnEnable();
         }
 
         public void StepTwo()
         {
+            ProgressToNextStep();
+
             // Don't need device text any more
             _deviceText.text = "";
 
@@ -80,6 +84,13 @@ namespace YARG.Menu.Dialogs
                     profileName = $"New Keys Profile {count[2]}";
                     count[2]++;
                 }
+                else if (device is MidiDevice)
+                {
+                    // TODO: It is a lie that all MIDI devices are Pro Keys, but we are just testing for now
+                    gameMode = GameMode.ProKeys;
+                    profileName = $"New Keys Profile {count[2]}";
+                    count[2]++;
+                }
                 else
                 {
                     continue;
@@ -107,6 +118,12 @@ namespace YARG.Menu.Dialogs
 
                 player.Bindings.AddDevice(device);
 
+                if (device is MidiDevice)
+                {
+                    // Show friendly binding dialog
+                    BindMidiDevice(player, device);
+                }
+
                 if (!player.Bindings.ContainsBindingsForDevice(device))
                 {
                     // TODO: make this work with devices that show up as a gamepad (like CRKD mode 1)
@@ -125,6 +142,11 @@ namespace YARG.Menu.Dialogs
                     MenuData.Colors.ConfirmButton,
                     DialogManager.Instance.ClearDialog
                 );
+                _testButton = AddDialogButton(
+                    "Test",
+                    MenuData.Colors.ConfirmButton,
+                    TestMessage
+                );
             } else {
                 ClearButtons();
                 _closeButton = AddDialogButton(
@@ -135,7 +157,19 @@ namespace YARG.Menu.Dialogs
             }
         }
 
-        public void MidiDeviceMessage()
+        public async void TestMessage()
+        {
+            DialogManager.Instance.ShowMessage("Test", "Test");
+            await DialogManager.Instance.WaitUntilCurrentClosed();
+        }
+
+        public async void BindMidiDevice(YargPlayer player, InputDevice device)
+        {
+            var bindingDialog = DialogManager.Instance.ShowFriendlyBindingDialog(player, device);
+            await bindingDialog.WaitUntilClosed();
+        }
+
+        public async void MidiDeviceMessage()
         {
             MenuManager.Instance.PushMenu(MenuManager.Menu.ProfileList);
 
@@ -146,6 +180,9 @@ namespace YARG.Menu.Dialogs
                 DialogManager.Instance.ClearDialog
             );
             Message.text = Localize.Key("Menu.Dialog.FirstTimePlayer.MIDIInstructions");
+
+            // var bindingDialog = DialogManager.Instance.ShowFriendlyBindingDialog(_midiDevices[0]);
+            // await bindingDialog.WaitUntilClosed();
         }
 
         private void GenerateDeviceText()
@@ -168,7 +205,13 @@ namespace YARG.Menu.Dialogs
                 }
                 else if (device is MidiDevice)
                 {
+                    if (device.displayName.Contains("All Channels"))
+                    {
+                        continue;
+                    }
+
                     _midiDevices.Add(device);
+                    _devices.Add(device);
                 }
                 else
                 {

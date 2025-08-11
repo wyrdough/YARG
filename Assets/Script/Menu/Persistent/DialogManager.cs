@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Triggers;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using YARG.Localization;
 using YARG.Menu.Data;
 using YARG.Menu.Dialogs;
+using YARG.Player;
 using YARG.Menu.MusicLibrary;
 
 namespace YARG.Menu.Persistent
@@ -33,7 +36,11 @@ namespace YARG.Menu.Persistent
         [SerializeField]
         private OnboardingProfileDialog _onboardingProfileDialog;
         [SerializeField]
+        private FriendlyBindingDialog _friendlyBindingDialog;
+        [SerializeField]
         private SongPickerListDialog _playAShowDialog;
+
+        private Stack<Dialog> _dialogs = new();
 
         private Dialog _currentDialog;
 
@@ -86,18 +93,25 @@ namespace YARG.Menu.Persistent
         /// Displays and returns the onboarding dialog
         /// </summary>
         /// <param name="localizationKey"></param>
-        /// <param name="dontShowAgainAction"></param>
         /// <param name="okAction"></param>
         /// <returns></returns>
-        public OnboardingProfileDialog ShowOnboardingMessage(string localizationKey, Action dontShowAgainAction, Action okAction)
+        public OnboardingProfileDialog ShowOnboardingMessage(string localizationKey, Action okAction)
         {
             var dialog = ShowDialog(_onboardingProfileDialog);
 
             dialog.Title.text = Localize.Key(localizationKey, "Title");
             dialog.Message.text = Localize.Key(localizationKey, "Description");
 
-            dialog.DontShowAgainAction = dontShowAgainAction;
+            // dialog.DontShowAgainAction = dontShowAgainAction;
 
+            return dialog;
+        }
+
+        public FriendlyBindingDialog ShowFriendlyBindingDialog(YargPlayer player, InputDevice device)
+        {
+            var dialog = ShowDialog(_friendlyBindingDialog);
+            dialog.SetParameters((device, player));
+            dialog.Initialize();
             return dialog;
         }
 
@@ -205,11 +219,19 @@ namespace YARG.Menu.Persistent
             where TDialog : Dialog
         {
             if (IsDialogShowing)
-                throw new InvalidOperationException("A dialog already exists! Clear the previous dialog before showing a new one.");
+            {
+                // Set current dialog inactive and push it onto the stack
+                _currentDialog.gameObject.SetActive(false);
+                _dialogs.Push(_currentDialog);
+
+                // throw new InvalidOperationException(
+                //     "A dialog already exists! Clear the previous dialog before showing a new one.");
+            }
 
             var dialog = Instantiate(prefab, _dialogContainer);
             _currentDialog = dialog;
 
+            dialog.Initialize();
             dialog.ClearButtons();
             dialog.AddDialogButton("Menu.Common.Close", MenuData.Colors.CancelButton, ClearDialog);
 
@@ -231,6 +253,13 @@ namespace YARG.Menu.Persistent
             _currentDialog.Close();
             Destroy(_currentDialog.gameObject);
             _currentDialog = null;
+
+            // If there are more dialogs on the stack, pop the top one and make it active
+            if (_dialogs.Count > 0)
+            {
+                _currentDialog = _dialogs.Pop();
+                _currentDialog.gameObject.SetActive(true);
+            }
         }
 
         /// <summary>

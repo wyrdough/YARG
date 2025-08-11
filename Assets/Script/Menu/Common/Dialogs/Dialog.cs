@@ -22,9 +22,14 @@ namespace YARG.Menu.Dialogs
         [field: SerializeField]
         public TextMeshProUGUI Title { get; private set; }
 
-        protected virtual void OnEnable()
+        protected void OnEnable()
         {
             Navigator.Instance.PushScheme(GetNavigationScheme());
+        }
+
+        public virtual void Initialize()
+        {
+
         }
 
         protected virtual NavigationScheme GetNavigationScheme()
@@ -98,7 +103,7 @@ namespace YARG.Menu.Dialogs
 
         public UniTask WaitUntilClosed()
         {
-            return UniTask.WaitUntil(() => this == null || !gameObject.activeSelf);
+            return UniTask.WaitUntil(() => this == null);// || !gameObject.activeSelf);
         }
     }
 }
