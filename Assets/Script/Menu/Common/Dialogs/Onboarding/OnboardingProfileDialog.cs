@@ -47,7 +47,7 @@ namespace YARG.Menu.Dialogs
             );
         }
 
-        public void StepTwo()
+        public async void StepTwo()
         {
             ProgressToNextStep();
 
@@ -57,7 +57,7 @@ namespace YARG.Menu.Dialogs
             int[] count = { 1, 1, 1 };
             foreach (var device in _devices)
             {
-                GameMode gameMode;
+                GameMode? gameMode = null;
                 string profileName;
 
                 if (device is FiveFretGuitar)
@@ -86,10 +86,31 @@ namespace YARG.Menu.Dialogs
                 }
                 else if (device is MidiDevice)
                 {
-                    // TODO: It is a lie that all MIDI devices are Pro Keys, but we are just testing for now
-                    gameMode = GameMode.ProKeys;
-                    profileName = $"New Keys Profile {count[2]}";
-                    count[2]++;
+                    var typeSelectDialog =
+                        DialogManager.Instance.ShowList($"What Kind of MIDI Device is this?\n\n{device.displayName}");
+                    typeSelectDialog.AddListButton("25+ Key MIDI Keyboard", () => gameMode = GameMode.ProKeys);
+                    typeSelectDialog.AddListButton("Drum Kit", () => gameMode = GameMode.FourLaneDrums);
+                    await typeSelectDialog.WaitUntilClosed();
+
+                    if (!gameMode.HasValue)
+                    {
+                        continue;
+                    }
+
+                    switch (gameMode)
+                    {
+                        case GameMode.FourLaneDrums:
+                            profileName = $"New Drums Profile {count[1]}";
+                            count[1]++;
+                            break;
+                        case GameMode.ProKeys:
+                            profileName = $"New Keys Profile {count[2]}";
+                            count[2]++;
+                            break;
+                        default:
+                            profileName = "New MIDI Profile";
+                            break;
+                    }
                 }
                 else
                 {
@@ -101,7 +122,7 @@ namespace YARG.Menu.Dialogs
                     Name = profileName,
                     NoteSpeed = 5,
                     HighwayLength = 1,
-                    GameMode = gameMode
+                    GameMode = gameMode.Value
                 };
 
                 PlayerContainer.AddProfile(newProfile);
@@ -122,6 +143,7 @@ namespace YARG.Menu.Dialogs
                 {
                     // Show friendly binding dialog
                     BindMidiDevice(player, device);
+                    continue;
                 }
 
                 if (!player.Bindings.ContainsBindingsForDevice(device))

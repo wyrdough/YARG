@@ -5,6 +5,8 @@ using Cysharp.Threading.Tasks.Triggers;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
+using YARG.Core;
 using YARG.Localization;
 using YARG.Menu.Data;
 using YARG.Menu.Dialogs;
@@ -36,7 +38,9 @@ namespace YARG.Menu.Persistent
         [SerializeField]
         private OnboardingProfileDialog _onboardingProfileDialog;
         [SerializeField]
-        private FriendlyBindingDialog _friendlyBindingDialog;
+        private FriendlyBindingDialog _friendlyKeysBindingDialog;
+        [SerializeField]
+        private FriendlyBindingDialog _friendlyDrumsBindingDialog;
         [SerializeField]
         private SongPickerListDialog _playAShowDialog;
 
@@ -109,7 +113,14 @@ namespace YARG.Menu.Persistent
 
         public FriendlyBindingDialog ShowFriendlyBindingDialog(YargPlayer player, InputDevice device)
         {
-            var dialog = ShowDialog(_friendlyBindingDialog);
+            var prefab = player.Profile.GameMode switch
+            {
+                GameMode.ProKeys       => _friendlyKeysBindingDialog,
+                GameMode.FourLaneDrums => _friendlyDrumsBindingDialog,
+                _                      => throw new NotImplementedException("Game mode not supported")
+            };
+
+            var dialog = ShowDialog(prefab);
             dialog.SetParameters((device, player));
             dialog.Initialize();
             return dialog;
