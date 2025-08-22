@@ -227,7 +227,11 @@ namespace YARG.Menu.Dialogs
                 }
                 else if (device is MidiDevice)
                 {
-                    if (device.displayName.Contains("All Channels"))
+                    var midiDevice = (MidiDevice) device;
+
+                    // TODO: Poll users to find out whether their devices even have an "All Channels" option
+                    //  and whether or not their different channels have overlapping midi note numbers
+                    if (midiDevice.channel == -1)
                     {
                         continue;
                     }
