@@ -18,7 +18,7 @@ namespace YARG.Menu.Calibrator
 {
     // TODO: Redo this
 
-    public class Calibrator : MonoBehaviour
+    public class AudioCalibrator : MonoBehaviour
     {
         private const float SECONDS_PER_BEAT = 1f / 80f * 60f;
         private const float DROP_THRESH = 0.05f;
@@ -44,6 +44,8 @@ namespace YARG.Menu.Calibrator
         private State _state = State.Starting;
         private readonly List<double> _calibrationTimes = new();
 
+        private CalibrationMenu _calibrationMenu;
+
         private YargPlayer _player;
 #nullable enable
         private StemMixer? _mixer;
@@ -52,6 +54,7 @@ namespace YARG.Menu.Calibrator
 
         private void Start()
         {
+            _calibrationMenu = GetComponentInParent<CalibrationMenu>();
             UpdateForState();
         }
 
@@ -284,7 +287,8 @@ namespace YARG.Menu.Calibrator
         {
             if (_state == State.Starting)
             {
-                GlobalVariables.Instance.LoadScene(SceneIndex.Menu);
+                Navigator.Instance.PopScheme();
+                _calibrationMenu.Back();
             }
             else
             {
