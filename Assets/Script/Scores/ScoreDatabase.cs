@@ -75,6 +75,7 @@ namespace YARG.Scores
             _db.CreateTable<GameRecord>();
             _db.CreateTable<PlayerScoreRecord>();
             _db.CreateTable<PlayerInfoRecord>();
+            _db.CreateTable<ChallengeRecord>();
 
             // Fill in missing percentage values
             int amountFilled = _db.Execute(
@@ -190,6 +191,11 @@ namespace YARG.Scores
         public void InsertSoloRecords(IEnumerable<PlayerScoreRecord> records)
         {
             InsertAll(records);
+        }
+
+        public void InsertChallengeRecord(ChallengeRecord record)
+        {
+            Insert(record);
         }
 
         #endregion
@@ -444,6 +450,25 @@ namespace YARG.Scores
                     profile.Id,
                     (int) profile.CurrentInstrument,
                     (int) profile.CurrentDifficulty);
+        }
+
+        public ChallengeRecord QueryChallengeCompletion(Guid id, Guid playerId, Difficulty difficulty,
+            Instrument instrument, HashWrapper songHash)
+        {
+            var query = @"SELECT * FROM Challenges WHERE
+                               Id = ?
+                           AND PlayerId = ?
+                           AND ChallengeDifficulty = ?
+                           AND ChallengeInstrument = ?
+                           AND SongHash = ?";
+
+            return _db.FindWithQuery<ChallengeRecord>(
+                query,
+                id,
+                playerId,
+                (int) difficulty,
+                (int) instrument,
+                songHash.HashBytes);
         }
 
         #endregion

@@ -478,6 +478,8 @@ namespace YARG.Settings
                 BandComboType.Strict
             };
 
+            public ToggleSetting ChallengesEnable { get; } = new(false);
+
             #endregion
 
             #region Callbacks

@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using YARG.Audio.BASS;
+using YARG.Challenges;
 using YARG.Core;
 using YARG.Core.Logging;
 using YARG.Core.Audio;
@@ -83,6 +84,7 @@ namespace YARG
             ReplayContainer.Init();
             ScoreContainer.Init();
             PlaylistContainer.Initialize();
+            ChallengeContainer.Initialize();
             CustomContentManager.Initialize();
             LocalizationManager.Initialize(CommandLineArgs.Language);
 

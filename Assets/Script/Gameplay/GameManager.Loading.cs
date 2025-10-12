@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using YARG.Challenges;
 using YARG.Core;
 using YARG.Core.Audio;
 using YARG.Core.Chart;
@@ -96,6 +97,20 @@ namespace YARG.Gameplay
                 if (IsSongStarted) value?.Invoke();
             }
             remove => _songStarted -= value;
+        }
+
+        private event Action _songEnding;
+
+        public event Action SongEnding
+        {
+            add
+            {
+                _songEnding += value;
+
+                // Invoke now if the song is already over, this event is only fired once
+                if (IsSongEnding) value?.Invoke();
+            }
+            remove => _songEnding -= value;
         }
 
         private async void Start()
@@ -201,6 +216,12 @@ namespace YARG.Gameplay
 
             // Spawn players
             CreatePlayers();
+
+            // Instantiate ChallengeManager if enabled and single player
+            if (SettingsManager.Settings.ChallengesEnable.Value && _players.Count == 1)
+            {
+                _challengeManager = gameObject.AddComponent<ChallengeManager>();
+            }
 
             // Set up the crowd stem so it can be restored after muting (if it exists)
             if (_stemStates.TryGetValue(SongStem.Crowd, out var state))

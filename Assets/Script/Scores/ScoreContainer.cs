@@ -12,6 +12,7 @@ using YARG.Player;
 using YARG.Settings;
 using YARG.Song;
 
+// Not actually just scores any more...should probably be renamed
 namespace YARG.Scores
 {
     public enum HighScoreHistoryMode
@@ -167,6 +168,27 @@ namespace YARG.Scores
         public static void RecordPlayerInfo(Guid id, string name)
         {
             _db.InsertPlayerRecord(id, name);
+        }
+
+        public static void RecordChallengeCompletion(ChallengeRecord record)
+        {
+            // TODO: Some twiddling will need to be done to make sure we are referencing the correct PlayerScoreRecord
+            //  (do we actually need to reference PSR, the Challenge table has song metadata and date anyway?)
+            _db.InsertChallengeRecord(record);
+        }
+
+        public static ChallengeRecord GetChallengeCompletion(Guid id, YargPlayer player, SongEntry song)
+        {
+            try
+            {
+                return _db.QueryChallengeCompletion(id, player.Profile.Id, player.Profile.CurrentDifficulty, player.Profile.CurrentInstrument, song.Hash);
+            }
+            catch (Exception e)
+            {
+                YargLogger.LogException(e, "Failed to load challenge completion from database.");
+            }
+
+            return null;
         }
 
         public static List<GameRecord> GetAllGameRecords()

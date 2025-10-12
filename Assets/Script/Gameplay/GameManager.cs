@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using YARG.Challenges;
 using YARG.Core.Audio;
 using YARG.Core.Chart;
 using YARG.Core.Engine;
@@ -62,7 +63,11 @@ namespace YARG.Gameplay
 
         private List<BasePlayer> _players;
 
+        // TODO: We may not actually need to keep this reference since it's a MonoBehaviour derivative
+        private ChallengeManager _challengeManager;
+
         public bool IsSongStarted { get; private set; } = false;
+        public bool IsSongEnding  { get; private set; } = false;
 
         private SongRunner _songRunner;
 
@@ -260,7 +265,7 @@ namespace YARG.Gameplay
 
                 totalScore += player.Score;
                 totalScore += player.BandBonusScore;
-                totalStars += player.Stars;               
+                totalStars += player.Stars;
             }
 
             if (GlobalVariables.VerboseReplays)
@@ -274,6 +279,12 @@ namespace YARG.Gameplay
             // End song if needed (required for the [end] event)
             if (_songRunner.SongTime >= SongLength)
             {
+                if (!IsSongEnding)
+                {
+                    IsSongEnding = true;
+                    _songEnding?.Invoke();
+                }
+
                 if (EndSong())
                 {
                     return;
