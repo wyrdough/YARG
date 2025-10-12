@@ -10,6 +10,7 @@ using YARG.Core;
 using YARG.Core.Extensions;
 using YARG.Core.Game;
 using YARG.Core.Input;
+using YARG.Core.Logging;
 using YARG.Core.Song;
 using YARG.Core.Utility;
 using YARG.Helpers.Extensions;
@@ -124,7 +125,15 @@ namespace YARG.Menu.DifficultySelect
                 })
             }, false));
 
-            _speedInput.text = $"{Mathf.RoundToInt(_songSpeed * 100f)}%";
+            if (GlobalVariables.State.ChallengeMode)
+            {
+                _speedInput.text = $"{Mathf.RoundToInt(GlobalVariables.State.ChallengeRequiredSpeed * 100f)}%";
+            }
+            else
+            {
+                _speedInput.text = $"{Mathf.RoundToInt(_songSpeed * 100f)}%";
+            }
+
             _songTitleText.text = GlobalVariables.State.CurrentSong.Name;
             _artistText.text = GlobalVariables.State.CurrentSong.Artist;
 
@@ -137,8 +146,34 @@ namespace YARG.Menu.DifficultySelect
                 _songList = new List<SongEntry> { GlobalVariables.State.CurrentSong };
             }
 
+            // In challenge mode, set the player index to the challenge player's index
+            if (GlobalVariables.State.ChallengeMode)
+            {
+                var challengeProfile = GlobalVariables.State.ChallengeProfile;
+                var playerIndex = -1;
+                for (var i = 0; i < PlayerContainer.Players.Count; i++)
+                {
+                    if (PlayerContainer.Players[i].Equals(challengeProfile))
+                    {
+                        playerIndex = i;
+                        break;
+                    }
+                }
+
+                if (playerIndex == -1)
+                {
+                    YargLogger.LogError("Could not find challenge player in player container");
+                    throw new ArgumentOutOfRangeException("Could not find challenge player in player container");
+                }
+
+                _playerIndex = playerIndex;
+            }
+            else
+            {
+                _playerIndex = 0;
+            }
+
             // ChangePlayer(0) will update for the current player
-            _playerIndex = 0;
             _vocalModifierSelectIndex = -1;
             ChangePlayer(0);
 
@@ -278,8 +313,8 @@ namespace YARG.Menu.DifficultySelect
                 });
             }
 
-            // Only show if there is more than one play, only if there is instruments available
-            if (_possibleInstruments.Count <= 0 || PlayerContainer.Players.Count != 1)
+            // Only show if there is more than one play, only if there is instruments available, and only when not in challenge mode
+            if ((_possibleInstruments.Count <= 0 || PlayerContainer.Players.Count != 1) && !GlobalVariables.State.ChallengeMode)
             {
                 // Sit out button
                 CreateItem(LocalizeHeader("SitOut"), _possibleInstruments.Count <= 0, _difficultyRedPrefab, () =>
@@ -330,8 +365,21 @@ namespace YARG.Menu.DifficultySelect
 
         private void CreateDifficultyMenu()
         {
+            List<Difficulty> challengeDifficulties = new();
+
+            if (GlobalVariables.State.ChallengeMode)
+            {
+                challengeDifficulties = GlobalVariables.State.CurrentChallenge.Difficulties.Keys.ToList();
+            }
+
             foreach (var difficulty in _possibleDifficulties)
             {
+                // In challenge mode, do not allow difficulties not available in the challenge
+                if (GlobalVariables.State.ChallengeMode && !challengeDifficulties.Contains(difficulty))
+                {
+                    continue;
+                }
+
                 bool selected = CurrentPlayer.Profile.CurrentDifficulty == difficulty;
                 CreateItem(difficulty.ToLocalizedName(), selected, () =>
                 {
@@ -443,8 +491,28 @@ namespace YARG.Menu.DifficultySelect
 
         }
 
+        private void LoadGameplayScene()
+        {
+            // This will always work (as it's set up in the input field)
+            // The max speed that the game can keep up with is 5000%
+            float speed = float.Parse(_speedInput.text.TrimEnd('%')) / 100f;
+            speed = Mathf.Clamp(speed, 0.1f, 50.0f);
+            _songSpeed = speed;
+            GlobalVariables.State.SongSpeed = speed;
+
+            GlobalVariables.Instance.LoadScene(SceneIndex.Gameplay);
+        }
+
         private void ChangePlayer(int add)
         {
+            // When in challenge mode, we only process one player, the challenge player. Everybody else sits out.
+            if (GlobalVariables.State.ChallengeMode && add != 0)
+            {
+                PlayerContainer.Players.Except(new[] { PlayerContainer.Players[_playerIndex] }).ToList().ForEach(p => p.SittingOut = true);
+                LoadGameplayScene();
+                return;
+            }
+
             _playerIndex += add;
             _menuState = State.Main;
 
@@ -481,14 +549,7 @@ namespace YARG.Menu.DifficultySelect
                     }
                 }
 
-                // This will always work (as it's set up in the input field)
-                // The max speed that the game can keep up with is 5000%
-                float speed = float.Parse(_speedInput.text.TrimEnd('%')) / 100f;
-                speed = Mathf.Clamp(speed, 0.1f, 50.0f);
-                _songSpeed = speed;
-                GlobalVariables.State.SongSpeed = speed;
-
-                GlobalVariables.Instance.LoadScene(SceneIndex.Gameplay);
+                LoadGameplayScene();
                 return;
             }
 
@@ -705,6 +766,15 @@ namespace YARG.Menu.DifficultySelect
             }
 
             int intSpeed = (int) Math.Clamp(speed, 10, 5000);
+
+            // In practice mode, any speed is allowed even when challenge mode is on, otherwise
+            // don't allow anything less than the required challenge speed
+            if (GlobalVariables.State.ChallengeMode && !GlobalVariables.State.IsPractice)
+            {
+                // In challenge mode, don't allow anything less than the required speed
+                var currentSpeed = GlobalVariables.State.ChallengeRequiredSpeed * 100;
+                intSpeed = Mathf.Max(intSpeed, (int) currentSpeed);
+            }
 
             _speedInput.SetTextWithoutNotify($"{intSpeed}%");
         }

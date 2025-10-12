@@ -59,9 +59,12 @@ namespace YARG.Challenges
             try
             {
                 var text = File.ReadAllText(filePath);
-                var playlist = JsonConvert.DeserializeObject<IChallenge>(text, JsonSettings);
+                var challenge = JsonConvert.DeserializeObject<IChallenge>(text, JsonSettings);
 
-                return playlist;
+                // Since the state of the challenge depends on the profile/instrument, we can't determine
+                // here whether it has yet been satisifed. The menu will have to do that...
+
+                return challenge;
             }
             catch (Exception ex)
             {

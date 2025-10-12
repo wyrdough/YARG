@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using YARG.Challenges;
 using YARG.Core.Replays;
 using YARG.Core.Song;
 using YARG.Menu.ScoreScreen;
+using YARG.Player;
 using YARG.Replays;
 
 namespace YARG
@@ -27,9 +29,14 @@ namespace YARG
         public          List<SongEntry> ShowSongs    { get; set; }
         public          int             ShowIndex    { get; set; }
 
-        public          bool IsPractice;
-        public readonly bool IsReplay => CurrentReplay is not null;
-        public          bool PlayingWithReplay;
+        public          bool   IsPractice;
+        public readonly bool   IsReplay        => CurrentReplay is not null;
 
+        public bool       PlayingWithReplay;
+        public bool       ChallengeMode;
+        public float      ChallengeRequiredSpeed;
+        public YargPlayer ChallengeProfile;
+        public IChallenge CurrentChallenge;
+        public string     PracticeSection;
     }
 }

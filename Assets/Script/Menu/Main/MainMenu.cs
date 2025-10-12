@@ -72,7 +72,7 @@ namespace YARG.Menu.Main
 
         public void Challenge()
         {
-
+            var menu = MenuManager.Instance.PushMenu(MenuManager.Menu.Challenge);
         }
 
         public void Practice()

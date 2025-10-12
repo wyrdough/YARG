@@ -12,8 +12,8 @@ namespace YARG.Gameplay.HUD
         {
             base.OnEnable();
 
-            // Disable skip option if this is the last song
-            if (GlobalVariables.State.ShowIndex == GlobalVariables.State.ShowSongs.Count - 1)
+            // Disable skip option if this is the last song or we are in challenge mode
+            if (GlobalVariables.State.ShowIndex == GlobalVariables.State.ShowSongs.Count - 1 || GlobalVariables.State.ChallengeMode)
             {
                 _skipObject.SetActive(false);
                 var navigationGroup = GetComponentInChildren<NavigationGroup>();

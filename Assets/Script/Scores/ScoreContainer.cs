@@ -191,6 +191,20 @@ namespace YARG.Scores
             return null;
         }
 
+        public static ChallengeRecord GetChallengeCompletion(Guid id, YargPlayer player, HashWrapper hash)
+        {
+            try
+            {
+                return _db.QueryChallengeCompletion(id, player.Profile.Id, player.Profile.CurrentDifficulty, player.Profile.CurrentInstrument, hash);
+            }
+            catch (Exception e)
+            {
+                YargLogger.LogException(e, "Failed to load challenge completion from database.");
+            }
+
+            return null;
+        }
+
         public static List<GameRecord> GetAllGameRecords()
         {
             try

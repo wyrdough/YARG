@@ -229,6 +229,9 @@
                 "Select": "That's Plenty"
             }
         },
+        "Challenge": {
+            "Name": "Challenges"
+        },
         "DifficultySelect": {
             "Instrument": "Instrument",
             "Difficulty": "Difficulty",

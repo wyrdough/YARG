@@ -45,7 +45,7 @@ namespace YARG.Challenges
                     continue;
                 }
 
-                if (challenge.Length == ChallengeLength.Playlist && !GlobalVariables.State.PlayingAShow)
+                if (challenge.Length == ChallengeLength.Setlist && !GlobalVariables.State.PlayingAShow)
                 {
                     continue;
                 }

@@ -135,6 +135,6 @@ namespace YARG.Challenges
     {
         Section,
         Song,
-        Playlist,
+        Setlist,
     }
 }
