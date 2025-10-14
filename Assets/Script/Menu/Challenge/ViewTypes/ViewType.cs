@@ -1,4 +1,5 @@
-﻿using YARG.Menu.ListMenu;
+﻿using YARG.Challenges;
+using YARG.Menu.ListMenu;
 
 namespace YARG.Menu.Challenge
 {
@@ -11,6 +12,11 @@ namespace YARG.Menu.Challenge
         public virtual void ViewClick()
         {
 
+        }
+
+        public virtual IChallenge GetChallenge()
+        {
+            return null;
         }
 
     }

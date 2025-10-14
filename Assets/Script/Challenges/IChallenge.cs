@@ -4,7 +4,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using YARG.Core;
 using YARG.Core.Song;
+using YARG.Gameplay;
 using YARG.Gameplay.Player;
+using YARG.Player;
 
 namespace YARG.Challenges
 {
@@ -30,6 +32,11 @@ namespace YARG.Challenges
 
         // Not set or used internally, this exists to make life easier for consumers
         public BasePlayer Player { get; set; }
+        public GameManager GameManager { get; set; }
+
+        public bool Loaded { get; }
+
+        public Guid LoadedPlayer { get; }
 
         public bool IsActive  => DateTime.Now >= StartTime && DateTime.Now <= EndTime;
 
@@ -62,11 +69,15 @@ namespace YARG.Challenges
             return difficultyData.Passed;
         }
 
-        public abstract bool CheckForPass();
+        public abstract void Initialize();
+
+        public abstract bool CheckForPass(int songIndex);
 
         public abstract void SavePass(SongEntry songEntry);
 
         public abstract float GetActualPerformance();
+
+        public abstract void LoadDataForPlayer(YargPlayer player, bool reload = false);
 
         public abstract IChallenge Clone(IChallenge other);
     }

@@ -12,12 +12,17 @@ namespace YARG.Challenges
             return (float) Player.NotesHit / Player.TotalNotes;
         }
 
-        public override bool CheckForPass()
+        public override bool CheckForPass(int songIndex)
         {
-            if (!Passed && GetActualPerformance() >= Difficulties[Player.Player.Profile.CurrentDifficulty].Threshold)
+            if (!base.CheckForPass(songIndex))
             {
-                Passed = true;
-                return true;
+                return false;
+            }
+
+            if (!PlaylistPassed[songIndex] && GetActualPerformance() >= Difficulties[Player.Player.Profile.CurrentDifficulty].Threshold)
+            {
+                PlaylistPassed[songIndex] = true;
+                return Passed;
             }
 
             return false;
@@ -47,6 +52,7 @@ namespace YARG.Challenges
                 clone.Difficulties[difficulty.Key] = ChallengeDifficulty.Clone(difficulty.Value);
             }
 
+            clone.Initialize();
             return clone;
         }
     }

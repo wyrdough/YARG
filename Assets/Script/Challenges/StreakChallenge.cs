@@ -1,4 +1,7 @@
-﻿namespace YARG.Challenges
+﻿using System.Collections.Generic;
+using YARG.Core;
+
+namespace YARG.Challenges
 {
     public class StreakChallenge : Challenge
     {
@@ -9,14 +12,19 @@
             return Player.BaseStats.MaxCombo;
         }
 
-        public override bool CheckForPass()
+        public override bool CheckForPass(int songIndex)
         {
+            if (!base.CheckForPass(songIndex))
+            {
+                return false;
+            }
+
             var currentDiff = Difficulties[Player.Player.Profile.CurrentDifficulty];
 
-            if (!Passed && Player.BaseStats.MaxCombo >= currentDiff.Threshold)
+            if (!PlaylistPassed[songIndex] && Player.BaseStats.MaxCombo >= currentDiff.Threshold)
             {
-                Passed = true;
-                return true;
+                PlaylistPassed[songIndex] = true;
+                return Passed;
             }
 
             return false;
@@ -35,7 +43,7 @@
                 Section = other.Section,
                 Instruments = other.Instruments,
                 MinimumSpeed = other.MinimumSpeed,
-                Difficulties = other.Difficulties,
+                Difficulties = new Dictionary<Difficulty, ChallengeDifficulty>(),
                 StartTime = other.StartTime,
                 EndTime = other.EndTime,
             };
@@ -46,6 +54,7 @@
                 clone.Difficulties[difficulty.Key] = ChallengeDifficulty.Clone(difficulty.Value);
             }
 
+            clone.Initialize();
             return clone;
         }
     }

@@ -32,13 +32,6 @@ namespace YARG.Challenges
                     continue;
                 }
 
-                // Because the below are unimplemented, skip if challenge length is not song
-                // TODO: Actually implement section and playlist challenges and remove this check
-                if (challenge.Length != ChallengeLength.Song)
-                {
-                    continue;
-                }
-
                 // Filter out challenges that are not valid for this game mode (aka, no section challenges except in practice mode)
                 if (challenge.Length == ChallengeLength.Section && !GameManager.IsPractice)
                 {
@@ -69,7 +62,7 @@ namespace YARG.Challenges
 
                             var completed = ScoreContainer.GetChallengeCompletion(challenge.ID, player.Player, _song);
 
-                            if (ScoreContainer.GetChallengeCompletion(challenge.ID, player.Player, _song) != null)
+                            if (completed != null)
                             {
                                 continue;
                             }
@@ -79,6 +72,7 @@ namespace YARG.Challenges
                             {
                                 var clone = challenge.Clone(challenge);
                                 clone.Player = player;
+                                clone.GameManager = GameManager;
                                 _activeChallenges.Add(clone);
                             }
                         }
@@ -93,9 +87,20 @@ namespace YARG.Challenges
         {
             foreach (var challenge in _activeChallenges)
             {
-                if (challenge.CheckForPass())
+                if (challenge.CheckForPass(GlobalVariables.State.ShowIndex))
                 {
                     ToastManager.ToastSuccess($"Congratulations! You passed the {challenge.Name} challenge!");
+                }
+            }
+        }
+
+        protected override void OnPracticeReset()
+        {
+            foreach (var challenge in _activeChallenges)
+            {
+                if (challenge.Length == ChallengeLength.Section)
+                {
+                    challenge.SavePass(_song);
                 }
             }
         }

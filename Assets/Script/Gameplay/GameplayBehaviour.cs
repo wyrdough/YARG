@@ -39,6 +39,7 @@ namespace YARG.Gameplay
             GameManager.SongLoaded += _OnSongLoaded;
             GameManager.SongStarted += _OnSongStarted;
             GameManager.SongEnding += _OnSongEnding;
+            GameManager.PracticeReset += _OnPracticeReset;
 
             GameplayAwake();
         }
@@ -57,6 +58,7 @@ namespace YARG.Gameplay
             GameManager.SongLoaded -= _OnSongLoaded;
             GameManager.SongStarted -= _OnSongStarted;
             GameManager.SongEnding -= _OnSongEnding;
+            GameManager.PracticeReset -= _OnPracticeReset;
         }
 
         private void _OnChartLoaded(SongChart chart)
@@ -88,6 +90,11 @@ namespace YARG.Gameplay
             OnSongEnding();
         }
 
+        private void _OnPracticeReset()
+        {
+            OnPracticeReset();
+        }
+
         protected virtual void GameplayAwake()
         {
         }
@@ -109,6 +116,10 @@ namespace YARG.Gameplay
         }
 
         protected virtual void OnSongEnding()
+        {
+        }
+
+        protected virtual void OnPracticeReset()
         {
         }
     }

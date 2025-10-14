@@ -31,6 +31,8 @@ namespace YARG.Menu.Challenge
                     SongEntries.Add(songs[0]);
                 }
             }
+
+            challenge.LoadDataForPlayer(Player);
         }
 
         public override string GetPrimaryText(bool selected)
@@ -59,12 +61,18 @@ namespace YARG.Menu.Challenge
 
             if (Challenge.Length == ChallengeLength.Section)
             {
+                GlobalVariables.State.IsPractice = true;
                 GlobalVariables.State.PracticeSection = Challenge.Section;
             }
 
             GlobalVariables.State.ChallengeRequiredSpeed = Mathf.Max(GlobalVariables.State.SongSpeed, Challenge.MinimumSpeed / 100.0f);
 
             MenuManager.Instance.PushMenu(MenuManager.Menu.DifficultySelect);
+        }
+
+        public override IChallenge GetChallenge()
+        {
+            return Challenge;
         }
     }
 }

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using UnityEngine;
 using YARG.Core;
 using YARG.Core.Song;
+using YARG.Gameplay;
 using YARG.Gameplay.Player;
 using YARG.Player;
 using YARG.Scores;
@@ -18,7 +20,7 @@ namespace YARG.Challenges
         public string Description { get; set; }
 
         public abstract ChallengeType   Type   { get; }
-        public ChallengeLength Length { get; set; }
+        public          ChallengeLength Length { get; set; }
 
         public HashWrapper[] SongHashes   { get; set; }
         public string        Section      { get; set; }
@@ -34,10 +36,82 @@ namespace YARG.Challenges
         [JsonIgnore]
         // Not set or used internally, this exists to make life easier for consumers
         public BasePlayer Player { get; set; }
+        [JsonIgnore]
+        public GameManager GameManager { get; set; }
 
         // Whether we passed the challenge this time around
         [JsonIgnore]
-        protected bool Passed;
+        protected bool Passed
+        {
+            get
+            {
+                if (IsInvalidated)
+                {
+                    return false;
+                }
+
+                if (SongHashes.Length > 0)
+                {
+                    // Only if all songs are passed
+                    for (var i = 0; i < SongHashes.Length; i++)
+                    {
+                        if (!PlaylistPassed[i])
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        [JsonIgnore]
+        protected bool IsInvalidated;
+
+        [JsonIgnore]
+        protected bool _isSaved;
+
+        [JsonIgnore]
+        protected bool[] PlaylistPassed;
+
+        [JsonIgnore]
+        public bool Loaded { get; protected set; } = false;
+        [JsonIgnore]
+        public Guid LoadedPlayer { get; protected set; }
+
+        public void Initialize()
+        {
+            PlaylistPassed = new bool[SongHashes.Length];
+        }
+
+        public virtual void LoadDataForPlayer(YargPlayer player, bool reload = false)
+        {
+            if (!reload && LoadedPlayer == player.Profile.Id)
+            {
+                return;
+            }
+
+            // Try to read from score db
+            bool foundAny = false;
+            for (var i = 0; i < SongHashes.Length; i++)
+            {
+                var result = ScoreContainer.GetChallengeCompletion(ID, player, SongHashes[i]);
+                if (result != null)
+                {
+                    PlaylistPassed[i] = true;
+                    foundAny = true;
+                }
+            }
+
+            if (foundAny)
+            {
+                LoadedPlayer = player.Profile.Id;
+                Loaded = true;
+            }
+        }
 
         public bool HasPassedDifficulty(Difficulty difficulty)
         {
@@ -61,7 +135,21 @@ namespace YARG.Challenges
 
         public abstract float GetActualPerformance();
 
-        public abstract bool CheckForPass();
+        public virtual bool CheckForPass(int songIndex)
+        {
+            if (IsInvalidated)
+            {
+                return false;
+            }
+
+            if (!Passed && GameManager.SongSpeed < Mathf.RoundToInt(MinimumSpeed / 100f))
+            {
+                IsInvalidated = true;
+                return false;
+            }
+
+            return true;
+        }
 
         public virtual void SavePass(SongEntry songEntry)
         {
@@ -71,7 +159,7 @@ namespace YARG.Challenges
             var actualAchieved = GetActualPerformance();
 
             // Make call to save the challenge into scores.db
-            if (Passed)
+            if (Passed && !_isSaved)
             {
                 ScoreContainer.RecordChallengeCompletion(new ChallengeRecord {
                     Id = ID,
@@ -93,6 +181,7 @@ namespace YARG.Challenges
                     SongArtist = songEntry.Artist,
                     SongCharter = songEntry.Charter,
                     });
+                _isSaved = true;
             }
         }
 

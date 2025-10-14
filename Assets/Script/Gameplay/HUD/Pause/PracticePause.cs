@@ -12,11 +12,19 @@ namespace YARG.Gameplay.HUD
         [SerializeField]
         private TextMeshProUGUI _bPositionText;
 
+        [SerializeField]
+        private GameObject[] _disabledForChallenge;
+
         protected override void OnEnable()
         {
             base.OnEnable();
 
             UpdatePositionText();
+
+            foreach (var item in _disabledForChallenge)
+            {
+                item.SetActive(!GlobalVariables.State.ChallengeMode);
+            }
         }
 
         public void SetAPosition()

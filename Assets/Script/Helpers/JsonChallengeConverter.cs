@@ -65,6 +65,7 @@ namespace YARG.Helpers
             };
 
             serializer.Populate(jObject.CreateReader(), challenge);
+            challenge.Initialize();
             return challenge;
         }
     }

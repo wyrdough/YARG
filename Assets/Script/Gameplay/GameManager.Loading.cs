@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using YARG.Assets.Script.Helpers;
 using YARG.Challenges;
 using YARG.Core;
 using YARG.Core.Audio;
@@ -111,6 +112,14 @@ namespace YARG.Gameplay
                 if (IsSongEnding) value?.Invoke();
             }
             remove => _songEnding -= value;
+        }
+
+        private event Action _practiceReset;
+
+        public event Action PracticeReset
+        {
+            add => _practiceReset += value;
+            remove => _practiceReset -= value;
         }
 
         private async void Start()
@@ -250,7 +259,37 @@ namespace YARG.Gameplay
             // Initialize/destroy practice mode
             if (IsPractice)
             {
-                PracticeManager.DisplayPracticeMenu();
+                // If we are in challenge mode, we force a particular section and don't display the menu
+                if (GlobalVariables.State.ChallengeMode)
+                {
+                    var challengeString = GlobalVariables.State.PracticeSection.ToLowerInvariant();
+                    Section section = null;
+                    foreach (var s in Chart.Sections)
+                    {
+                        // Allow either the raw section name or the parsed section name to make it easier to set up challenges
+                        if (s.Name.ToLowerInvariant() == challengeString ||
+                            PracticeSectionHelper.ParseSectionName(s.Name).ToLowerInvariant() == challengeString)
+                        {
+                            section = s;
+                            break;
+                        }
+                    }
+
+                    if (section == null)
+                    {
+                        ToastManager.ToastError("Could not find section for challenge mode");
+                        global.LoadScene(SceneIndex.Menu);
+                        YargLogger.LogError("Could not find section for challenge mode");
+                        return;
+                    }
+
+                    // For now we only support single section challenges
+                    PracticeManager.SetPracticeSection(section, section);
+                }
+                else
+                {
+                    PracticeManager.DisplayPracticeMenu();
+                }
             }
             else
             {

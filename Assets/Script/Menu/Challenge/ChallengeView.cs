@@ -19,7 +19,7 @@ namespace YARG.Menu.Challenge
         [SerializeField]
         private TextMeshProUGUI _bandScore;
         [SerializeField]
-        private StarView _starView;
+        private ChallengeStarView _starView;
 
         private Button _button;
 
@@ -41,22 +41,14 @@ namespace YARG.Menu.Challenge
             _fullContainer.SetActive(viewType.UseFullContainer);
             _categoryContainer.SetActive(!viewType.UseFullContainer);
 
-            _button.interactable = true;
+            var challenge = viewType.GetChallenge();
+            if (challenge is not null)
+            {
+                _button.interactable = true;
+                _starView.SetStars(challenge);
+            }
 
-            // var gameInfo = viewType.GetGameInfo();
-
-            // Show the stats
-            // if (gameInfo is not null)
-            // {
-            //     _scoreContainer.SetActive(true);
-            //
-            //     _bandScore.text = gameInfo.Value.BandScore.ToString("N0");
-            //     _starView.SetStars(gameInfo.Value.BandStars);
-            // }
-            // else
-            // {
-                _scoreContainer.SetActive(false);
-            // }
+            // _scoreContainer.SetActive(false);
         }
 
         public override void Hide()

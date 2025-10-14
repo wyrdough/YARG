@@ -1,4 +1,7 @@
-﻿namespace YARG.Challenges
+﻿using System.Collections.Generic;
+using YARG.Core;
+
+namespace YARG.Challenges
 {
     public class FullComboChallenge : Challenge
     {
@@ -10,12 +13,17 @@
             return Player.TotalNotes == Player.NotesHit && Player.IsFc ? 1f : 0f;
         }
 
-        public override bool CheckForPass()
+        public override bool CheckForPass(int songIndex)
         {
-            if (!Passed && Player.TotalNotes == Player.NotesHit && Player.IsFc)
+            if (!base.CheckForPass(songIndex))
             {
-                Passed = true;
-                return true;
+                return false;
+            }
+
+            if (!PlaylistPassed[songIndex] && Player.TotalNotes == Player.NotesHit && Player.IsFc)
+            {
+                PlaylistPassed[songIndex] = true;
+                return Passed;
             }
 
             return false;
@@ -34,7 +42,7 @@
                 Section = other.Section,
                 Instruments = other.Instruments,
                 MinimumSpeed = other.MinimumSpeed,
-                Difficulties = other.Difficulties,
+                Difficulties = new Dictionary<Difficulty, ChallengeDifficulty>(),
                 StartTime = other.StartTime,
                 EndTime = other.EndTime,
             };
@@ -45,6 +53,7 @@
                 clone.Difficulties[difficulty.Key] = ChallengeDifficulty.Clone(difficulty.Value);
             }
 
+            clone.Initialize();
             return clone;
         }
     }

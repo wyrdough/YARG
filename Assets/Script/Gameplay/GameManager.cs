@@ -722,5 +722,15 @@ namespace YARG.Gameplay
                 EngineManager.InitializeHappiness();
             }
         }
+
+        public void ResetPractice()
+        {
+            if (!IsPractice)
+            {
+                return;
+            }
+
+            _practiceReset?.Invoke();
+        }
     }
 }

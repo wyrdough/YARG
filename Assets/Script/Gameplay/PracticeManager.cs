@@ -220,6 +220,7 @@ namespace YARG.Gameplay
             foreach (var player in GameManager.Players)
             {
                 player.ResetPracticeSection();
+                GameManager.ResetPractice();
             }
             GameManager.VocalTrack.ResetPracticeSection();
 
