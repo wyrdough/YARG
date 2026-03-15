@@ -3047,6 +3047,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa1ffdd765c941c997324c6c895126bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _sortingOrder: 1000
   _toastPrefab: {fileID: 4055295879329251365, guid: 1110c6f6ce2b3b248be0cac777029671, type: 3}
   _generalColor: {r: 0, g: 0.8666667, b: 0.9843137, a: 255}
   _successColor: {r: 0.27450982, g: 0.90588236, b: 0.30980393, a: 255}
@@ -4301,7 +4302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fc8e810ea88d44f1b1d6151eb0cc3a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::YARG.Menu.Persistent.MenuFontScaler
-  _fontScaleNormalized: 0
+  _fontScaleFactor: 0
 --- !u!1 &1710005230
 GameObject:
   m_ObjectHideFlags: 0
@@ -5616,4 +5617,3 @@ SceneRoots:
   - {fileID: 1817699728}
   - {fileID: 1517407188}
   - {fileID: 1617137651}
-
