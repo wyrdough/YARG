@@ -26,22 +26,6 @@ namespace YARG.Settings.Metadata
         // controls remain interactive.
         public bool ReadOnlyFields { get; set; }
 
-        // Shared preview visual state across all preset type tabs (Camera, Color,
-        // Engine, Highway, RockMeter). Bundled into one object (rather than a
-        // handful of loose statics) so there is a single named thing to point at
-        // with a documented lifetime: process-lifetime, shared by every
-        // PresetSubTab<T>, not persisted to disk.
-        protected sealed class PreviewOptionsState
-        {
-            public bool ForceStarPowerNotes;
-            public bool ForceStarPower;
-            public bool ForceGroove;
-            public bool LeftyFlip;
-            public GameMode GameMode = GameMode.FiveFretGuitar;
-        }
-
-        protected static readonly PreviewOptionsState PreviewOptions = new();
-
         // Single shared container for the preview-header controls (instrument
         // dropdown). Static so all preset sub-tabs reuse one container — with
         // per-tab containers, every visited tab left its own live dropdown
@@ -50,8 +34,8 @@ namespace YARG.Settings.Metadata
         protected static Transform PreviewControlsContainer;
 
         // Prefabs needed for this tab type
-        private static GameObject _headerPrefab;
-        private static GameObject _smallRoundButtonPrefab;
+        private static            GameObject          _headerPrefab;
+        private static            GameObject          _smallRoundButtonPrefab;
 
         protected static GameObject GetSmallRoundButtonPrefab()
         {

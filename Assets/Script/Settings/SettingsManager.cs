@@ -11,6 +11,7 @@ using YARG.Core.Utility;
 using YARG.Helpers;
 using YARG.Menu.Filters;
 using YARG.Settings.Metadata;
+using YARG.Settings.Preview;
 using YARG.Settings.Types;
 
 namespace YARG.Settings
@@ -41,6 +42,8 @@ namespace YARG.Settings
         private static bool _settingsCanBeSaved = true;
 
         public static string OutputDeviceAtStartup { get; private set; } = "Default";
+
+        public static readonly    PreviewOptionsState PreviewOptions          = new();
 
         public static SettingContainer Settings { get; private set; }
 

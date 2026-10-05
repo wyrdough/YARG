@@ -407,6 +407,7 @@ namespace YARG.Settings.Preview
             _trackMaterial.GrooveMode = ForceGroove;
 
             SettingsMenu.Instance.SettingChanged += OnSettingChanged;
+            SettingsManager.PreviewOptions.OnChange += OnPreviewOptionsChanged;
 
             var highwayRenderer = _cameraPositioner.GetComponent<HighwayCameraRendering>();
             var camera = _cameraPositioner.GetComponent<Camera>();
@@ -462,6 +463,30 @@ namespace YARG.Settings.Preview
                 // PRESET's overlay colors (not ColorProfile.Default), so editing
                 // an overlay color live-updates without a rebuild.
                 RecolorProKeysOverlay(colorProfile.ProKeys);
+            }
+        }
+
+        private void OnPreviewOptionsChanged()
+        {
+            if (SettingsManager.PreviewOptions.ForceGroove != ForceGroove)
+            {
+                ForceGroove = SettingsManager.PreviewOptions.ForceGroove;
+            }
+            if (SettingsManager.PreviewOptions.ForceStarPower != ForceStarPower)
+            {
+                ForceStarPower = SettingsManager.PreviewOptions.ForceStarPower;
+            }
+            if (SettingsManager.PreviewOptions.ForceStarPowerNotes != ForceStarPowerNotes)
+            {
+                ForceStarPowerNotes = SettingsManager.PreviewOptions.ForceStarPowerNotes;
+            }
+            if (SettingsManager.PreviewOptions.LeftyFlip != LeftyFlip)
+            {
+                LeftyFlip = SettingsManager.PreviewOptions.LeftyFlip;
+            }
+            if (SettingsManager.PreviewOptions.GameMode != SelectedGameMode)
+            {
+                SelectedGameMode = SettingsManager.PreviewOptions.GameMode;
             }
         }
 
@@ -663,6 +688,7 @@ namespace YARG.Settings.Preview
             if (_previewModeSupported)
             {
                 SettingsMenu.Instance.SettingChanged -= OnSettingChanged;
+                SettingsManager.PreviewOptions.OnChange -= OnPreviewOptionsChanged;
             }
         }
 
